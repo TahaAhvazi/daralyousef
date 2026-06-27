@@ -1,0 +1,17 @@
+# Backend-specific ignores (root .gitignore covers the rest).
+# Kept for clarity when working only inside backend/.
+
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+uploads/
+.pytest_cache/

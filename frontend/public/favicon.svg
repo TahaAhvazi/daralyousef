@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#064736"/>
+      <stop offset="55%" stop-color="#105C46"/>
+      <stop offset="100%" stop-color="#2A8C6E"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E0B860"/>
+      <stop offset="100%" stop-color="#C49A3C"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="url(#g)"/>
+  <!-- Stylised "ي" yaa shape as a placeholder until the real logo is dropped -->
+  <path d="M18 24 L46 24 L46 30 L24 30 L24 38 L42 38 L42 44 L18 44 Z"
+        fill="url(#gold)" opacity=".95"/>
+  <circle cx="50" cy="20" r="3" fill="url(#gold)"/>
+</svg>

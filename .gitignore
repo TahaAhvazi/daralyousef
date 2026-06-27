@@ -1,0 +1,85 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Atelier ERP — monorepo (.gitignore)
+# Tracks: backend/, frontend/, docs/, README.md
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── OS / editor ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# ── Secrets & local env (never commit) ───────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets.json
+
+# ── Logs & temp ─────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.cache/
+tmp/
+temp/
+
+# ═════════════════════════════════════════════════════════════════════════════
+# BACKEND (Python / FastAPI)
+# ═════════════════════════════════════════════════════════════════════════════
+
+# Virtual environments
+backend/.venv/
+backend/venv/
+backend/env/
+
+# Python bytecode & caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Local database (SQLite)
+backend/*.db
+backend/*.db-journal
+backend/*.db-wal
+backend/*.db-shm
+
+# User uploads & generated files
+backend/uploads/
+
+# ═════════════════════════════════════════════════════════════════════════════
+# FRONTEND (React / Vite)
+# ═════════════════════════════════════════════════════════════════════════════
+
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.vite/
+frontend/coverage/
+frontend/*.tsbuildinfo
+
+# Local env overrides (Vite)
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
