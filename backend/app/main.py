@@ -3,14 +3,13 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import api_router
-from app.core.config import settings
+from app.core.config import ensure_upload_dir, settings
 from app.core.exceptions import install_exception_handlers
 from app.core.logging import setup_logging
 from app.db.base import SessionLocal, engine
@@ -62,9 +61,12 @@ async def touch_last_seen(request: Request, call_next):
     return response
 
 
-# Static uploads
-Path(settings.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=str(settings.UPLOAD_DIR)), name="uploads")
+# Static uploads (/tmp on Vercel)
+try:
+    ensure_upload_dir(settings.UPLOAD_DIR)
+    app.mount("/uploads", StaticFiles(directory=str(settings.UPLOAD_DIR)), name="uploads")
+except OSError:
+    pass
 
 
 # Routers
