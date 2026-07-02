@@ -36,6 +36,7 @@ import MessagesPage from "@/pages/messages/MessagesPage";
 import NotificationsPage from "@/pages/notifications/NotificationsPage";
 
 import LandingPage from "@/pages/landing/LandingPage";
+import ServiceCategoryPage from "@/pages/landing/ServiceCategoryPage";
 
 import { ScrollLock } from "@/components/layout/ScrollLock";
 
@@ -192,6 +193,7 @@ export default function App() {
         </Route>
 
         <Route path="/" element={<LandingPage />} />
+        <Route path="/services/:slug" element={<ServiceCategoryPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

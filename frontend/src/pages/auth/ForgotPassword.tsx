@@ -27,9 +27,9 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="glass rounded-2xl p-7">
+    <div className="landing-dar-auth-panel">
       <h2 className="text-2xl font-semibold tracking-tight">{t.auth.forgotTitle}</h2>
-      <p className="text-[13px] text-text-2 mt-1">{t.auth.forgotSubtitle}</p>
+      <p className="text-[13px] text-white/70 mt-1">{t.auth.forgotSubtitle}</p>
 
       {!done ? (
         <form onSubmit={submit} className="mt-6 grid gap-4">
@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <Button type="submit" loading={loading} full size="lg">
+          <Button type="submit" loading={loading} full size="lg" className="landing-dar-auth-submit">
             {t.auth.sendReset}
           </Button>
         </form>
@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
               {token}
             </div>
           ) : null}
-          <Link to="/login" className="text-brand text-[13px] hover:underline text-center">
+          <Link to="/login" className="text-[#f5c518] text-[13px] hover:underline text-center">
             {t.auth.backToSignIn}
           </Link>
         </div>

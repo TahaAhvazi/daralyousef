@@ -1117,7 +1117,7 @@ const en: Dict = {
     authCardLead: "Track orders, approve designs and get instant quotes.",
     authCardTitle: "Access your customer portal",
     explorePortal: "Customer portal",
-    regionLabel: "IRAQ · Baghdad",
+    regionLabel: "Basra",
   },
 
   services: {
@@ -2277,7 +2277,7 @@ const ar: Dict = {
     authCardLead: "تابع الطلبات، اعتمد التصاميم، واحصل على تسعيرة فورية.",
     authCardTitle: "بوابة العميل",
     explorePortal: "بوابة العميل",
-    regionLabel: "العراق · بغداد",
+    regionLabel: "البصرة",
   },
 
   services: {

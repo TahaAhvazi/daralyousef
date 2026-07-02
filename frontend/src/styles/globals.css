@@ -70,6 +70,7 @@
     @apply min-w-0 w-full max-w-full;
   }
 }
+
 * {
   box-sizing: border-box;
 }
@@ -529,6 +530,1037 @@ a {
 @keyframes landing-blink {
   50% {
     opacity: 0;
+  }
+}
+
+/* ── Dar Alyousif landing (sliced video hero) ───────────────────────────── */
+.landing-dar {
+  --landing-nav-h: clamp(3.75rem, 9vh, 5.25rem);
+  min-height: 100dvh;
+  background: #1a3f96;
+  color: #fff;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+.landing-dar-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-color: #1a3f96;
+  background-image: url("../assets/landing-texture.png");
+  background-repeat: repeat;
+  background-size: 88px 88px;
+  opacity: 0.34;
+  pointer-events: none;
+  animation: landing-dar-texture-drift 48s linear infinite;
+}
+
+.landing-dar-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 18%, rgba(255, 255, 255, 0.1), transparent 62%),
+    linear-gradient(180deg, rgba(8, 28, 78, 0.15) 0%, rgba(8, 28, 78, 0.45) 72%, rgba(6, 20, 58, 0.55) 100%);
+}
+
+.landing-dar-hero-wave {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 100vw;
+  height: clamp(9rem, 24vh, 15rem);
+  margin-left: -50vw;
+  background: #f5c518;
+  clip-path: ellipse(118% 100% at 50% 100%);
+  pointer-events: none;
+  z-index: 6;
+}
+
+.landing-dar-nav {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 50;
+  height: var(--landing-nav-h);
+  background: rgba(8, 26, 64, 0.18);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.landing-dar-main {
+  position: relative;
+  z-index: 10;
+  padding-top: var(--landing-nav-h);
+}
+
+.landing-dar-hero {
+  position: relative;
+  width: 100%;
+  min-height: calc(100dvh - var(--landing-nav-h));
+  height: calc(100dvh - var(--landing-nav-h));
+}
+
+.landing-dar-columns-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin-inline: auto;
+}
+
+@media (min-width: 1601px) {
+  .landing-dar-columns-shell {
+    max-width: 100rem;
+  }
+}
+
+.landing-dar-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.landing-dar-brand {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(clamp(-2rem, -7vh, -5rem));
+  pointer-events: none;
+}
+
+.landing-dar-logo {
+  display: block;
+  width: auto;
+  max-width: min(98vw, 100rem);
+  height: auto;
+  max-height: min(92vh, 80rem);
+  object-fit: contain;
+  filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.28));
+  pointer-events: none;
+}
+
+.landing-dar-logo-link {
+  display: inline-flex;
+  width: max-content;
+  max-width: min(98vw, 100rem);
+  line-height: 0;
+  pointer-events: auto;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.landing-dar-logo-link:hover .landing-dar-logo {
+  filter: drop-shadow(0 12px 36px rgba(0, 0, 0, 0.32));
+}
+
+.landing-dar-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-dar-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(105deg,
+      transparent 38%,
+      rgba(255, 255, 255, 0.42) 50%,
+      transparent 62%);
+  transform: translateX(-130%);
+  pointer-events: none;
+}
+
+.landing-dar-shine:hover::after {
+  animation: landing-dar-shine-sweep 0.75s ease-in-out;
+}
+
+@keyframes landing-dar-shine-sweep {
+  0% {
+    transform: translateX(-130%);
+  }
+
+  100% {
+    transform: translateX(130%);
+  }
+}
+
+.landing-dar-column-slot {
+  position: absolute;
+  z-index: 10;
+  will-change: transform;
+  appearance: none;
+  -webkit-appearance: none;
+  pointer-events: auto;
+}
+
+.landing-dar-column-slot:hover,
+.landing-dar-column-slot:focus-visible {
+  z-index: 14;
+}
+
+.landing-dar-column-link {
+  display: block;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  text-align: inherit;
+  border: 2px solid rgba(255, 255, 255, 0.88);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    0 8px 24px rgba(0, 0, 0, 0.18);
+  text-decoration: none;
+  color: #fff;
+  overflow: hidden;
+  transition:
+    border-color 0.35s ease,
+    box-shadow 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.landing-dar-column-link.landing-dar-shine::after {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.landing-dar-column-link.landing-dar-shine:hover::after {
+  opacity: 1;
+  animation: landing-dar-shine-sweep 0.75s ease-in-out;
+}
+
+.landing-dar-column-link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.06) 22%,
+    transparent 48%,
+    rgba(245, 197, 24, 0.1) 100%
+  );
+  pointer-events: none;
+  transition: background 0.35s ease;
+}
+
+.landing-dar-column-link:hover::before {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.48) 0%,
+    rgba(255, 255, 255, 0.12) 22%,
+    transparent 48%,
+    rgba(245, 197, 24, 0.18) 100%
+  );
+}
+
+.landing-dar-column-link:hover {
+  border-color: rgba(255, 255, 255, 1);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 16px 36px rgba(0, 0, 0, 0.32),
+    0 0 32px rgba(255, 255, 255, 0.2);
+}
+
+.landing-dar-column-caption {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 100%;
+  padding: clamp(0.45rem, 1.2vw, 0.75rem) clamp(0.35rem, 0.9vw, 0.55rem);
+  text-align: center;
+  pointer-events: none;
+  background: linear-gradient(to top,
+      rgba(8, 22, 58, 0.92) 0%,
+      rgba(8, 22, 58, 0.72) 55%,
+      transparent 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.landing-dar-column-title {
+  display: block;
+  font-size: clamp(0.58rem, 1.05vw, 0.82rem);
+  font-weight: 600;
+  line-height: 1.35;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+}
+
+.landing-dar-columns {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.landing-dar-mask-svg {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.landing-dar-video {
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+  transform: translateZ(0);
+  will-change: opacity;
+  pointer-events: none;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+.landing-dar-cta {
+  position: relative;
+  z-index: 20;
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: clamp(0.5rem, 1.5vh, 1rem) 1rem clamp(1rem, 3vh, 2rem);
+}
+
+.landing-dar-cta-primary,
+.landing-dar-cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding-inline: 1.35rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+
+.landing-dar-cta-primary {
+  background: #f5c518;
+  color: #0a1f4d;
+  border: 2px solid #0a0a0a;
+}
+
+.landing-dar-cta-primary:hover {
+  background: #ffd84a;
+  transform: translateY(-1px);
+}
+
+.landing-dar-cta-secondary {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(10, 31, 77, 0.45);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.landing-dar-cta-secondary:hover {
+  background: rgba(10, 31, 77, 0.62);
+  transform: translateY(-1px);
+}
+
+@keyframes landing-dar-texture-drift {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 176px 176px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-dar-bg {
+    animation: none;
+  }
+
+  .landing-dar-shine:hover::after {
+    animation: none;
+  }
+
+  .landing-dar-cta-primary:hover,
+  .landing-dar-cta-secondary:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-dar-brand {
+    transform: translateY(clamp(-1.25rem, -5vh, -3rem));
+  }
+
+  .landing-dar-logo {
+    width: min(98vw, 100%);
+    max-height: min(82vh, 60rem);
+  }
+}
+
+@media (max-width: 380px) {
+  .landing-dar-column-link {
+    border-width: 1.5px;
+  }
+}
+
+/* Service dialog */
+.landing-dar-dialog-root {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.landing-dar-dialog-backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  background: rgba(6, 16, 42, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: pointer;
+}
+
+.landing-dar-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 28rem);
+  max-height: min(88vh, 40rem);
+  overflow: auto;
+  padding: 1.35rem 1.35rem 1.15rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(165deg, rgba(13, 45, 107, 0.97), rgba(8, 28, 78, 0.94));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  color: #fff;
+}
+
+.landing-dar-dialog-close {
+  position: absolute;
+  top: 0.85rem;
+  inset-inline-end: 0.85rem;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.landing-dar-dialog-close:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.landing-dar-dialog-title {
+  padding-inline-end: 2rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.landing-dar-dialog-lead {
+  margin-top: 0.65rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.landing-dar-dialog-items {
+  margin-top: 1rem;
+  padding: 0.85rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.landing-dar-dialog-items-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #f5c518;
+}
+
+.landing-dar-dialog-items ul {
+  margin-top: 0.55rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.landing-dar-dialog-items li {
+  border-radius: 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 0.65rem;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.landing-dar-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1.1rem;
+}
+
+/* Auth pages — landing theme (split layout + glass panel) */
+.landing-dar-auth {
+  min-height: 100dvh;
+}
+
+.landing-dar-auth-hero {
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(165deg, rgba(8, 28, 78, 0.55), rgba(13, 45, 107, 0.35));
+}
+
+.landing-dar-auth-feature {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.landing-dar-auth-panel {
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(165deg, rgba(13, 45, 107, 0.92), rgba(8, 28, 78, 0.88));
+  padding: 1.75rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.landing-dar-auth .landing-field,
+.landing-dar-auth .input,
+.landing-dar-auth input:not([type="checkbox"]),
+.landing-dar-auth textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 13.5px;
+  outline: none;
+}
+
+.landing-dar-auth .input:focus,
+.landing-dar-auth input:not([type="checkbox"]):focus,
+.landing-dar-auth textarea:focus {
+  border-color: rgba(245, 197, 24, 0.55);
+  box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.15);
+}
+
+.landing-dar-auth .text-text-3 {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.landing-dar-auth label span {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.landing-dar-auth-submit.btn-primary {
+  background: #f5c518 !important;
+  color: #0a1f4d !important;
+  border: 2px solid #0a0a0a !important;
+  box-shadow: none;
+}
+
+.landing-dar-auth-submit.btn-primary:hover {
+  background: #ffd84a !important;
+}
+
+/* ── Dar landing — scroll sections & footer ─────────────────────────────── */
+.landing-dar-scroll {
+  position: relative;
+  z-index: 12;
+  background: #f5c518;
+  color: #0a1f4d;
+}
+
+.landing-dar-scroll-hint {
+  position: absolute;
+  top: -2.75rem;
+  left: 50%;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-left: -1.25rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(10, 31, 77, 0.2);
+  background: rgba(255, 255, 255, 0.55);
+  color: #0a1f4d;
+  text-decoration: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.landing-dar-scroll-hint:hover {
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateY(2px);
+}
+
+.landing-dar-section {
+  scroll-margin-top: calc(var(--landing-nav-h) + 1rem);
+  padding-block: clamp(3.5rem, 8vw, 6rem);
+}
+
+.landing-dar-section--alt {
+  background: linear-gradient(180deg, #fff4c4 0%, #f5c518 100%);
+}
+
+.landing-dar-section--stats {
+  padding-block: clamp(2.5rem, 6vw, 4rem);
+  background: #1a3f96;
+  color: #fff;
+}
+
+.landing-dar-section--cta {
+  padding-block: clamp(3rem, 7vw, 5rem);
+  background:
+    radial-gradient(ellipse 70% 80% at 50% 0%, rgba(255, 255, 255, 0.12), transparent 55%),
+    linear-gradient(180deg, #163a8a 0%, #0a1f4d 100%);
+  color: #fff;
+}
+
+.landing-dar-section-head {
+  max-width: 42rem;
+  margin-bottom: clamp(2rem, 5vw, 3rem);
+}
+
+.landing-dar-eyebrow {
+  margin-bottom: 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(10, 31, 77, 0.65);
+}
+
+.landing-dar-section--stats .landing-dar-eyebrow,
+.landing-dar-section--cta .landing-dar-eyebrow {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.landing-dar-section-title {
+  font-size: clamp(1.65rem, 3.8vw, 2.65rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.landing-dar-section-lead {
+  margin-top: 0.85rem;
+  max-width: 36rem;
+  font-size: clamp(0.95rem, 1.6vw, 1.05rem);
+  line-height: 1.65;
+  color: rgba(10, 31, 77, 0.78);
+}
+
+.landing-dar-section--stats .landing-dar-section-lead,
+.landing-dar-section--cta .landing-dar-section-lead {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.landing-dar-services-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .landing-dar-services-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .landing-dar-services-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.15rem;
+  }
+}
+
+.landing-dar-card {
+  position: relative;
+  height: 100%;
+  padding: 1.35rem 1.25rem 1.4rem;
+  border-radius: 1.1rem;
+  border: 2px solid rgba(10, 31, 77, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 10px 28px rgba(10, 31, 77, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.landing-dar-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(10, 31, 77, 0.28);
+  box-shadow: 0 18px 40px rgba(10, 31, 77, 0.14);
+}
+
+.landing-dar-card-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.85rem;
+  border-radius: 0.75rem;
+  background: #0a1f4d;
+  color: #f5c518;
+}
+
+.landing-dar-card-title {
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.landing-dar-card-desc {
+  margin-top: 0.45rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: rgba(10, 31, 77, 0.72);
+}
+
+.landing-dar-steps {
+  display: grid;
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .landing-dar-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.15rem;
+  }
+}
+
+.landing-dar-step {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 0.85rem;
+  align-items: start;
+  padding: 1.15rem 1.1rem;
+  border-radius: 1rem;
+  border: 2px solid rgba(10, 31, 77, 0.12);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.landing-dar-step-num {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  background: #0a1f4d;
+  color: #f5c518;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.landing-dar-step-icon {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.65rem;
+  background: rgba(10, 31, 77, 0.08);
+  color: #0a1f4d;
+}
+
+.landing-dar-step-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.landing-dar-step-desc {
+  margin-top: 0.3rem;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: rgba(10, 31, 77, 0.7);
+}
+
+.landing-dar-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .landing-dar-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.landing-dar-stat {
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.landing-dar-stat-value {
+  display: block;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: #f5c518;
+}
+
+.landing-dar-stat-label {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.landing-dar-faq-shell {
+  max-width: 48rem;
+}
+
+.landing-dar-faq-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.landing-dar-faq-item {
+  overflow: hidden;
+  border-radius: 0.95rem;
+  border: 2px solid rgba(10, 31, 77, 0.12);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.landing-dar-faq-trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  text-align: start;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0a1f4d;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.landing-dar-faq-chevron {
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.landing-dar-faq-item.is-open .landing-dar-faq-chevron {
+  transform: rotate(180deg);
+}
+
+.landing-dar-faq-panel {
+  padding: 0 1.1rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: rgba(10, 31, 77, 0.75);
+}
+
+.landing-dar-cta-band {
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-radius: 1.35rem;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+@media (min-width: 900px) {
+  .landing-dar-cta-band {
+    grid-template-columns: 1.2fr auto;
+  }
+}
+
+.landing-dar-cta-title {
+  font-size: clamp(1.5rem, 3.2vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.landing-dar-cta-lead {
+  margin-top: 0.75rem;
+  max-width: 32rem;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.landing-dar-cta-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.landing-dar-cta-badges span {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.landing-dar-cta-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-width: min(100%, 16rem);
+}
+
+.landing-dar-footer {
+  scroll-margin-top: calc(var(--landing-nav-h) + 1rem);
+  padding-block: clamp(3rem, 7vw, 4.5rem) 1.5rem;
+  background: #081a40;
+  color: rgba(255, 255, 255, 0.85);
+  border-top: 3px solid #0a0a0a;
+}
+
+.landing-dar-footer-grid {
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .landing-dar-footer-grid {
+    grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr));
+    gap: 2rem 1.5rem;
+  }
+}
+
+.landing-dar-footer-brand {
+  width: 100%;
+}
+
+.landing-dar-footer-logo-link {
+  display: block;
+  width: 100%;
+  line-height: 0;
+}
+
+.landing-dar-footer-logo {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.25));
+}
+
+.landing-dar-footer-tagline {
+  margin-top: 0.85rem;
+  max-width: 22rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.landing-dar-footer-contact {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 1.1rem;
+}
+
+.landing-dar-footer-contact-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.78);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a.landing-dar-footer-contact-row:hover {
+  color: #f5c518;
+}
+
+.landing-dar-footer-col-title {
+  margin-bottom: 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #f5c518;
+}
+
+.landing-dar-footer-links {
+  display: grid;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.landing-dar-footer-links a {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.72);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.landing-dar-footer-links a:hover {
+  color: #fff;
+}
+
+.landing-dar-footer-bottom {
+  margin-top: clamp(2rem, 5vw, 3rem);
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-dar {
+    scroll-behavior: auto;
+  }
+
+  .landing-dar-card:hover {
+    transform: none;
+  }
+
+  .landing-dar-scroll-hint .animate-bounce {
+    animation: none;
   }
 }
 

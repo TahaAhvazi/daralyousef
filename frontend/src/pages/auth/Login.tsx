@@ -59,10 +59,10 @@ export default function LoginPage() {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
-      className="glass rounded-2xl p-7"
+      className="landing-dar-auth-panel"
     >
       <h2 className="text-2xl font-semibold tracking-tight">{t.auth.welcome}</h2>
-      <p className="text-[13px] text-text-2 mt-1">{t.auth.signInSubtitle}</p>
+      <p className="text-[13px] text-white/70 mt-1">{t.auth.signInSubtitle}</p>
 
       <form onSubmit={handleLogin} className="mt-6 grid gap-4">
         <Input
@@ -84,7 +84,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShow((s) => !s)}
-              className="grid place-items-center hover:text-text"
+              className="grid place-items-center hover:text-white"
             >
               {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
@@ -94,10 +94,10 @@ export default function LoginPage() {
         />
 
         <div className="flex items-center justify-between gap-3">
-          <label className="flex items-center gap-2 text-[12.5px] text-text-2">
-            <input type="checkbox" className="size-3.5 accent-[rgb(var(--brand))]" /> {t.auth.remember}
+          <label className="flex items-center gap-2 text-[12.5px] text-white/70">
+            <input type="checkbox" className="size-3.5 accent-[#f5c518]" /> {t.auth.remember}
           </label>
-          <Link to="/forgot-password" className="text-[12.5px] text-brand hover:underline">
+          <Link to="/forgot-password" className="text-[12.5px] text-[#f5c518] hover:underline">
             {t.auth.forgot}
           </Link>
         </div>
@@ -108,20 +108,20 @@ export default function LoginPage() {
           </div>
         ) : null}
 
-        <Button type="submit" loading={loading} full size="lg">
+        <Button type="submit" loading={loading} full size="lg" className="landing-dar-auth-submit">
           {t.auth.signIn}
         </Button>
 
-        <p className="text-[13px] text-text-2 text-center">
+        <p className="text-[13px] text-white/70 text-center">
           {t.auth.newHere}{" "}
-          <Link to="/register" className="text-brand hover:underline">
+          <Link to="/register" className="text-[#f5c518] hover:underline">
             {t.auth.createAccount}
           </Link>
         </p>
       </form>
 
-      <div className="mt-6 border-t border-border/70 pt-4">
-        <div className="text-[11.5px] uppercase tracking-wider text-text-3 mb-2 text-center">
+      <div className="mt-6 border-t border-white/15 pt-4">
+        <div className="text-[11.5px] uppercase tracking-wider text-white/50 mb-2 text-center">
           {t.auth.tryDemo}
         </div>
         <div className="flex flex-wrap gap-2 justify-center">
@@ -130,7 +130,7 @@ export default function LoginPage() {
               key={d.email}
               type="button"
               onClick={() => { setEmail(d.email); setPassword("Demo@1234"); }}
-              className="badge hover:bg-surface-2"
+              className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[12px] text-white/85 hover:bg-white/15 transition-colors"
             >
               {d.label}
             </button>

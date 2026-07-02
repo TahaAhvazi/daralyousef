@@ -37,9 +37,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="glass rounded-2xl p-7">
+    <div className="landing-dar-auth-panel">
       <h2 className="text-2xl font-semibold tracking-tight">{t.auth.registerTitle}</h2>
-      <p className="text-[13px] text-text-2 mt-1">{t.auth.registerSubtitle}</p>
+      <p className="text-[13px] text-white/70 mt-1">{t.auth.registerSubtitle}</p>
 
       <form onSubmit={submit} className="mt-6 grid gap-4">
         <Input
@@ -78,13 +78,13 @@ export default function RegisterPage() {
           </div>
         ) : null}
 
-        <Button type="submit" loading={loading} full size="lg">
+        <Button type="submit" loading={loading} full size="lg" className="landing-dar-auth-submit">
           {t.auth.createBtn}
         </Button>
 
-        <p className="text-[13px] text-text-2 text-center">
+        <p className="text-[13px] text-white/70 text-center">
           {t.auth.haveAccount}{" "}
-          <Link to="/login" className="text-brand hover:underline">{t.auth.signIn}</Link>
+          <Link to="/login" className="text-[#f5c518] hover:underline">{t.auth.signIn}</Link>
         </p>
       </form>
     </div>
