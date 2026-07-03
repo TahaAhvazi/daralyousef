@@ -8,6 +8,7 @@ import { LanguageSwitcher } from "@/components/brand/LanguageSwitcher";
 import { useBrand } from "@/hooks/useBrand";
 import { applyLocaleToHtml, useLocaleStore } from "@/store/locale";
 import { useT } from "@/i18n/useT";
+import { LandingMobileMenuSection, LandingNavMenus, useLandingMobileMenus } from "@/pages/landing/LandingNavMenus";
 import { LandingScrollSections } from "@/pages/landing/LandingScrollSections";
 import { SlicedVideoColumns } from "@/pages/landing/SlicedVideoColumns";
 
@@ -16,32 +17,8 @@ const easeOut = [0.2, 0.7, 0.2, 1] as const;
 function LandingNav() {
   const { t } = useT();
   const brand = useBrand();
+  const mobileMenus = useLandingMobileMenus();
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const navLinks: Array<{ label: string; to?: string; href?: string }> = [
-    { label: t.nav.services, href: "#services" },
-    { label: t.nav.how, href: "#how" },
-    { label: t.nav.portal, to: "/portal" },
-  ];
-
-  const renderNavLink = (
-    item: (typeof navLinks)[number],
-    className: string,
-    onNavigate?: () => void,
-  ) => {
-    if (item.href) {
-      return (
-        <a key={item.label} href={item.href} className={className} onClick={onNavigate}>
-          {item.label}
-        </a>
-      );
-    }
-    return (
-      <Link key={item.label} to={item.to!} className={className} onClick={onNavigate}>
-        {item.label}
-      </Link>
-    );
-  };
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -63,14 +40,7 @@ function LandingNav() {
         <span className="sr-only">{brand.name}</span>
 
         <div className="ms-auto flex items-center gap-2 sm:gap-3">
-          <nav className="hidden sm:flex items-center gap-4">
-            {navLinks.map((item) =>
-              renderNavLink(
-                item,
-                "text-[12px] sm:text-[13px] font-medium text-white/80 hover:text-white transition-colors",
-              ),
-            )}
-          </nav>
+          <LandingNavMenus />
 
           <LanguageSwitcher variant="minimal" align="end" className="hidden xs:block" />
 
@@ -127,14 +97,12 @@ function LandingNav() {
                 </button>
               </div>
               <ul className="space-y-1">
-                {navLinks.map((item) => (
-                  <li key={item.label}>
-                    {renderNavLink(
-                      item,
-                      "flex w-full items-center rounded-xl px-4 py-3.5 text-[15px] font-medium text-white/90 hover:bg-white/10 transition-colors",
-                      () => setMenuOpen(false),
-                    )}
-                  </li>
+                {mobileMenus.map((menu) => (
+                  <LandingMobileMenuSection
+                    key={menu.id}
+                    menu={menu}
+                    onNavigate={() => setMenuOpen(false)}
+                  />
                 ))}
               </ul>
               <div className="mt-4 border-t border-white/10 pt-4">

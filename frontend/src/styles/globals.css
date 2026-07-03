@@ -591,6 +591,197 @@ a {
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
+.landing-dar-nav-menus {
+  position: relative;
+}
+
+.landing-dar-nav-item {
+  position: relative;
+}
+
+.landing-dar-nav-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.55rem;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+@media (min-width: 640px) {
+  .landing-dar-nav-trigger {
+    font-size: 13px;
+  }
+}
+
+.landing-dar-nav-trigger:hover,
+.landing-dar-nav-trigger.is-open {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.landing-dar-nav-chevron {
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: transform 0.22s ease, opacity 0.2s ease;
+}
+
+.landing-dar-nav-trigger.is-open .landing-dar-nav-chevron,
+.landing-dar-mobile-menu-trigger.is-open .landing-dar-nav-chevron {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+.landing-dar-nav-dropdown {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  inset-inline-start: 0;
+  z-index: 60;
+  min-width: min(18.5rem, 78vw);
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background:
+    linear-gradient(165deg, rgba(13, 45, 107, 0.96) 0%, rgba(8, 26, 64, 0.98) 100%);
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+.landing-dar-nav-item:last-child .landing-dar-nav-dropdown {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+.landing-dar-nav-dropdown-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.35rem;
+  max-height: min(22rem, 62vh);
+  overflow-y: auto;
+}
+
+.landing-dar-nav-dropdown-link {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.62rem 0.7rem;
+  border-radius: 0.7rem;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.landing-dar-nav-dropdown-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(2px);
+}
+
+[dir="rtl"] .landing-dar-nav-dropdown-link:hover {
+  transform: translateX(-2px);
+}
+
+.landing-dar-nav-dropdown-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #fff;
+}
+
+.landing-dar-nav-dropdown-desc {
+  display: block;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.landing-dar-nav-dropdown-footer {
+  display: block;
+  padding: 0.65rem 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(245, 197, 24, 0.1);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #f5c518;
+  text-decoration: none;
+  text-align: center;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.landing-dar-nav-dropdown-footer:hover {
+  background: rgba(245, 197, 24, 0.18);
+  color: #ffd84a;
+}
+
+.landing-dar-mobile-menu-section {
+  overflow: hidden;
+  border-radius: 0.85rem;
+}
+
+.landing-dar-mobile-menu-trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: none;
+  border-radius: 0.85rem;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  text-align: start;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.landing-dar-mobile-menu-trigger:hover,
+.landing-dar-mobile-menu-trigger.is-open {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.landing-dar-mobile-submenu {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.35rem 0.35rem;
+  overflow: hidden;
+}
+
+.landing-dar-mobile-submenu-link,
+.landing-dar-mobile-submenu-viewall {
+  display: block;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.65rem;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.82);
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.landing-dar-mobile-submenu-link:hover,
+.landing-dar-mobile-submenu-viewall:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.landing-dar-mobile-submenu-viewall {
+  margin-top: 0.15rem;
+  font-weight: 600;
+  color: #f5c518;
+}
+
 .landing-dar-main {
   position: relative;
   z-index: 10;
