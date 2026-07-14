@@ -3,8 +3,8 @@
  * Override with VITE_BACKEND_ORIGIN in .env if needed.
  */
 
-/** Default API server (no trailing slash). */
-export const DEFAULT_BACKEND_ORIGIN = "http://187.55.228.244:8000";
+/** Default API server (no trailing slash). Nginx mounts backend under /api. */
+export const DEFAULT_BACKEND_ORIGIN = "https://daralyousif.iq/api";
 
 export const BACKEND_ORIGIN = (
   import.meta.env.VITE_BACKEND_ORIGIN ?? DEFAULT_BACKEND_ORIGIN

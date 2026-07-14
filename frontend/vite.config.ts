@@ -10,8 +10,8 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      "/api": { target: "http://187.55.228.244:8000", changeOrigin: true },
-      "/uploads": { target: "http://187.55.228.244:8000", changeOrigin: true },
+      "/api": { target: "https://daralyousif.iq", changeOrigin: true, secure: true },
+      "/uploads": { target: "https://daralyousif.iq", changeOrigin: true, secure: true },
     },
   },
 });

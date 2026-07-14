@@ -33,9 +33,8 @@ def _default_cors_origins() -> List[str]:
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:4173",
-        "http://187.55.228.244",
-        "http://187.55.228.244:5173",
-        "http://187.55.228.244:80",
+        "https://daralyousif.iq",
+        "https://www.daralyousif.iq",
     ]
     for key in ("FRONTEND_ORIGIN", "FRONTEND_URL"):
         raw = os.getenv(key, "").strip().rstrip("/")
@@ -55,7 +54,7 @@ def _default_cors_origin_regex() -> str:
         r"https://.*\.vercel\.app"
         r"|http://localhost:\d+"
         r"|http://127\.0\.0\.1:\d+"
-        r"|https?://187\.55\.228\.244(:\d+)?"
+        r"|https://(www\.)?daralyousif\.iq(:\d+)?"
     )
 
 
