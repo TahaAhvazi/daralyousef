@@ -33,11 +33,30 @@ def _default_cors_origins() -> List[str]:
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:4173",
+        "http://187.55.228.244",
+        "http://187.55.228.244:5173",
+        "http://187.55.228.244:80",
     ]
+    for key in ("FRONTEND_ORIGIN", "FRONTEND_URL"):
+        raw = os.getenv(key, "").strip().rstrip("/")
+        if raw and raw not in origins:
+            origins.append(raw)
     vercel_url = os.getenv("VERCEL_URL")
     if vercel_url:
-        origins.append(f"https://{vercel_url}")
+        origin = f"https://{vercel_url}"
+        if origin not in origins:
+            origins.append(origin)
     return origins
+
+
+def _default_cors_origin_regex() -> str:
+    """Vercel (any subdomain) + local dev + production host (any port)."""
+    return (
+        r"https://.*\.vercel\.app"
+        r"|http://localhost:\d+"
+        r"|http://127\.0\.0\.1:\d+"
+        r"|https?://187\.55\.228\.244(:\d+)?"
+    )
 
 
 class Settings(BaseSettings):
@@ -68,6 +87,7 @@ class Settings(BaseSettings):
 
     # ── CORS ─────────────────────────────────────────────────────────────────
     CORS_ORIGINS: List[str] = Field(default_factory=_default_cors_origins)
+    CORS_ORIGIN_REGEX: str = Field(default_factory=_default_cors_origin_regex)
 
     # ── Files ────────────────────────────────────────────────────────────────
     UPLOAD_DIR: Path = Field(default_factory=_default_upload_dir)
@@ -95,6 +115,32 @@ class Settings(BaseSettings):
                 return json.loads(value)
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
+
+    @model_validator(mode="after")
+    def finalize_cors(self) -> Self:
+        """Merge env overrides with safe defaults so a minimal .env still allows the deployed UI."""
+        extras: List[str] = []
+        for key in ("FRONTEND_ORIGIN", "FRONTEND_URL"):
+            raw = os.getenv(key, "").strip().rstrip("/")
+            if raw:
+                extras.append(raw)
+        vercel_url = os.getenv("VERCEL_URL")
+        if vercel_url:
+            extras.append(f"https://{vercel_url}")
+
+        merged = list(self.CORS_ORIGINS)
+        for origin in _default_cors_origins():
+            if origin not in merged:
+                merged.append(origin)
+        for origin in extras:
+            if origin not in merged:
+                merged.append(origin)
+        self.CORS_ORIGINS = merged
+
+        if not self.CORS_ORIGIN_REGEX or self.CORS_ORIGIN_REGEX.lower() == "none":
+            self.CORS_ORIGIN_REGEX = _default_cors_origin_regex()
+
+        return self
 
     @model_validator(mode="after")
     def apply_vercel_runtime_paths(self) -> Self:
