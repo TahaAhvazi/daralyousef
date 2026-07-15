@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ListChecks, Plus, Search, Columns3 } from "lucide-react";
+import { Eye, ListChecks, Plus, Search, Columns3 } from "lucide-react";
 
 import { ordersApi } from "@/api/modules";
 import { Badge } from "@/components/ui/Badge";
@@ -10,9 +10,11 @@ import { Column, DataTable } from "@/components/ui/DataTable";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input, Select } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { PageTip } from "@/components/ui/PageTip";
 import { PageToolbar, TOOLBAR_INPUT, TOOLBAR_SELECT } from "@/components/ui/PageToolbar";
+import { Pagination } from "@/components/ui/Pagination";
 import { formatDate, formatMoney } from "@/lib/format";
-import { canManageOrdersAdmin } from "@/lib/permissions";
+import { canOpenOrderDetail } from "@/lib/permissions";
 import { useAuthStore } from "@/store/auth";
 import { useT } from "@/i18n/useT";
 import type { Order } from "@/types/api";
@@ -24,8 +26,9 @@ export default function OrdersPage() {
   const { t } = useT();
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
-  const canOpenDetail = canManageOrdersAdmin(user);
+  const canOpenDetail = canOpenOrderDetail(user);
   const tt = t.staffUi.orders;
+  const common = t.staffUi.common;
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
@@ -37,13 +40,12 @@ export default function OrdersPage() {
   });
 
   const columnLabels = t.staffUi.orderBoard.columns as Record<string, string>;
-  const tStatus = (s: string) => columnLabels[s] ?? t.portalUi.statuses[s] ?? s;
   const tPriority = (p: string) => t.staffUi.priorities[p as keyof typeof t.staffUi.priorities] ?? p;
   const tChannel = (c: string) => t.staffUi.placedVia[c] ?? c;
 
   const columns: Column<Order>[] = [
     { key: "code", header: tt.colCode, render: (o) => (
-      <span className={`font-mono text-[12px] ${canOpenDetail ? "text-brand" : "text-text-2"}`}>{o.code}</span>
+      <span className={`font-mono text-[12px] font-semibold ${canOpenDetail ? "text-brand" : "text-text-2"}`}>{o.code}</span>
     ) },
     { key: "title", header: tt.colTitle, render: (o) => (
       <div>
@@ -55,9 +57,24 @@ export default function OrdersPage() {
       const col = orderBoardColumn(o);
       return <Badge variant="brand">{columnLabels[col] ?? col}</Badge>;
     } },
-    { key: "priority", header: tt.colPriority, render: (o) => tPriority(o.priority) },
-    { key: "deadline", header: tt.colDeadline, render: (o) => formatDate(o.deadline) },
+    { key: "priority", header: tt.colPriority, hideOnMobile: true, render: (o) => tPriority(o.priority) },
+    { key: "deadline", header: tt.colDeadline, hideOnMobile: true, render: (o) => formatDate(o.deadline) },
     { key: "total", header: tt.colTotal, align: "right", render: (o) => formatMoney(o.grand_total, o.currency) },
+    {
+      key: "actions",
+      header: "",
+      align: "right",
+      render: (o) => canOpenDetail ? (
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={<Eye className="size-3.5" />}
+          onClick={(e) => { e.stopPropagation(); navigate(`/app/orders/${o.id}`); }}
+        >
+          {common.open}
+        </Button>
+      ) : null,
+    },
   ];
 
   return (
@@ -67,15 +84,19 @@ export default function OrdersPage() {
         description={tt.description}
         actions={
           <>
-            <Link to="/app/orders/board" className="btn btn-secondary w-full sm:w-auto">
-              <Columns3 className="size-4" /> Board
+            <Link to="/app/orders/board" className="btn btn-secondary w-full sm:w-auto min-h-11">
+              <Columns3 className="size-4" /> {t.staffUi.nav.orderBoard}
             </Link>
-            <Link to="/app/orders/new" className="btn btn-primary w-full sm:w-auto">
+            <Link to="/app/orders/new" className="btn btn-primary w-full sm:w-auto min-h-11">
               <Plus className="size-4" /> {tt.newBtn}
             </Link>
           </>
         }
       />
+
+      <PageTip storageKey="orders-list">
+        {canOpenDetail ? common.clickRowToOpen : tt.description}
+      </PageTip>
 
       <PageToolbar>
         <Input
@@ -99,17 +120,28 @@ export default function OrdersPage() {
         loading={isLoading}
         rowKey={(r) => r.id}
         onRowClick={canOpenDetail ? (row) => navigate(`/app/orders/${row.id}`) : undefined}
-        empty={<EmptyState icon={<ListChecks className="size-7" />} title={tt.emptyTitle} description={tt.emptyDesc} />}
+        empty={
+          <EmptyState
+            icon={<ListChecks className="size-7" />}
+            title={tt.emptyTitle}
+            description={tt.emptyDesc}
+            action={
+              <Link to="/app/orders/new">
+                <Button icon={<Plus className="size-4" />}>{tt.newBtn}</Button>
+              </Link>
+            }
+          />
+        }
       />
 
-      {data && data.total > 20 ? (
-        <div className="mt-4 flex flex-col gap-2 text-[12.5px] text-text-2 sm:flex-row sm:items-center sm:justify-between">
-          <span>{t.staffUi.common.page} {page} {t.staffUi.common.of} {Math.ceil(data.total / 20)}</span>
-          <div className="flex gap-2">
-            <Button variant="secondary" size="sm" disabled={page === 1} onClick={() => setPage((p) => p - 1)}>{t.staffUi.common.previous}</Button>
-            <Button variant="secondary" size="sm" disabled={page * 20 >= data.total} onClick={() => setPage((p) => p + 1)}>{t.staffUi.common.next}</Button>
-          </div>
-        </div>
+      {data ? (
+        <Pagination
+          className="mt-4"
+          page={page}
+          pageSize={20}
+          total={data.total}
+          onPageChange={setPage}
+        />
       ) : null}
     </div>
   );

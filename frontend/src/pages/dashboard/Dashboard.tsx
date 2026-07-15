@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ComponentType, ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 import { Activity, AlertTriangle, ArrowUpRight, Boxes, CheckCircle2, Clock, FileWarning, TrendingUp, Users, Zap } from "lucide-react";
 import {
   Area, AreaChart, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
@@ -9,6 +10,7 @@ import { dashboardApi } from "@/api/modules";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { StatCard } from "@/components/ui/StatCard";
 import { Badge, StatusBadge } from "@/components/ui/Badge";
 import { formatMoney, formatNumber, fromNow } from "@/lib/format";
 import {
@@ -19,6 +21,7 @@ import {
 } from "@/lib/chartColors";
 import { useT } from "@/i18n/useT";
 import { useThemeStore } from "@/store/theme";
+import { staffBreadcrumbs } from "@/lib/breadcrumbs";
 
 // Backend returns English KPI labels; map them to translation keys
 const KPI_LABEL_MAP: Record<string, { labelKey: keyof ReturnType<typeof getKpiDict>; hintKey: keyof ReturnType<typeof getKpiDict> }> = {
@@ -36,6 +39,7 @@ function getKpiDict(t: ReturnType<typeof useT>["t"]) {
 
 export default function DashboardPage() {
   const { t } = useT();
+  const location = useLocation();
   const theme = useThemeStore((s) => s.theme);
   const revenueColors = revenueChartColor(theme);
   const axisColor = chartAxisColor();
@@ -52,6 +56,9 @@ export default function DashboardPage() {
   const revenueMTD = data.kpis.find((k) => k.label === "Revenue MTD");
   const kpiDict = getKpiDict(t);
   const tDash = t.staffUi.dashboard;
+  const breadcrumbs = staffBreadcrumbs(location.pathname, t.staffUi.nav, {
+    notifications: t.staffUi.topbar.notifications,
+  });
 
   const translateStatus = (s: string) =>
     t.portalUi.statuses[s] ?? s.replace(/_/g, " ");
@@ -61,6 +68,7 @@ export default function DashboardPage() {
       <PageHeader
         title={tDash.title}
         description={tDash.description}
+        breadcrumbs={breadcrumbs}
         actions={
           <span className="badge badge-brand">
             <Activity className="size-3" /> {t.staffUi.common.autoRefresh}
@@ -68,32 +76,24 @@ export default function DashboardPage() {
         }
       />
 
-      {/* Hero KPI cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(11.5rem,1fr))] gap-3 sm:gap-4">
         {data.kpis.map((k) => {
           const m = KPI_LABEL_MAP[k.label];
           const label = m ? kpiDict[m.labelKey] : k.label;
           const hint = m && k.hint ? kpiDict[m.hintKey] : k.hint;
           return (
-            <Card key={k.label} className="relative overflow-hidden">
-              <div className="ambient" />
-              <CardBody className="relative">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11.5px] uppercase tracking-wider text-text-3 font-semibold">
-                    {label}
-                  </span>
-                  <KpiIcon label={k.label} />
-                </div>
-                <div className="mt-2.5 text-[26px] leading-none font-semibold tracking-tight">
-                  {k.currency
-                    ? formatMoney(k.value, k.currency)
-                    : formatNumber(k.value)}
-                </div>
-                {hint ? (
-                  <div className="mt-1 text-[12px] text-text-3">{hint}</div>
-                ) : null}
-              </CardBody>
-            </Card>
+            <StatCard
+              key={k.label}
+              label={label}
+              value={
+                k.currency
+                  ? formatMoney(k.value, k.currency)
+                  : formatNumber(k.value)
+              }
+              hint={hint}
+              tone={kpiTone(k.label)}
+              icon={<KpiIcon label={k.label} />}
+            />
           );
         })}
       </div>
@@ -388,18 +388,26 @@ function DashboardAlertCard({
   );
 }
 
+function kpiTone(label: string): "brand" | "success" | "warning" | "danger" | "info" {
+  if (label.includes("Revenue")) return "brand";
+  if (label.includes("Active")) return "success";
+  if (label.includes("Delayed")) return "danger";
+  if (label.includes("Online")) return "info";
+  return "warning";
+}
+
 function KpiIcon({ label }: { label: string }) {
-  if (label.includes("Revenue")) return <span className="size-7 grid place-items-center rounded-md bg-grad-brand text-white"><TrendingUp className="size-3.5" /></span>;
-  if (label.includes("Active"))  return <span className="size-7 grid place-items-center rounded-md bg-accent/15 text-accent"><ArrowUpRight className="size-3.5" /></span>;
-  if (label.includes("Delayed")) return <span className="size-7 grid place-items-center rounded-md bg-danger/15 text-danger"><AlertTriangle className="size-3.5" /></span>;
-  if (label.includes("Online"))  return <span className="size-7 grid place-items-center rounded-md bg-success/15 text-success"><Users className="size-3.5" /></span>;
-  return <span className="size-7 grid place-items-center rounded-md bg-warning/15 text-warning"><Clock className="size-3.5" /></span>;
+  if (label.includes("Revenue")) return <TrendingUp className="size-5" />;
+  if (label.includes("Active")) return <ArrowUpRight className="size-5" />;
+  if (label.includes("Delayed")) return <AlertTriangle className="size-5" />;
+  if (label.includes("Online")) return <Users className="size-5" />;
+  return <Clock className="size-5" />;
 }
 
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(11.5rem,1fr))] gap-3 sm:gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="card p-5"><Skeleton className="h-3 w-24" /><Skeleton className="mt-3 h-6 w-32" /></div>
         ))}

@@ -7,6 +7,7 @@ import { PagePanel } from "@/components/layout/PagePanel";
 import { ChatEmptyState, ChatPane } from "@/components/messages/ChatPane";
 import { ConversationSidebar } from "@/components/messages/ConversationSidebar";
 import { NewGroupModal } from "@/components/messages/NewGroupModal";
+import { ProfileViewModal } from "@/components/profile/ProfileViewModal";
 import { conversationsApi, filesApi } from "@/api/modules";
 import { uploadFiles } from "@/components/files/FileUploadPanel";
 import { Button } from "@/components/ui/Button";
@@ -23,6 +24,7 @@ export default function MessagesPage() {
   const [searchParams] = useSearchParams();
   const [activeId, setActiveId] = useState<number | null>(null);
   const [groupOpen, setGroupOpen] = useState(false);
+  const [profileUserId, setProfileUserId] = useState<number | null>(null);
 
   useEffect(() => {
     const c = searchParams.get("c");
@@ -171,6 +173,7 @@ export default function MessagesPage() {
               showBack
               onBack={() => setActiveId(null)}
               labels={chatLabels}
+              onAuthorClick={(id) => setProfileUserId(id)}
               onSend={async (body, orderId, files) => {
                 await send.mutateAsync({ body, orderId, files });
               }}
@@ -180,6 +183,12 @@ export default function MessagesPage() {
           )}
         </div>
       </div>
+
+      <ProfileViewModal
+        userId={profileUserId}
+        open={profileUserId != null}
+        onClose={() => setProfileUserId(null)}
+      />
 
       {user?.is_superuser ? (
         <NewGroupModal

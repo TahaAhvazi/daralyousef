@@ -23,7 +23,7 @@ export function ConversationSidebar({
   activeId: number | null;
   onSelect: (id: number) => void;
   onSelectContact: (userId: number) => void;
-  staff: { id: number; full_name: string; email: string }[];
+  staff: { id: number; full_name: string; email: string; avatar_url?: string | null }[];
   selfId?: number;
   locale: string;
   labels: {
@@ -125,7 +125,11 @@ export function ConversationSidebar({
                       <Users className="size-5" />
                     </span>
                   ) : (
-                    <UserAvatar name={displayName} seed={String(peer?.user_id ?? c.id)} />
+                    <UserAvatar
+                      name={displayName}
+                      seed={peer?.user_id ?? c.id}
+                      src={peer?.avatar_url}
+                    />
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
@@ -157,7 +161,7 @@ export function ConversationSidebar({
               onClick={() => onSelectContact(s.id)}
               className="flex w-full items-center gap-3 px-3 py-3 text-start transition-colors hover:bg-surface-2/60"
             >
-              <UserAvatar name={s.full_name} seed={String(s.id)} />
+              <UserAvatar name={s.full_name} seed={s.id} src={s.avatar_url} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[14px] font-semibold text-text">{s.full_name}</p>
                 <p className="truncate text-[12px] text-text-3">{s.email}</p>

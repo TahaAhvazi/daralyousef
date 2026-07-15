@@ -51,23 +51,24 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     <FieldShell label={label} hint={hint} error={error} required={rest.required} wrapperClassName={wrapperClassName}>
       <div className="relative">
         {iconLeft ? (
-          <span className="pointer-events-none absolute inset-y-0 start-3 grid place-items-center text-text-3">
+          <span className="pointer-events-none absolute inset-y-0 start-3 z-[1] grid w-5 place-items-center text-text-3">
             {iconLeft}
           </span>
         ) : null}
         <input
           ref={ref}
           className={cn(
-            "input text-[13.5px] font-medium tabular-nums",
-            iconLeft ? "ps-9" : "",
-            iconRight ? "pe-9" : "",
+            "input text-[13.5px] font-medium",
+            iconLeft && "input-icon-start",
+            iconRight && "input-icon-end",
+            !iconLeft && !iconRight && "tabular-nums",
             error ? "border-danger focus:border-danger focus:!shadow-[0_0_0_4px_rgb(239_68_68_/_0.15)]" : "",
             className
           )}
           {...rest}
         />
         {iconRight ? (
-          <span className="absolute inset-y-0 end-3 grid place-items-center text-text-3">
+          <span className="absolute inset-y-0 end-3 z-[1] grid w-5 place-items-center text-text-3">
             {iconRight}
           </span>
         ) : null}

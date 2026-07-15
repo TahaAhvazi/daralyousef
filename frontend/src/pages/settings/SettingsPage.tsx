@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { ImageUp, ShieldAlert, Trash2 } from "lucide-react";
+import { ImageUp, MonitorSmartphone, ShieldAlert, Trash2 } from "lucide-react";
 
 import { authApi } from "@/api/auth";
 import { brandApi } from "@/api/brand";
@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useAuthStore } from "@/store/auth";
 import { useThemeStore } from "@/store/theme";
+import { useWebPush } from "@/hooks/useWebPush";
+import { ProfilePhotoCard } from "@/components/profile/ProfilePhotoCard";
 import { useT } from "@/i18n/useT";
 import { resolveBackendAssetUrl } from "@/config/backend";
 import { BRAND_QUERY_KEY, useBrand } from "@/hooks/useBrand";
@@ -22,6 +24,7 @@ export default function SettingsPage() {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const { theme, setTheme } = useThemeStore();
+  const push = useWebPush();
   const [form, setForm] = useState({
     full_name: user?.full_name ?? "",
     phone: user?.phone ?? "",
@@ -57,6 +60,8 @@ export default function SettingsPage() {
           </CardBody>
         </Card>
 
+        <ProfilePhotoCard />
+
         <Card>
           <CardHeader title={tt.appearanceTitle} subtitle={tt.appearanceSub} />
           <CardBody className="space-y-3">
@@ -74,6 +79,51 @@ export default function SettingsPage() {
               <span className="font-medium shrink-0">{tt.dark}</span>
               <span className="min-w-0 text-text-3 text-[12px] break-words">{tt.darkHint}</span>
             </label>
+          </CardBody>
+        </Card>
+
+        <Card className="lg:col-span-3">
+          <CardHeader
+            title={
+              <span className="inline-flex items-center gap-2">
+                <MonitorSmartphone className="size-4 text-brand" />
+                {tt.pushTitle}
+              </span>
+            }
+            subtitle={tt.pushSub}
+          />
+          <CardBody className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0 space-y-1">
+              <p className="text-[13px] text-text-2">{tt.pushHint}</p>
+              <p className="text-[12px] text-text-3">
+                {!push.supported
+                  ? tt.pushUnsupported
+                  : push.active
+                    ? tt.pushStatusOn
+                    : push.permission === "denied"
+                      ? tt.pushDenied
+                      : tt.pushStatusOff}
+              </p>
+            </div>
+            <div className="flex shrink-0 gap-2">
+              {push.active ? (
+                <Button
+                  variant="secondary"
+                  loading={push.isDisabling}
+                  onClick={() => push.disable()}
+                >
+                  {tt.pushDisable}
+                </Button>
+              ) : (
+                <Button
+                  loading={push.isEnabling}
+                  disabled={!push.supported || push.permission === "denied"}
+                  onClick={() => push.enable()}
+                >
+                  {tt.pushEnable}
+                </Button>
+              )}
+            </div>
           </CardBody>
         </Card>
 

@@ -8,6 +8,7 @@ import { Topbar } from "@/components/layout/Topbar";
 import { Drawer } from "@/components/ui/Drawer";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { useNotificationStream } from "@/hooks/useNotificationStream";
+import { useWebPush } from "@/hooks/useWebPush";
 import { useAuthStore } from "@/store/auth";
 import { useBrand } from "@/hooks/useBrand";
 
@@ -18,10 +19,22 @@ export function AppShell() {
   const user = useAuthStore((s) => s.user);
   const brand = useBrand();
   useNotificationStream();
+  useWebPush();
 
   useEffect(() => {
     setMobileNavOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    const onMsg = (event: MessageEvent) => {
+      const data = event.data as { type?: string; url?: string } | undefined;
+      if (data?.type === "notification-click" && data.url) {
+        window.location.assign(data.url);
+      }
+    };
+    navigator.serviceWorker?.addEventListener("message", onMsg);
+    return () => navigator.serviceWorker?.removeEventListener("message", onMsg);
+  }, []);
 
   return (
     <div className="relative flex h-dvh max-h-dvh w-full overflow-hidden bg-bg text-text">

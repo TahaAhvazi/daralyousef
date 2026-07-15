@@ -16,5 +16,11 @@ export const API_BASE = `${BACKEND_ORIGIN}/api/v1`;
 export function resolveBackendAssetUrl(path: string | null | undefined): string {
   if (!path) return "";
   if (/^https?:\/\//i.test(path)) return path;
+  // Uploads are mounted at host root (/uploads), not under /api
+  if (path.startsWith("/uploads")) {
+    if (import.meta.env.DEV) return path; // Vite proxies /uploads
+    const root = BACKEND_ORIGIN.replace(/\/api\/?$/, "");
+    return `${root}${path}`;
+  }
   return path.startsWith("/") ? `${BACKEND_ORIGIN}${path}` : `${BACKEND_ORIGIN}/${path}`;
 }

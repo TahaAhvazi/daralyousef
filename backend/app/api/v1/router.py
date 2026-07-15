@@ -5,7 +5,7 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     audit, auth, brand, catalog, conversations, crm, customers, dashboard, departments, files,
-    finance, inventory, notifications, orders, tickets, users,
+    finance, inventory, notifications, order_notes, orders, tickets, users,
 )
 
 
@@ -16,6 +16,7 @@ api_router.include_router(customers.router, prefix="/customers", tags=["crm"])
 api_router.include_router(crm.router, prefix="/crm", tags=["crm"])
 api_router.include_router(catalog.router, prefix="/catalog", tags=["catalog"])
 api_router.include_router(departments.router, prefix="/departments", tags=["departments"])
+api_router.include_router(order_notes.router, prefix="/orders", tags=["orders"])
 api_router.include_router(orders.router, prefix="/orders", tags=["orders"])
 api_router.include_router(finance.router, prefix="/finance", tags=["finance"])
 api_router.include_router(inventory.router, prefix="/inventory", tags=["inventory"])

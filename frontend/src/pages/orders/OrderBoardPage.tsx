@@ -1,21 +1,31 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Columns3, RefreshCw } from "lucide-react";
+import { AlertTriangle, Columns3, RefreshCw, Search, UserRound } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { BoardRevertReasonModal } from "@/components/orders/BoardRevertReasonModal";
-import { BoardOrderCard } from "@/components/orders/BoardOrderCard";
+import {
+  BoardOrderCard,
+  boardOrderIsMine,
+  boardOrderIsOverdue,
+  boardOrderMatchesQuery,
+} from "@/components/orders/BoardOrderCard";
 import { MobileBoardView } from "@/components/orders/MobileBoardView";
 import { departmentsApi, ordersApi } from "@/api/modules";
 import { BoardCanvas, columnAtPoint } from "@/components/orders/BoardCanvas";
 import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { PagePanel } from "@/components/layout/PagePanel";
-import { Select } from "@/components/ui/Input";
+import { Input, Select } from "@/components/ui/Input";
 import { formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/cn";
-import { canManageOrdersAdmin, canChangeOrderPaidStatus, canOverrideProductionWorkflow, canViewOrderList } from "@/lib/permissions";
+import {
+  canOpenOrderDetail,
+  canChangeOrderPaidStatus,
+  canOverrideProductionWorkflow,
+  canViewOrderList,
+} from "@/lib/permissions";
 import {
   ORDER_BOARD_COLUMNS,
   WORKFLOW_BOARD_STAGES,
@@ -28,7 +38,7 @@ import { useT } from "@/i18n/useT";
 import { departmentLabel } from "@/i18n/labels";
 import type { WorkflowBoardOrder } from "@/types/api";
 
-const COLUMN_WIDTH = 260;
+const COLUMN_WIDTH = 272;
 const COLUMN_GAP = 12;
 const BOARD_CONTENT_WIDTH = ORDER_BOARD_COLUMNS.length * (COLUMN_WIDTH + COLUMN_GAP) - COLUMN_GAP + 32;
 
@@ -57,15 +67,15 @@ const STAT_COLORS: Record<string, string> = {
 function DragGhost({ order, x, y }: { order: WorkflowBoardOrder; x: number; y: number }) {
   return (
     <div
-      className="fixed z-[9999] pointer-events-none w-[240px] rounded-xl border-2 border-brand bg-surface p-3 shadow-xl rotate-2 opacity-95"
+      className="pointer-events-none fixed z-[9999] w-[250px] rotate-2 rounded-xl border-2 border-brand bg-surface p-3 opacity-95 shadow-xl"
       style={{ left: x, top: y, transform: "translate(-50%, -50%) rotate(2deg)" }}
     >
-      <p className="text-[12px] font-semibold text-text truncate">{order.order_code}</p>
+      <p className="truncate text-[12px] font-semibold text-text">{order.order_code}</p>
       {order.order_title ? (
-        <p className="text-[11px] text-text-2 truncate mt-0.5">{order.order_title}</p>
+        <p className="mt-0.5 truncate text-[11px] text-text-2">{order.order_title}</p>
       ) : null}
-      <div className="mt-2 h-1 rounded-full bg-surface-2 overflow-hidden">
-        <div className="h-full bg-brand rounded-full" style={{ width: `${order.progress_pct}%` }} />
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
+        <div className="h-full rounded-full bg-brand" style={{ width: `${order.progress_pct}%` }} />
       </div>
     </div>
   );
@@ -103,21 +113,18 @@ function StatsDonut({
           .join(", ")})`;
 
   return (
-    <div className="flex gap-3 items-start">
-      <div
-        className="relative size-[88px] shrink-0 rounded-full"
-        style={{ background: gradient }}
-      >
-        <div className="absolute inset-[14px] rounded-full bg-surface flex flex-col items-center justify-center">
-          <span className="text-lg font-bold text-text leading-none">{total}</span>
+    <div className="flex items-start gap-3">
+      <div className="relative size-[88px] shrink-0 rounded-full" style={{ background: gradient }}>
+        <div className="absolute inset-[14px] flex flex-col items-center justify-center rounded-full bg-surface">
+          <span className="text-lg font-bold leading-none text-text">{total}</span>
         </div>
       </div>
-      <ul className="flex-1 space-y-1 min-w-0">
+      <ul className="min-w-0 flex-1 space-y-1">
         {segments.slice(0, 6).map((s) => (
-          <li key={s.col} className="flex items-center gap-1.5 text-[10px] min-w-0">
-            <span className="size-2 rounded-full shrink-0" style={{ background: s.color }} />
-            <span className="text-text-2 truncate flex-1">{columnLabels[s.col] ?? s.col}</span>
-            <span className="text-text-3 shrink-0">{s.pct}%</span>
+          <li key={s.col} className="flex min-w-0 items-center gap-1.5 text-[10px]">
+            <span className="size-2 shrink-0 rounded-full" style={{ background: s.color }} />
+            <span className="flex-1 truncate text-text-2">{columnLabels[s.col] ?? s.col}</span>
+            <span className="shrink-0 text-text-3">{s.pct}%</span>
           </li>
         ))}
       </ul>
@@ -129,15 +136,22 @@ export default function OrderBoardPage() {
   const { t } = useT();
   const bb = t.staffUi.orderBoard;
   const columnLabels = bb.columns as Record<string, string>;
+  const priorityLabels = t.staffUi.priorities as Record<string, string>;
   const qc = useQueryClient();
   const user = useAuthStore((s) => s.user);
-  const canOpenDetail = canManageOrdersAdmin(user);
+  const canOpenDetail = canOpenOrderDetail(user);
   const canOverride = canOverrideProductionWorkflow(user);
   const canChangePaid = canChangeOrderPaidStatus(user);
-  const canDrag = canOverride || !!user?.permissions?.some((p) =>
-    ["production:update", "orders:admin", "orders:update", "*"].includes(p),
-  );
+  const canDrag =
+    canOverride ||
+    !!user?.permissions?.some((p) =>
+      ["production:update", "orders:admin", "orders:update", "*"].includes(p),
+    );
   const [deptSlug, setDeptSlug] = useState("");
+  const [search, setSearch] = useState("");
+  const [mineOnly, setMineOnly] = useState(false);
+  const [overdueOnly, setOverdueOnly] = useState(false);
+  const [hideEmpty, setHideEmpty] = useState(false);
   const [draggingId, setDraggingId] = useState<number | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
   const [draggingOrder, setDraggingOrder] = useState<WorkflowBoardOrder | null>(null);
@@ -163,6 +177,49 @@ export default function OrderBoardPage() {
     }
     return map;
   }, [data]);
+
+  const filteredColumns = useMemo(() => {
+    const out: Record<string, WorkflowBoardOrder[]> = {};
+    for (const col of ORDER_BOARD_COLUMNS) {
+      out[col] = (data?.columns?.[col] ?? []).filter((o) => {
+        if (!boardOrderMatchesQuery(o, search)) return false;
+        if (mineOnly && !boardOrderIsMine(o, user?.id)) return false;
+        if (overdueOnly && !boardOrderIsOverdue(o)) return false;
+        return true;
+      });
+    }
+    return out;
+  }, [data?.columns, search, mineOnly, overdueOnly, user?.id]);
+
+  const visibleColumns = useMemo(() => {
+    if (!hideEmpty && !search.trim() && !mineOnly && !overdueOnly) return [...ORDER_BOARD_COLUMNS];
+    if (!hideEmpty) return [...ORDER_BOARD_COLUMNS];
+    return ORDER_BOARD_COLUMNS.filter((c) => (filteredColumns[c]?.length ?? 0) > 0);
+  }, [hideEmpty, search, mineOnly, overdueOnly, filteredColumns]);
+
+  const boardWidth =
+    Math.max(visibleColumns.length, 1) * (COLUMN_WIDTH + COLUMN_GAP) - COLUMN_GAP + 32;
+
+  const filteredTotal = useMemo(
+    () => Object.values(filteredColumns).reduce((sum, rows) => sum + rows.length, 0),
+    [filteredColumns],
+  );
+
+  const mineCount = useMemo(() => {
+    let n = 0;
+    for (const rows of Object.values(data?.columns ?? {})) {
+      for (const o of rows) if (boardOrderIsMine(o, user?.id)) n += 1;
+    }
+    return n;
+  }, [data?.columns, user?.id]);
+
+  const overdueCount = useMemo(() => {
+    let n = 0;
+    for (const rows of Object.values(data?.columns ?? {})) {
+      for (const o of rows) if (boardOrderIsOverdue(o)) n += 1;
+    }
+    return n;
+  }, [data?.columns]);
 
   const move = useMutation({
     mutationFn: ({ orderId, toColumn, notes }: { orderId: number; toColumn: string; notes?: string }) =>
@@ -276,7 +333,7 @@ export default function OrderBoardPage() {
   return (
     <PagePanel className="!gap-2 h-full min-h-0">
       <PageHeader
-        className="!mb-2 shrink-0"
+        className="!mb-1 shrink-0"
         actionsClassName="w-full gap-1.5 lg:w-auto"
         title={bb.title}
         description={bb.description}
@@ -316,8 +373,77 @@ export default function OrderBoardPage() {
         }
       />
 
+      <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="relative min-w-0 flex-1 sm:max-w-xs">
+          <Search className="pointer-events-none absolute start-2.5 top-1/2 size-3.5 -translate-y-1/2 text-text-3" />
+          <Input
+            className="!h-9 !ps-8 !text-[12.5px]"
+            placeholder={bb.searchPh}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setMineOnly((v) => !v)}
+            className={cn(
+              "inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-[12px] font-medium transition-colors",
+              mineOnly
+                ? "border-brand bg-brand/10 text-brand"
+                : "border-border bg-surface text-text-2 hover:bg-surface-2",
+            )}
+          >
+            <UserRound className="size-3.5" />
+            {bb.filterMine}
+            {mineCount > 0 ? (
+              <span className="rounded-full bg-surface-2 px-1.5 text-[10px] tabular-nums text-text-3">
+                {mineCount}
+              </span>
+            ) : null}
+          </button>
+          <button
+            type="button"
+            onClick={() => setOverdueOnly((v) => !v)}
+            className={cn(
+              "inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-[12px] font-medium transition-colors",
+              overdueOnly
+                ? "border-danger bg-danger/10 text-danger"
+                : "border-border bg-surface text-text-2 hover:bg-surface-2",
+            )}
+          >
+            <AlertTriangle className="size-3.5" />
+            {bb.filterOverdue}
+            {overdueCount > 0 ? (
+              <span className="rounded-full bg-surface-2 px-1.5 text-[10px] tabular-nums text-text-3">
+                {overdueCount}
+              </span>
+            ) : null}
+          </button>
+          <button
+            type="button"
+            onClick={() => setHideEmpty((v) => !v)}
+            className={cn(
+              "hidden h-9 items-center rounded-full border px-3 text-[12px] font-medium transition-colors lg:inline-flex",
+              hideEmpty
+                ? "border-brand bg-brand/10 text-brand"
+                : "border-border bg-surface text-text-2 hover:bg-surface-2",
+            )}
+          >
+            {bb.hideEmpty}
+          </button>
+        </div>
+        {(search.trim() || mineOnly || overdueOnly) && (
+          <p className="text-[11px] text-text-3 sm:ms-auto">
+            {bb.showingCount
+              .replace("{shown}", String(filteredTotal))
+              .replace("{total}", String(totalOrders))}
+          </p>
+        )}
+      </div>
+
       {isLoading ? (
-        <div className="text-text-3 text-sm">{bb.loading}</div>
+        <div className="text-sm text-text-3">{bb.loading}</div>
       ) : (
         <>
           <MobileBoardView
@@ -332,123 +458,133 @@ export default function OrderBoardPage() {
             loading={move.isPending}
             canOpenDetail={canOpenDetail}
             canOverride={canOverride}
+            currentUserId={user?.id}
+            search={search}
+            mineOnly={mineOnly}
+            overdueOnly={overdueOnly}
+            priorityLabels={priorityLabels}
           />
 
-          <div className="hidden lg:flex min-h-0 flex-1 gap-0 overflow-hidden">
-          <BoardCanvas
-            className="flex-1 min-h-0 min-w-0"
-            contentWidth={BOARD_CONTENT_WIDTH}
-            cardDragging={!!draggingOrder}
-            labels={{
-              zoomIn: bb.zoomIn,
-              zoomOut: bb.zoomOut,
-              resetZoom: bb.resetZoom,
-              fitView: bb.fitView,
-              zoomPct: bb.zoomPct,
-              panHint: bb.panHint,
-              enterFullscreen: bb.enterFullscreen,
-              exitFullscreen: bb.exitFullscreen,
-            }}
-          >
-            <div className="flex gap-3 p-4" style={{ width: BOARD_CONTENT_WIDTH }}>
-              {ORDER_BOARD_COLUMNS.map((col) => {
-                const orders = data?.columns[col] ?? [];
-                const isDropTarget = dropTarget === col;
-                const isCancelled = col === "cancelled";
-                return (
-                  <div
-                    key={col}
-                    className={cn(
-                      "flex shrink-0 flex-col",
-                      isCancelled && "opacity-90",
-                    )}
-                    style={{ width: COLUMN_WIDTH }}
-                  >
-                    <div className="mb-2 flex items-center justify-between gap-2 px-0.5">
-                      <h3 className="text-[11px] font-semibold text-text truncate">
-                        {columnLabels[col] ?? col}
-                      </h3>
-                      <span
+          <div className="hidden min-h-0 flex-1 gap-0 overflow-hidden lg:flex">
+            <BoardCanvas
+              className="min-h-0 min-w-0 flex-1"
+              contentWidth={boardWidth}
+              cardDragging={!!draggingOrder}
+              labels={{
+                zoomIn: bb.zoomIn,
+                zoomOut: bb.zoomOut,
+                resetZoom: bb.resetZoom,
+                fitView: bb.fitView,
+                zoomPct: bb.zoomPct,
+                panHint: bb.panHint,
+                enterFullscreen: bb.enterFullscreen,
+                exitFullscreen: bb.exitFullscreen,
+              }}
+            >
+              <div className="flex gap-3 p-4" style={{ width: boardWidth }}>
+                {visibleColumns.map((col) => {
+                  const orders = filteredColumns[col] ?? [];
+                  const isDropTarget = dropTarget === col;
+                  const isCancelled = col === "cancelled";
+                  return (
+                    <div
+                      key={col}
+                      className={cn("flex shrink-0 flex-col", isCancelled && "opacity-90")}
+                      style={{ width: COLUMN_WIDTH }}
+                    >
+                      <div className="mb-2 flex items-center justify-between gap-2 px-0.5">
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          <span
+                            className="size-2 shrink-0 rounded-full"
+                            style={{ background: STAT_COLORS[col] ?? "#94a3b8" }}
+                          />
+                          <h3 className="truncate text-[12px] font-semibold text-text">
+                            {columnLabels[col] ?? col}
+                          </h3>
+                        </div>
+                        <span
+                          className={cn(
+                            "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium",
+                            orders.length ? "bg-brand/10 text-brand" : "bg-surface-2 text-text-3",
+                          )}
+                        >
+                          {orders.length}
+                        </span>
+                      </div>
+                      <div
+                        data-board-drop={col}
                         className={cn(
-                          "text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0",
-                          orders.length ? "bg-brand/10 text-brand" : "bg-surface-2 text-text-3",
+                          "min-h-[640px] space-y-2.5 rounded-xl border p-2 transition-colors",
+                          isDropTarget
+                            ? "border-dashed border-brand bg-brand/10 ring-2 ring-brand/25"
+                            : isCancelled
+                              ? "border-red-500/20 bg-red-500/5"
+                              : "border-border/60 bg-surface-2/60",
                         )}
                       >
-                        {orders.length}
-                      </span>
+                        {orders.length === 0 ? (
+                          <p className="py-8 text-center text-[11px] text-text-3">{bb.emptyColumn}</p>
+                        ) : (
+                          orders.map((order) => (
+                            <BoardOrderCard
+                              key={order.order_id}
+                              order={order}
+                              bb={bb}
+                              columnLabels={columnLabels}
+                              priorityLabels={priorityLabels}
+                              onAdvance={(id, toColumn) => requestMove(id, toColumn)}
+                              onRevert={(id, toColumn) => requestMove(id, toColumn)}
+                              loading={move.isPending}
+                              canOpenDetail={canOpenDetail}
+                              canOverride={canOverride}
+                              canDrag={canDrag}
+                              isDragging={draggingId === order.order_id}
+                              onPointerDragStart={startCardDrag}
+                              currentUserId={user?.id}
+                            />
+                          ))
+                        )}
+                      </div>
                     </div>
-                    <div
-                      data-board-drop={col}
-                      className={cn(
-                        "min-h-[640px] space-y-2 rounded-xl border p-2 transition-colors",
-                        isDropTarget
-                          ? "border-brand bg-brand/10 border-dashed ring-2 ring-brand/25"
-                          : isCancelled
-                            ? "bg-red-500/5 border-red-500/20"
-                            : "bg-surface-2/60 border-border/60",
-                      )}
-                    >
-                      {orders.length === 0 ? (
-                        <p className="text-[10px] text-text-3 text-center py-8">—</p>
-                      ) : (
-                        orders.map((order) => (
-                          <BoardOrderCard
-                            key={order.order_id}
-                            order={order}
-                            bb={bb}
-                            columnLabels={columnLabels}
-                            onAdvance={(id, toColumn) => requestMove(id, toColumn)}
-                            onRevert={(id, toColumn) => requestMove(id, toColumn)}
-                            loading={move.isPending}
-                            canOpenDetail={canOpenDetail}
-                            canOverride={canOverride}
-                            canDrag={canDrag}
-                            isDragging={draggingId === order.order_id}
-                            onPointerDragStart={startCardDrag}
-                          />
-                        ))
-                      )}
-                    </div>
+                  );
+                })}
+              </div>
+            </BoardCanvas>
+
+            <aside className="ml-3 hidden h-full min-h-0 w-[280px] shrink-0 flex-col border-l border-border bg-surface/40 pl-3 xl:flex">
+              <div className="flex h-full min-h-0 flex-col gap-3 py-0.5">
+                <div className="shrink-0 rounded-xl border border-border bg-surface p-4 shadow-soft">
+                  <h3 className="mb-1 text-sm font-semibold text-text">{bb.statsTitle}</h3>
+                  <p className="mb-3 text-[11px] text-text-3">
+                    {bb.totalOrders} · {bb.activeCount.replace("{n}", String(totalOrders))}
+                  </p>
+                  <StatsDonut total={totalOrders} byColumn={byColumn} columnLabels={columnLabels} />
+                </div>
+
+                <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-soft">
+                  <div className="shrink-0 border-b border-border/60 px-4 pb-2 pt-4">
+                    <h3 className="text-sm font-semibold text-text">{bb.activityTitle}</h3>
                   </div>
-                );
-              })}
-            </div>
-          </BoardCanvas>
-
-          <aside className="hidden xl:flex w-[280px] shrink-0 flex-col h-full min-h-0 border-l border-border bg-surface/40 pl-3 ml-3">
-            <div className="flex flex-col h-full min-h-0 gap-3 py-0.5">
-              <div className="shrink-0 rounded-xl border border-border bg-surface p-4 shadow-soft">
-                <h3 className="text-sm font-semibold text-text mb-1">{bb.statsTitle}</h3>
-                <p className="text-[11px] text-text-3 mb-3">
-                  {bb.totalOrders} · {bb.activeCount.replace("{n}", String(totalOrders))}
-                </p>
-                <StatsDonut total={totalOrders} byColumn={byColumn} columnLabels={columnLabels} />
-              </div>
-
-              <div className="flex flex-col flex-1 min-h-0 rounded-xl border border-border bg-surface shadow-soft overflow-hidden">
-                <div className="shrink-0 px-4 pt-4 pb-2 border-b border-border/60">
-                  <h3 className="text-sm font-semibold text-text">{bb.activityTitle}</h3>
-                </div>
-                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-3">
-                  {activity.length === 0 ? (
-                    <p className="text-[11px] text-text-3">{bb.activityEmpty}</p>
-                  ) : (
-                    <ul className="space-y-3">
-                      {activity.map((ev) => (
-                        <li key={ev.id} className="relative pl-3 border-l-2 border-border">
-                          <p className="text-[11px] text-text leading-snug">{ev.summary}</p>
-                          <p className="text-[10px] text-text-3 mt-0.5">
-                            {ev.actor_name ? `${ev.actor_name} · ` : ""}
-                            {formatDateTime(ev.occurred_at)}
-                          </p>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3">
+                    {activity.length === 0 ? (
+                      <p className="text-[11px] text-text-3">{bb.activityEmpty}</p>
+                    ) : (
+                      <ul className="space-y-3">
+                        {activity.map((ev) => (
+                          <li key={ev.id} className="relative border-l-2 border-border pl-3">
+                            <p className="text-[11px] leading-snug text-text">{ev.summary}</p>
+                            <p className="mt-0.5 text-[10px] text-text-3">
+                              {ev.actor_name ? `${ev.actor_name} · ` : ""}
+                              {formatDateTime(ev.occurred_at)}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          </aside>
+            </aside>
           </div>
         </>
       )}

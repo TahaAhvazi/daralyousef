@@ -429,16 +429,28 @@ export interface ChatMessage {
   body: string;
   author_user_id?: number | null;
   author_name?: string | null;
+  author_avatar_url?: string | null;
   order_id?: number | null;
   order_code?: string | null;
   order_title?: string | null;
   created_at: string;
 }
 
+export interface OrderNote {
+  id: number;
+  order_id: number;
+  author_id?: number | null;
+  author_name?: string | null;
+  body: string;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
 export interface ConversationMember {
   user_id: number;
   full_name: string;
   email: string;
+  avatar_url?: string | null;
 }
 
 export interface Conversation {

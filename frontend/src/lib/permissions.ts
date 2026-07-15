@@ -38,6 +38,48 @@ export function canManageOrdersAdmin(user: User | null | undefined): boolean {
   return !!user?.is_superuser || hasPermission(user, "orders:admin");
 }
 
+/** Open project page for overview, chat, and shift notes. */
+export function canOpenOrderDetail(user: User | null | undefined): boolean {
+  if (!user) return false;
+  if (user.is_superuser || hasRole(user, "ceo", "accountant")) return true;
+  return hasAnyPermission(
+    user,
+    "orders:admin",
+    "orders:read",
+    "orders:update",
+    "orders:create",
+    "production:read",
+    "production:update",
+  );
+}
+
+/** Shift notes: assignees, CEO, accountant, and order admins. */
+export function canWriteOrderNotes(
+  user: User | null | undefined,
+  order: {
+    workflow_assignments?: {
+      assignee_id?: number | null;
+      assignee_ids?: number[];
+      is_skipped?: boolean;
+    }[];
+  },
+): boolean {
+  if (!user) return false;
+  if (user.is_superuser || canManageOrdersAdmin(user)) return true;
+  if (hasRole(user, "ceo", "accountant")) return true;
+  for (const a of order.workflow_assignments ?? []) {
+    if (a.is_skipped) continue;
+    const ids =
+      a.assignee_ids && a.assignee_ids.length > 0
+        ? a.assignee_ids
+        : a.assignee_id != null
+          ? [a.assignee_id]
+          : [];
+    if (ids.includes(user.id)) return true;
+  }
+  return false;
+}
+
 export function canViewOrderList(user: User | null | undefined): boolean {
   return hasAnyPermission(user, "orders:read", "orders:admin", "orders:create");
 }
@@ -148,6 +190,10 @@ export function canDeleteInventory(user: User | null | undefined): boolean {
 
 export function canCreateCrm(user: User | null | undefined): boolean {
   return !!user?.is_superuser || hasPermission(user, "crm:create");
+}
+
+export function canUpdateCrm(user: User | null | undefined): boolean {
+  return !!user?.is_superuser || hasPermission(user, "crm:update");
 }
 
 export function canDeleteCrm(user: User | null | undefined): boolean {

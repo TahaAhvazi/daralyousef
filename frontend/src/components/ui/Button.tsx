@@ -36,17 +36,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       disabled={loading || disabled}
       className={cn(
-        "btn",
+        "btn focus-ring",
         VARIANT[variant],
         SIZE[size],
         full && "w-full",
-        (loading || disabled) && "opacity-60 cursor-not-allowed",
+        (loading || disabled) && "opacity-60 cursor-not-allowed pointer-events-none",
         className
       )}
       {...rest}
     >
-      {loading ? <Loader2 className="size-4 animate-spin" /> : icon}
-      <span className="whitespace-nowrap">{children}</span>
+      {loading ? <Loader2 className="size-4 animate-spin" aria-hidden /> : icon}
+      {children ? <span className="whitespace-nowrap">{children}</span> : null}
       {iconRight}
     </button>
   );

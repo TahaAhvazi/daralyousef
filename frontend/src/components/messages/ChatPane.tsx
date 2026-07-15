@@ -26,16 +26,38 @@ function MessageBubble({
   self,
   showAvatar,
   locale,
+  onAuthorClick,
 }: {
   msg: ChatMessage;
   self: boolean;
   showAvatar: boolean;
   locale: string;
+  onAuthorClick?: (userId: number) => void;
 }) {
+  const avatar = (
+    <UserAvatar
+      name={msg.author_name}
+      seed={msg.author_user_id}
+      src={msg.author_avatar_url}
+      size="sm"
+      className="mt-auto mb-0.5"
+    />
+  );
   return (
     <div className={cn("flex gap-2 mb-1", self ? "flex-row-reverse" : "flex-row")}>
       {showAvatar ? (
-        <UserAvatar name={msg.author_name} seed={String(msg.author_user_id)} size="sm" className="mt-auto mb-0.5" />
+        msg.author_user_id && onAuthorClick && !self ? (
+          <button
+            type="button"
+            className="shrink-0 rounded-full focus-ring"
+            onClick={() => onAuthorClick(msg.author_user_id!)}
+            title={msg.author_name ?? undefined}
+          >
+            {avatar}
+          </button>
+        ) : (
+          avatar
+        )
       ) : (
         <span className="size-9 shrink-0" />
       )}
@@ -89,6 +111,7 @@ export function ChatPane({
   onBack,
   showBack,
   labels,
+  onAuthorClick,
 }: {
   conversation: Conversation;
   selfId?: number;
@@ -99,6 +122,7 @@ export function ChatPane({
   sending: boolean;
   onBack?: () => void;
   showBack?: boolean;
+  onAuthorClick?: (userId: number) => void;
   labels: {
     placeholder: string;
     linkProject: string;
@@ -205,6 +229,7 @@ export function ChatPane({
                   self={msg.author_user_id === selfId}
                   showAvatar={showAvatar}
                   locale={locale}
+                  onAuthorClick={onAuthorClick}
                 />
               );
             })}

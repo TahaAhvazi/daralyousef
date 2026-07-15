@@ -41,6 +41,13 @@ async def _assert_staff_order_admin(db: AsyncSession, user: User) -> None:
     raise ForbiddenError("Administrator access required for order details")
 
 
+async def _assert_staff_can_view_order(db: AsyncSession, user: User, order) -> None:
+    """View order detail: admin, readers, assignees, CEO, accountant."""
+    from app.services.order_collaboration import assert_can_access_order_collaboration
+
+    await assert_can_access_order_collaboration(db, user, order)
+
+
 async def _assert_order_list_access(db: AsyncSession, user: User) -> None:
     """Staff need orders:read/admin; portal customers may list their own orders."""
     if user.is_staff or user.is_superuser:
@@ -210,7 +217,7 @@ async def get_order(
 ):
     order = await orders_svc.get_order_by_id(db, oid)
     if user.is_staff or user.is_superuser:
-        await _assert_staff_order_admin(db, user)
+        await _assert_staff_can_view_order(db, user, order)
     await orders_svc.assert_order_access(db, user, order)
     return await orders_svc.serialize_order(db, order)
 

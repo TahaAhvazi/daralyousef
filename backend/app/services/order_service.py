@@ -153,6 +153,13 @@ async def create_order(
         await assign_svc.replace_order_assignments(
             db, order, user, data.workflow_assignments, require_all_stages=False,
         )
+    else:
+        # Still create the project chat room (members: creator + CEO/accountant)
+        from app.services import chat_service as chat_svc
+
+        await chat_svc.ensure_order_conversation(
+            db, order, created_by_id=user.id, extra_member_ids={user.id},
+        )
 
     return order
 

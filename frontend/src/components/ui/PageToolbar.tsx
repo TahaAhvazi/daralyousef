@@ -14,7 +14,7 @@ export function PageToolbar({
   return (
     <div
       className={cn(
-        "mb-4 flex w-full min-w-0 max-w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center",
+        "mb-4 flex w-full min-w-0 max-w-full flex-col gap-2 rounded-xl border border-border bg-surface/80 p-3 sm:flex-row sm:flex-wrap sm:items-center",
         className,
       )}
     >

@@ -14,6 +14,7 @@ class ChatMessageOut(ORMModel):
     body: str
     author_user_id: Optional[int] = None
     author_name: Optional[str] = None
+    author_avatar_url: Optional[str] = None
     order_id: Optional[int] = None
     order_code: Optional[str] = None
     order_title: Optional[str] = None
@@ -24,6 +25,7 @@ class ConversationMemberOut(ORMModel):
     user_id: int
     full_name: str
     email: str
+    avatar_url: Optional[str] = None
 
 
 class ConversationOut(ORMModel):

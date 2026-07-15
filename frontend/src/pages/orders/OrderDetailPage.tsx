@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ChevronRight, Clock, Rocket, Send } from "lucide-react";
+import { ArrowLeft, ChevronRight, Clock, MessageSquare, NotebookPen, Rocket, Send } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { ordersApi } from "@/api/modules";
@@ -10,11 +10,14 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Input, Select, Textarea } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Tabs } from "@/components/ui/Tabs";
 import { formatDate, formatDateTime, formatMoney } from "@/lib/format";
 import { canAdvanceOrderStage, canChangeOrderPaidStatus, canConfirmOrderReceipt, canManageOrdersAdmin, canOverrideProductionWorkflow, hasAnyPermission, isOrderReceiptConfirmable } from "@/lib/permissions";
 import { OrderPaymentToggle } from "@/components/orders/OrderPaymentToggle";
 import { isOrderPaymentConfirmed, PRODUCTION_ORDER_STATUSES } from "@/lib/orderStatuses";
 import { BoardRevertReasonModal } from "@/components/orders/BoardRevertReasonModal";
+import { OrderChatPanel } from "@/components/orders/OrderChatPanel";
+import { OrderNotesPanel } from "@/components/orders/OrderNotesPanel";
 import {
   WORKFLOW_ASSIGNMENT_STAGES,
   ORDER_BOARD_COLUMNS,
@@ -113,6 +116,7 @@ function OrderApprovalPanel({ order }: { order: Order }) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["order", order.id] });
       qc.invalidateQueries({ queryKey: ["workflow-board"] });
+      qc.invalidateQueries({ queryKey: ["order.conversation", order.id] });
       toast.success("Order released to production");
     },
   });
@@ -204,6 +208,7 @@ function OrderAssignmentsPanel({ order }: { order: Order }) {
       qc.invalidateQueries({ queryKey: ["order", order.id] });
       qc.invalidateQueries({ queryKey: ["workflow-board"] });
       qc.invalidateQueries({ queryKey: ["orders"] });
+      qc.invalidateQueries({ queryKey: ["order.conversation", order.id] });
       toast.success(wa.saved);
       setDirty(false);
     },
@@ -437,6 +442,8 @@ export default function OrderDetailPage() {
   const canOverride = canOverrideProductionWorkflow(user);
   const canPaid = canChangeOrderPaidStatus(user);
   const so = t.staffUi.orders;
+  const collab = t.staffUi.orderCollab;
+  const [tab, setTab] = useState<"overview" | "chat" | "notes">("overview");
   const canEditBoardColumn =
     isOrderAdmin ||
     canOverride ||
@@ -519,6 +526,29 @@ export default function OrderDetailPage() {
         }
       />
 
+      <Tabs
+        fullWidth
+        value={tab}
+        onChange={(id) => setTab(id as "overview" | "chat" | "notes")}
+        items={[
+          { id: "overview", label: collab.tabOverview },
+          {
+            id: "chat",
+            label: collab.tabChat,
+            icon: <MessageSquare className="size-3.5" />,
+          },
+          {
+            id: "notes",
+            label: collab.tabNotes,
+            icon: <NotebookPen className="size-3.5" />,
+          },
+        ]}
+      />
+
+      {tab === "chat" ? <OrderChatPanel orderId={order.id} /> : null}
+      {tab === "notes" ? <OrderNotesPanel order={order} /> : null}
+
+      {tab === "overview" ? (
       <div className="grid gap-4 lg:grid-cols-3 lg:items-start">
         <div className="flex flex-col gap-4">
           <Card className="shrink-0 w-full">
@@ -607,6 +637,7 @@ export default function OrderDetailPage() {
           <OrderAssignmentsPanel order={order} />
         </div>
       </div>
+      ) : null}
 
       <BoardRevertReasonModal
         open={!!revertModal}

@@ -1,4 +1,4 @@
-"""In-app notifications + SSE stream."""
+"""In-app notifications + SSE stream + Web Push subscriptions."""
 from __future__ import annotations
 
 import asyncio
@@ -6,7 +6,7 @@ import json
 from datetime import datetime, timezone
 from typing import AsyncGenerator
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,6 +17,8 @@ from app.models.notification import Notification
 from app.models.user import User
 from app.schemas.common import OkResponse, PaginatedResponse
 from app.schemas.notification import NotificationOut
+from app.schemas.push import PushStatusOut, PushSubscribeIn, PushUnsubscribeIn
+from app.services import push_service
 
 
 router = APIRouter()
@@ -38,6 +40,64 @@ async def unread_count(db: AsyncSession = Depends(get_db), user: User = Depends(
     return {"count": await _unread_count(db, user.id)}
 
 
+@router.get("/push/vapid-public-key")
+async def push_vapid_public_key(user: User = Depends(current_user)):
+    keys = push_service.get_vapid_keys()
+    if not keys:
+        return {"public_key": None, "configured": False}
+    return {"public_key": keys[0], "configured": True}
+
+
+@router.get("/push/status", response_model=PushStatusOut)
+async def push_status(db: AsyncSession = Depends(get_db), user: User = Depends(current_user)):
+    return PushStatusOut(
+        enabled=(await push_service.subscription_count(db, user.id)) > 0,
+        vapid_configured=push_service.vapid_configured(),
+        subscription_count=await push_service.subscription_count(db, user.id),
+    )
+
+
+@router.post("/push/subscribe", response_model=OkResponse)
+async def push_subscribe(
+    data: PushSubscribeIn,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(current_user),
+):
+    ua = data.user_agent or (request.headers.get("user-agent") or None)
+    await push_service.upsert_subscription(
+        db,
+        user_id=user.id,
+        endpoint=data.endpoint.strip(),
+        p256dh=data.keys.p256dh.strip(),
+        auth=data.keys.auth.strip(),
+        user_agent=ua,
+    )
+    await db.commit()
+    return OkResponse()
+
+
+@router.post("/push/unsubscribe", response_model=OkResponse)
+async def push_unsubscribe(
+    data: PushUnsubscribeIn,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(current_user),
+):
+    await push_service.remove_subscription(db, user_id=user.id, endpoint=data.endpoint.strip())
+    await db.commit()
+    return OkResponse()
+
+
+@router.post("/push/unsubscribe-all", response_model=OkResponse)
+async def push_unsubscribe_all(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(current_user),
+):
+    await push_service.remove_all_for_user(db, user.id)
+    await db.commit()
+    return OkResponse()
+
+
 @router.get("", response_model=PaginatedResponse[NotificationOut])
 async def list_notifications(
     page: int = Query(1, ge=1), page_size: int = Query(25, ge=1, le=200),
@@ -45,10 +105,11 @@ async def list_notifications(
     db: AsyncSession = Depends(get_db), user: User = Depends(current_user),
 ):
     stmt = select(Notification).where(Notification.user_id == user.id)
-    if unread_only: stmt = stmt.where(Notification.read_at.is_(None))
+    if unread_only:
+        stmt = stmt.where(Notification.read_at.is_(None))
     total = await db.scalar(select(func.count()).select_from(stmt.subquery()))
     rows = (await db.execute(
-        stmt.order_by(Notification.id.desc()).offset((page-1)*page_size).limit(page_size)
+        stmt.order_by(Notification.id.desc()).offset((page - 1) * page_size).limit(page_size)
     )).scalars().all()
     return PaginatedResponse[NotificationOut](
         items=[NotificationOut.model_validate(r) for r in rows],
@@ -57,8 +118,11 @@ async def list_notifications(
 
 
 @router.post("/{nid}/read", response_model=OkResponse)
-async def mark_read(nid: int, db: AsyncSession = Depends(get_db),
-                    user: User = Depends(current_user)):
+async def mark_read(
+    nid: int,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(current_user),
+):
     n = await db.get(Notification, nid)
     if not n or n.user_id != user.id:
         return OkResponse(ok=False)
@@ -68,8 +132,10 @@ async def mark_read(nid: int, db: AsyncSession = Depends(get_db),
 
 
 @router.post("/read-all", response_model=OkResponse)
-async def mark_all_read(db: AsyncSession = Depends(get_db),
-                        user: User = Depends(current_user)):
+async def mark_all_read(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(current_user),
+):
     await db.execute(
         update(Notification)
         .where(Notification.user_id == user.id, Notification.read_at.is_(None))

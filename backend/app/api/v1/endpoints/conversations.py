@@ -38,11 +38,14 @@ async def list_staff(
     _require_staff(user)
     from sqlalchemy import select
     res = await db.execute(
-        select(User.id, User.full_name, User.email)
+        select(User.id, User.full_name, User.email, User.avatar_url)
         .where(User.is_staff.is_(True), User.is_active.is_(True), User.deleted_at.is_(None))
         .order_by(User.full_name)
     )
-    return [{"id": r.id, "full_name": r.full_name, "email": r.email} for r in res.all()]
+    return [
+        {"id": r.id, "full_name": r.full_name, "email": r.email, "avatar_url": r.avatar_url}
+        for r in res.all()
+    ]
 
 
 @router.get("/meta/orders")
@@ -60,6 +63,19 @@ async def list_orders_for_mention(
         .limit(100)
     )
     return [{"id": r.id, "code": r.code, "title": r.title} for r in res.all()]
+
+
+@router.get("/by-order/{order_id}", response_model=ConversationOut)
+async def get_conversation_for_order(
+    order_id: int,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(current_user),
+):
+    """Open (or auto-create) the project chat group for an order."""
+    _require_staff(user)
+    out = await chat_svc.get_or_create_order_conversation_for_user(db, user, order_id)
+    await db.commit()
+    return out
 
 
 @router.get("/{cid}", response_model=ConversationOut)

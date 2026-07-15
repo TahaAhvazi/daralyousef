@@ -5,14 +5,13 @@ import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, File, Request, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.core.config import settings
 from app.core.deps import current_user
-from app.core.exceptions import ConflictError, UnauthorizedError, ValidationError
+from app.core.exceptions import ConflictError, ForbiddenError, NotFoundError, UnauthorizedError, ValidationError
 from app.core.security import (
     create_access_token, create_refresh_token, hash_password,
     safe_decode_token, verify_password,
@@ -235,6 +234,96 @@ async def update_me(data: UpdateProfileInput, db: AsyncSession = Depends(get_db)
         setattr(user, field, value)
     await db.commit()
     return await _serialize_user(db, user)
+
+
+_AVATAR_ALLOWED = {"png", "jpg", "jpeg", "webp"}
+_AVATAR_DIR = settings.UPLOAD_DIR / "avatars"
+_AVATAR_MAX_BYTES = 3 * 1024 * 1024  # 3 MB
+
+
+def _unlink_user_avatars(user_id: int) -> None:
+    folder = _AVATAR_DIR
+    if not folder.exists():
+        return
+    for old in folder.glob(f"user_{user_id}.*"):
+        try:
+            old.unlink()
+        except OSError:
+            pass
+
+
+@router.post("/me/avatar", response_model=UserOut)
+async def upload_my_avatar(
+    request: Request,
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(current_user),
+):
+    """Any authenticated user (any role) can set their profile photo."""
+    from pathlib import Path
+
+    ext = (Path(file.filename or "").suffix.lstrip(".") or "").lower()
+    if ext == "jpeg":
+        ext = "jpg"
+    if ext not in _AVATAR_ALLOWED:
+        raise ValidationError(
+            f"Unsupported image type .{ext or '?'} (allowed: png, jpg, webp)"
+        )
+
+    content = await file.read()
+    if not content:
+        raise ValidationError("Empty file uploaded")
+    if len(content) > _AVATAR_MAX_BYTES:
+        raise ValidationError("Avatar must be 3 MB or smaller")
+
+    _AVATAR_DIR.mkdir(parents=True, exist_ok=True)
+    _unlink_user_avatars(user.id)
+
+    dest = _AVATAR_DIR / f"user_{user.id}.{ext}"
+    dest.write_bytes(content)
+    user.avatar_url = f"/uploads/avatars/user_{user.id}.{ext}?v={int(dest.stat().st_mtime)}"
+
+    await audit(
+        db, action="upload", module="auth", user=user,
+        entity_type="user_avatar", entity_id=user.id,
+        new={"avatar_url": user.avatar_url, "size": len(content)},
+        request=request,
+    )
+    await db.commit()
+    return await _serialize_user(db, user)
+
+
+@router.delete("/me/avatar", response_model=UserOut)
+async def remove_my_avatar(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(current_user),
+):
+    _unlink_user_avatars(user.id)
+    user.avatar_url = None
+    await audit(
+        db, action="delete", module="auth", user=user,
+        entity_type="user_avatar", entity_id=user.id, request=request,
+    )
+    await db.commit()
+    return await _serialize_user(db, user)
+
+
+@router.get("/users/{uid}/profile", response_model=UserOut)
+async def public_profile(
+    uid: int,
+    db: AsyncSession = Depends(get_db),
+    viewer: User = Depends(current_user),
+):
+    """Lightweight profile card — photo, name, role — for any logged-in user."""
+    target = await db.get(User, uid)
+    if not target or target.deleted_at is not None or not target.is_active:
+        raise NotFoundError("User not found")
+    # Staff can see staff; customers may only see their own profile here.
+    if not (viewer.is_staff or viewer.is_superuser):
+        if viewer.id != target.id:
+            raise ForbiddenError("Not allowed")
+    return await _serialize_user(db, target)
 
 
 @router.post("/change-password")

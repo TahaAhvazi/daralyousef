@@ -239,6 +239,7 @@ export type Dict = {
       quotations: string;
       invoices: string;
       support: string;
+      profile: string;
     };
     home: {
       greeting: string; // "Hello, {name}"
@@ -362,6 +363,28 @@ export type Dict = {
       optional: string;
       yes: string;
       no: string;
+      view: string;
+      open: string;
+      archive: string;
+      tip: string;
+      dismissTip: string;
+      clickRowToOpen: string;
+      startHere: string;
+    };
+    workHome: {
+      title: string;
+      description: string;
+      openShortcut: string;
+      hints: {
+        orderBoard: string;
+        newOrder: string;
+        customers: string;
+        invoices: string;
+        quotations: string;
+        materials: string;
+        tickets: string;
+        orders: string;
+      };
     };
     dashboard: {
       title: string;
@@ -434,6 +457,21 @@ export type Dict = {
       tags: string;
       notes: string;
       saved: string;
+      updated: string;
+      portalAccess: string;
+      portalAccessHint: string;
+      portalPassword: string;
+      portalPasswordConfirm: string;
+      portalPasswordMismatch: string;
+      portalSaved: string;
+      portalBadge: string;
+      colPortal: string;
+      editTitle: string;
+      editBtn: string;
+      resetPortalPassword: string;
+      resetPortalPasswordHint: string;
+      enablePortal: string;
+      enablePortalHint: string;
     };
     leads: {
       title: string;
@@ -584,6 +622,18 @@ export type Dict = {
       revertReasonPlaceholder: string;
       revertConfirm: string;
       assignmentsRequired: string;
+      searchPh: string;
+      filterMine: string;
+      filterOverdue: string;
+      hideEmpty: string;
+      showingCount: string;
+      mineBadge: string;
+      overdueBadge: string;
+      progressLabel: string;
+      dueLabel: string;
+      noDeadline: string;
+      unassigned: string;
+      itemCount: string;
       columns: {
         intake: string;
         approval: string;
@@ -618,6 +668,29 @@ export type Dict = {
       members: string;
       groupFallback: string;
       attachments: string;
+    };
+    orderCollab: {
+      tabOverview: string;
+      tabChat: string;
+      tabNotes: string;
+      chatTitle: string;
+      chatSubtitle: string;
+      chatPlaceholder: string;
+      chatEmpty: string;
+      chatEmptyHint: string;
+      chatLoadError: string;
+      send: string;
+      notesTitle: string;
+      notesSubtitle: string;
+      notesComposeLabel: string;
+      notesPlaceholder: string;
+      addNote: string;
+      notesEmpty: string;
+      notesEmptyHint: string;
+      notesReadOnly: string;
+      noteSaved: string;
+      noteDeleted: string;
+      confirmDeleteNote: string;
     };
     notifications: {
       title: string;
@@ -961,6 +1034,11 @@ export type Dict = {
       description: string;
       searchPh: string;
       staffOnly: string;
+      filterEmployees: string;
+      filterPortal: string;
+      filterAll: string;
+      editBtn: string;
+      deleteBtn: string;
       newBtn: string;
       newTitle: string;
       editTitle: string;
@@ -992,6 +1070,18 @@ export type Dict = {
       description: string;
       profileTitle: string;
       profileSub: string;
+      avatarTitle: string;
+      avatarSub: string;
+      avatarHint: string;
+      avatarUpload: string;
+      avatarChange: string;
+      avatarRemove: string;
+      avatarUpdated: string;
+      avatarRemoved: string;
+      avatarTypeError: string;
+      avatarSizeError: string;
+      profileViewTitle: string;
+      profileLoadError: string;
       fullName: string;
       email: string;
       phone: string;
@@ -1004,6 +1094,22 @@ export type Dict = {
       lightHint: string;
       dark: string;
       darkHint: string;
+      pushTitle: string;
+      pushSub: string;
+      pushHint: string;
+      pushEnable: string;
+      pushDisable: string;
+      pushEnabled: string;
+      pushDisabled: string;
+      pushUnsupported: string;
+      pushDenied: string;
+      pushUnavailable: string;
+      pushFailed: string;
+      pushStatusOn: string;
+      pushStatusOff: string;
+      pushPromptTitle: string;
+      pushPromptBody: string;
+      pushLater: string;
       brandTitle: string;
       brandSub: string;
       brandSaved: string;
@@ -1305,10 +1411,11 @@ const en: Dict = {
       quotations: "Quotations",
       invoices: "Invoices",
       support: "Support",
+      profile: "Profile",
     },
     home: {
       greeting: "Hello, {name}",
-      subtitle: "Here's a quick snapshot of your account.",
+      subtitle: "Start with a new order, or open your orders and invoices below. Big buttons = main actions.",
       startOrder: "Start a new order",
       kpiActive: "Active orders",
       kpiOutstanding: "Outstanding balance",
@@ -1452,10 +1559,32 @@ const en: Dict = {
       optional: "optional",
       yes: "Yes",
       no: "No",
+      view: "View",
+      open: "Open",
+      archive: "Archive",
+      tip: "Tip",
+      dismissTip: "Dismiss tip",
+      clickRowToOpen: "Click a row to open details",
+      startHere: "Start here",
+    },
+    workHome: {
+      title: "Your workspace",
+      description: "Pick a task below. Each card opens one clear place to work — nothing is hidden.",
+      openShortcut: "Open →",
+      hints: {
+        orderBoard: "See every job on a board and move it step by step",
+        newOrder: "Create a new order in a few simple steps",
+        customers: "Find customers and add new ones",
+        invoices: "Check invoices and payment status",
+        quotations: "Review price quotes for customers",
+        materials: "See stock and materials you have",
+        tickets: "Answer support tickets from customers",
+        orders: "Browse the full list of orders",
+      },
     },
     dashboard: {
-      title: "Executive command center",
-      description: "Live KPIs, production status, audit feed and approvals.",
+      title: "Dashboard overview",
+      description: "Numbers that need attention first — then charts and activity below.",
       revenueTitle: "Revenue · last 30 days",
       revenueSubtitle: "Today {today} · MTD {mtd}",
       paid: "Paid",
@@ -1501,7 +1630,7 @@ const en: Dict = {
     },
     customers: {
       title: "Customers",
-      description: "People and companies you serve.",
+      description: "People and companies you serve. Search above, then use New customer or Archive on a row.",
       newBtn: "New customer",
       newTitle: "New customer",
       searchPh: "Search by name, email, phone…",
@@ -1523,6 +1652,21 @@ const en: Dict = {
       tags: "Tags",
       notes: "Notes",
       saved: "Customer created",
+      updated: "Customer updated",
+      portalAccess: "Create portal login",
+      portalAccessHint: "Customer can sign in to /portal with this email and password. Self-registration still works separately.",
+      portalPassword: "Portal password",
+      portalPasswordConfirm: "Confirm portal password",
+      portalPasswordMismatch: "Passwords do not match",
+      portalSaved: "Customer created — they can sign in to the portal with the email and password you set.",
+      portalBadge: "Portal",
+      colPortal: "Portal",
+      editTitle: "Edit customer",
+      editBtn: "Edit",
+      resetPortalPassword: "New portal password (optional)",
+      resetPortalPasswordHint: "Leave blank to keep the current password.",
+      enablePortal: "Enable portal login now",
+      enablePortalHint: "Creates a portal account with the email and password below.",
     },
     leads: {
       title: "Leads",
@@ -1552,7 +1696,7 @@ const en: Dict = {
     },
     orders: {
       title: "Orders",
-      description: "Track production workflows end-to-end.",
+      description: "Find an order with search or filters. Open Board for the visual workflow, or New order to start.",
       newBtn: "New order",
       searchPh: "Search by code or title…",
       allStatuses: "All statuses",
@@ -1669,7 +1813,7 @@ const en: Dict = {
       panHint: "Scroll to zoom · Shift+scroll to pan · Space+drag to pan · Double-click fullscreen",
       enterFullscreen: "Fullscreen",
       exitFullscreen: "Exit fullscreen",
-      mobileTapHint: "Pick a stage below, then use the buttons on each card to move orders.",
+      mobileTapHint: "Pick a stage, swipe left/right to switch, then use the big buttons on each card.",
       mobilePrevStage: "Previous stage",
       mobileNextStage: "Next stage",
       emptyColumn: "No orders in this stage.",
@@ -1684,6 +1828,18 @@ const en: Dict = {
       revertConfirm: "Move back",
       assignmentsRequired:
         "Assign staff for every production stage before moving into Design, Printing, etc. Open the order detail page to configure team members.",
+      searchPh: "Search code, title, assignee…",
+      filterMine: "My jobs",
+      filterOverdue: "Overdue",
+      hideEmpty: "Hide empty",
+      showingCount: "Showing {shown} of {total}",
+      mineBadge: "Mine",
+      overdueBadge: "Overdue",
+      progressLabel: "Progress",
+      dueLabel: "Due",
+      noDeadline: "No deadline",
+      unassigned: "Unassigned",
+      itemCount: "{n} items",
       columns: {
         intake: "New request",
         approval: "Approval",
@@ -1718,6 +1874,29 @@ const en: Dict = {
       members: "Members",
       groupFallback: "Group chat",
       attachments: "Shared files",
+    },
+    orderCollab: {
+      tabOverview: "Overview",
+      tabChat: "Project chat",
+      tabNotes: "Shift notes",
+      chatTitle: "Project chat",
+      chatSubtitle: "Group for everyone assigned to this project. Messages stay here for the whole team.",
+      chatPlaceholder: "Message the project group…",
+      chatEmpty: "No messages yet",
+      chatEmptyHint: "Say hello — assignees are added to this group automatically.",
+      chatLoadError: "Couldn’t load the project chat.",
+      send: "Send",
+      notesTitle: "Shift notes",
+      notesSubtitle: "Handoff for the next person: what you did, what changed, where to continue. Separate from chat.",
+      notesComposeLabel: "New note",
+      notesPlaceholder: "e.g. Finished print setup — next shift: start finishing. Material X swapped to stock Y…",
+      addNote: "Add note",
+      notesEmpty: "No shift notes yet",
+      notesEmptyHint: "Leave a short handoff so the next assignee knows where things stand.",
+      notesReadOnly: "Only assignees, CEO, and accountant can add notes on this project.",
+      noteSaved: "Note saved",
+      noteDeleted: "Note deleted",
+      confirmDeleteNote: "Delete this note?",
     },
     notifications: {
       title: "Notifications",
@@ -2111,6 +2290,11 @@ const en: Dict = {
       description: "Add team members and assign any role.",
       searchPh: "Search…",
       staffOnly: "Staff only",
+      filterEmployees: "Employees",
+      filterPortal: "Portal customers",
+      filterAll: "All accounts",
+      editBtn: "Edit",
+      deleteBtn: "Delete",
       newBtn: "Add employee",
       newTitle: "New employee",
       editTitle: "Edit employee",
@@ -2142,6 +2326,18 @@ const en: Dict = {
       description: "Personal information and preferences.",
       profileTitle: "Profile",
       profileSub: "Visible to your team",
+      avatarTitle: "Profile photo",
+      avatarSub: "Shown in chat, sidebar, and team lists for every role.",
+      avatarHint: "PNG, JPG or WEBP · max 3 MB. Any role can set their own photo.",
+      avatarUpload: "Upload photo",
+      avatarChange: "Change photo",
+      avatarRemove: "Remove photo",
+      avatarUpdated: "Profile photo updated",
+      avatarRemoved: "Profile photo removed",
+      avatarTypeError: "Use a PNG, JPG, or WEBP image.",
+      avatarSizeError: "Photo must be 3 MB or smaller.",
+      profileViewTitle: "Profile",
+      profileLoadError: "Couldn’t load this profile.",
       fullName: "Full name",
       email: "Email",
       phone: "Phone",
@@ -2154,6 +2350,23 @@ const en: Dict = {
       lightHint: "Black & white, high contrast",
       dark: "Dark",
       darkHint: "Dark monochrome, easy on the eyes",
+      pushTitle: "Desktop notifications",
+      pushSub: "Chrome / Edge on Windows — also works on Android Chrome when installed.",
+      pushHint:
+        "Get an OS alert for new chat messages and order updates even when this tab is in the background.",
+      pushEnable: "Enable notifications",
+      pushDisable: "Turn off",
+      pushEnabled: "Desktop notifications enabled",
+      pushDisabled: "Desktop notifications turned off",
+      pushUnsupported: "This browser does not support push notifications.",
+      pushDenied: "Permission blocked — allow notifications in browser settings for this site.",
+      pushUnavailable: "Push is not configured on the server yet.",
+      pushFailed: "Could not update notification settings",
+      pushStatusOn: "On — you’ll get Windows alerts for chats and assignments.",
+      pushStatusOff: "Off — enable to receive alerts when you’re away from this tab.",
+      pushPromptTitle: "Turn on desktop alerts?",
+      pushPromptBody: "Get pinged for new messages and project updates on Windows (Chrome / Edge).",
+      pushLater: "Later",
       brandTitle: "Brand identity",
       brandSub: "System name and logo shown across the entire platform.",
       brandSaved: "Brand identity updated",
@@ -2465,10 +2678,11 @@ const ar: Dict = {
       quotations: "عروض الأسعار",
       invoices: "الفواتير",
       support: "الدعم",
+      profile: "الملف الشخصي",
     },
     home: {
       greeting: "هلا، {name}",
-      subtitle: "خلاصة سريعة لحسابك.",
+      subtitle: "ابدأ بطلب جديد، أو افتح طلباتك وفواتيرك من الأسفل. الأزرار الكبيرة = الإجراءات الرئيسية.",
       startOrder: "ابدأ طلب جديد",
       kpiActive: "طلبات نشطة",
       kpiOutstanding: "الرصيد المستحق",
@@ -2612,10 +2826,32 @@ const ar: Dict = {
       optional: "اختياري",
       yes: "نعم",
       no: "لا",
+      view: "عرض",
+      open: "فتح",
+      archive: "أرشفة",
+      tip: "نصيحة",
+      dismissTip: "إخفاء النصيحة",
+      clickRowToOpen: "اضغط على صف لفتح التفاصيل",
+      startHere: "ابدأ من هنا",
+    },
+    workHome: {
+      title: "مساحة عملك",
+      description: "اختر مهمة من البطاقات أدناه. كل بطاقة تفتح مكان عمل واحد واضح — بدون خيارات مخفية.",
+      openShortcut: "افتح ←",
+      hints: {
+        orderBoard: "شوف كل الشغل على اللوحة وحرّكه خطوة بخطوة",
+        newOrder: "أنشئ طلب جديد بخطوات بسيطة",
+        customers: "لاقي العملاء أو أضف عميل جديد",
+        invoices: "راجع الفواتير وحالة الدفع",
+        quotations: "راجع عروض الأسعار للعملاء",
+        materials: "شوف المخزون والمواد المتوفرة",
+        tickets: "جاوب تذاكر الدعم من العملاء",
+        orders: "تصفح قائمة كل الطلبات",
+      },
     },
     dashboard: {
-      title: "مركز القيادة التنفيذي",
-      description: "مؤشرات مباشرة، حالة الإنتاج، سجلّ التدقيق، والاعتمادات.",
+      title: "نظرة عامة على اللوحة",
+      description: "الأرقام اللي تحتاج انتباه أولاً — بعدها الرسوم والنشاط.",
       revenueTitle: "الإيرادات · آخر ٣٠ يوم",
       revenueSubtitle: "اليوم {today} · الشهر حتى الآن {mtd}",
       paid: "مدفوع",
@@ -2661,7 +2897,7 @@ const ar: Dict = {
     },
     customers: {
       title: "الزبائن",
-      description: "الأشخاص والشركات اللي تخدمهم.",
+      description: "الأشخاص والشركات اللي تخدمهم. ابحث فوق، وبعدها استخدم «زبون جديد» أو «أرشفة» على الصف.",
       newBtn: "زبون جديد",
       newTitle: "زبون جديد",
       searchPh: "ابحث بالاسم، الإيميل، أو الموبايل…",
@@ -2683,6 +2919,21 @@ const ar: Dict = {
       tags: "وسوم",
       notes: "ملاحظات",
       saved: "تم إنشاء الزبون",
+      updated: "تم تحديث الزبون",
+      portalAccess: "إنشاء دخول للبوابة",
+      portalAccessHint: "الزبون يقدر يدخل البوابة (/portal) بنفس الإيميل وكلمة المرور. تسجيل الزبون لنفسه يبقى شغّال مثل قبل.",
+      portalPassword: "كلمة مرور البوابة",
+      portalPasswordConfirm: "تأكيد كلمة مرور البوابة",
+      portalPasswordMismatch: "كلمتا المرور غير متطابقتين",
+      portalSaved: "تم إنشاء الزبون — يقدر يسجّل دخول للبوابة بالإيميل وكلمة المرور اللي حطيتها.",
+      portalBadge: "بوابة",
+      colPortal: "البوابة",
+      editTitle: "تعديل الزبون",
+      editBtn: "تعديل",
+      resetPortalPassword: "كلمة مرور جديدة للبوابة (اختياري)",
+      resetPortalPasswordHint: "اتركها فارغة إذا ما تريد تغيير كلمة المرور.",
+      enablePortal: "تفعيل دخول البوابة الآن",
+      enablePortalHint: "ينشئ حساب بوابة بالإيميل وكلمة المرور أدناه.",
     },
     leads: {
       title: "العملاء المحتملون",
@@ -2712,7 +2963,7 @@ const ar: Dict = {
     },
     orders: {
       title: "الطلبات",
-      description: "تتبّع سير الإنتاج من البداية للنهاية.",
+      description: "لاقي الطلب بالبحث أو الفلتر. افتح اللوحة لمسار الإنتاج البصري، أو «طلب جديد» للبدء.",
       newBtn: "طلب جديد",
       searchPh: "ابحث بالرمز أو العنوان…",
       allStatuses: "كل الحالات",
@@ -2829,7 +3080,7 @@ const ar: Dict = {
       panHint: "مرّر للتكبير · Shift+مرّر للتحريك · مسافة+سحب · نقرتين للشاشة الكاملة",
       enterFullscreen: "شاشة كاملة",
       exitFullscreen: "خروج من الشاشة الكاملة",
-      mobileTapHint: "اختر المرحلة من الأسفل، ثم استخدم الأزرار على كل بطاقة لنقل الطلب.",
+      mobileTapHint: "اختر المرحلة، اسحب يمين/يسار للتبديل، وبعدين استخدم الأزرار الكبيرة على البطاقة.",
       mobilePrevStage: "المرحلة السابقة",
       mobileNextStage: "المرحلة التالية",
       emptyColumn: "ما في طلبات بهذه المرحلة.",
@@ -2844,6 +3095,18 @@ const ar: Dict = {
       revertConfirm: "إرجاع",
       assignmentsRequired:
         "عيّن موظفين لكل مرحلة إنتاج قبل النقل إلى التصميم أو الطباعة وغيرها. افتح صفحة تفاصيل الطلب لتعيين الفريق.",
+      searchPh: "ابحث بالرمز أو العنوان أو المعيَّن…",
+      filterMine: "شغلي",
+      filterOverdue: "متأخر",
+      hideEmpty: "إخفاء الفارغ",
+      showingCount: "عرض {shown} من {total}",
+      mineBadge: "إلي",
+      overdueBadge: "متأخر",
+      progressLabel: "التقدّم",
+      dueLabel: "الموعد",
+      noDeadline: "بدون موعد",
+      unassigned: "غير معيَّن",
+      itemCount: "{n} أصناف",
       columns: {
         intake: "طلب جديد",
         approval: "الموافقة",
@@ -2878,6 +3141,29 @@ const ar: Dict = {
       members: "الأعضاء",
       groupFallback: "مجموعة",
       attachments: "الملفات المشتركة",
+    },
+    orderCollab: {
+      tabOverview: "نظرة عامة",
+      tabChat: "دردشة المشروع",
+      tabNotes: "ملاحظات الوردية",
+      chatTitle: "دردشة المشروع",
+      chatSubtitle: "مجموعة لكل من عليه مسؤولية بهذا المشروع. الرسائل تبقى هنا للفريق كامل.",
+      chatPlaceholder: "اكتب رسالة لمجموعة المشروع…",
+      chatEmpty: "ما في رسائل بعد",
+      chatEmptyHint: "ابدأ المحادثة — المعيَّنون ينضافون للمجموعة تلقائياً.",
+      chatLoadError: "ما قدرنا نحمّل دردشة المشروع.",
+      send: "إرسال",
+      notesTitle: "ملاحظات الوردية",
+      notesSubtitle: "تسليم للشخص اللي بعده: شو سويت، شو تغيّر، ومن وين يكمل. منفصلة عن الدردشة.",
+      notesComposeLabel: "ملاحظة جديدة",
+      notesPlaceholder: "مثال: خلّصت تجهيز الطباعة — الوردية الجاية: ابدأ التشطيب. المادة X استُبدلت بـ Y…",
+      addNote: "إضافة ملاحظة",
+      notesEmpty: "ما في ملاحظات وردية بعد",
+      notesEmptyHint: "اترك تسليم قصير عشان المعيَّن الجاي يعرف وين وصل الشغل.",
+      notesReadOnly: "بس المعيَّنين والمدير التنفيذي والمحاسب يقدروا يضيفوا ملاحظات على هالمشروع.",
+      noteSaved: "تم حفظ الملاحظة",
+      noteDeleted: "تم حذف الملاحظة",
+      confirmDeleteNote: "تحذف هالملاحظة؟",
     },
     notifications: {
       title: "الإشعارات",
@@ -3271,6 +3557,11 @@ const ar: Dict = {
       description: "إضافة أعضاء الفريق وتعيين أي دور لهم.",
       searchPh: "بحث…",
       staffOnly: "الموظفون فقط",
+      filterEmployees: "الموظفون",
+      filterPortal: "زبائن البوابة",
+      filterAll: "كل الحسابات",
+      editBtn: "تعديل",
+      deleteBtn: "حذف",
       newBtn: "إضافة موظف",
       newTitle: "موظف جديد",
       editTitle: "تعديل الموظف",
@@ -3302,6 +3593,18 @@ const ar: Dict = {
       description: "البيانات الشخصية والتفضيلات.",
       profileTitle: "الملف الشخصي",
       profileSub: "مرئي لفريقك",
+      avatarTitle: "صورة الملف الشخصي",
+      avatarSub: "تظهر في الدردشة والقائمة الجانبية وقوائم الفريق لكل الأدوار.",
+      avatarHint: "PNG أو JPG أو WEBP · بحد أقصى 3 ميجابايت. أي دور يقدر يضيف صورته.",
+      avatarUpload: "رفع صورة",
+      avatarChange: "تغيير الصورة",
+      avatarRemove: "حذف الصورة",
+      avatarUpdated: "تم تحديث صورة الملف الشخصي",
+      avatarRemoved: "تم حذف صورة الملف الشخصي",
+      avatarTypeError: "استخدم صورة PNG أو JPG أو WEBP.",
+      avatarSizeError: "الصورة لازم تكون 3 ميجابايت أو أقل.",
+      profileViewTitle: "الملف الشخصي",
+      profileLoadError: "ما قدرنا نحمّل هالملف.",
       fullName: "الاسم الكامل",
       email: "البريد الإلكتروني",
       phone: "الموبايل",
@@ -3314,6 +3617,23 @@ const ar: Dict = {
       lightHint: "أبيض وأسود، تباين عالٍ",
       dark: "داكن",
       darkHint: "أحادي اللون الداكن، مريح للعين",
+      pushTitle: "إشعارات سطح المكتب",
+      pushSub: "كروم / إيدج على ويندوز — وكمان أندرويد كروم لما يكون التطبيق مفعّل.",
+      pushHint:
+        "وصلك تنبيه من النظام لرسائل الشات وتحديثات الطلبات حتى لو التبويب بالخلفية.",
+      pushEnable: "تفعيل الإشعارات",
+      pushDisable: "إيقاف",
+      pushEnabled: "تم تفعيل إشعارات سطح المكتب",
+      pushDisabled: "تم إيقاف إشعارات سطح المكتب",
+      pushUnsupported: "هذا المتصفح ما يدعم إشعارات الدفع.",
+      pushDenied: "الإذن مرفوض — فعّل الإشعارات من إعدادات المتصفح لهذا الموقع.",
+      pushUnavailable: "إشعارات الدفع لسا مو مفعّلة على السيرفر.",
+      pushFailed: "ما قدرنا نحدّث إعدادات الإشعارات",
+      pushStatusOn: "مفعّل — راح توصلك تنبيهات ويندوز للشات والتعيينات.",
+      pushStatusOff: "مطفأ — فعّله عشان توصلك تنبيهات وأنت بعيد عن التبويب.",
+      pushPromptTitle: "تفعّل تنبيهات سطح المكتب؟",
+      pushPromptBody: "وصلك تنبيه لرسائل جديدة وتحديثات المشاريع على ويندوز (كروم / إيدج).",
+      pushLater: "لاحقاً",
       brandTitle: "هوية النظام",
       brandSub: "اسم النظام والشعار اللي يظهر بكل الصفحات.",
       brandSaved: "تم تحديث هوية النظام",

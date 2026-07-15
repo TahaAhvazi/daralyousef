@@ -8,6 +8,7 @@ export interface Column<T> {
   align?: "left" | "right" | "center";
   render: (row: T, index: number) => ReactNode;
   width?: string | number;
+  hideOnMobile?: boolean;
 }
 
 interface DataTableProps<T> {
@@ -17,6 +18,7 @@ interface DataTableProps<T> {
   empty?: ReactNode;
   onRowClick?: (row: T) => void;
   rowKey?: (row: T, index: number) => string | number;
+  stickyHeader?: boolean;
 }
 
 export function DataTable<T>({
@@ -26,22 +28,29 @@ export function DataTable<T>({
   empty,
   onRowClick,
   rowKey,
+  stickyHeader = true,
 }: DataTableProps<T>) {
   return (
     <div className="card min-w-0 max-w-full overflow-hidden">
       <div className="overflow-x-auto overscroll-x-contain">
-        <table className="min-w-full">
-          <thead className="bg-surface-2/60 border-b border-border">
+        <table className="min-w-full border-collapse">
+          <thead
+            className={cn(
+              "border-b border-border bg-surface-2/70",
+              stickyHeader && "sticky top-0 z-[1] backdrop-blur-sm",
+            )}
+          >
             <tr>
               {columns.map((c) => (
                 <th
                   key={c.key}
                   style={{ width: c.width }}
                   className={cn(
-                    "px-4 py-3 text-start text-[11.5px] font-semibold uppercase tracking-wider text-text-3",
+                    "px-4 py-3 text-start text-overline",
                     c.align === "right" && "text-end",
                     c.align === "center" && "text-center",
-                    c.className
+                    c.hideOnMobile && "hidden sm:table-cell",
+                    c.className,
                   )}
                 >
                   {c.header}
@@ -49,12 +58,15 @@ export function DataTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/80">
+          <tbody className="divide-y divide-border/70">
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => (
                 <tr key={i}>
                   {columns.map((c) => (
-                    <td key={c.key} className="px-4 py-3">
+                    <td
+                      key={c.key}
+                      className={cn("px-4 py-3.5", c.hideOnMobile && "hidden sm:table-cell")}
+                    >
                       <div className="skeleton h-4 w-2/3" />
                     </td>
                   ))}
@@ -73,17 +85,18 @@ export function DataTable<T>({
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
                   className={cn(
                     "transition-colors",
-                    onRowClick && "cursor-pointer hover:bg-surface-2/60"
+                    onRowClick && "cursor-pointer hover:bg-surface-2/50",
                   )}
                 >
                   {columns.map((c) => (
                     <td
                       key={c.key}
                       className={cn(
-                        "px-4 py-3 text-[13.5px] text-text",
+                        "px-4 py-3.5 text-body",
                         c.align === "right" && "text-end",
                         c.align === "center" && "text-center",
-                        c.className
+                        c.hideOnMobile && "hidden sm:table-cell",
+                        c.className,
                       )}
                     >
                       {c.render(row, i)}

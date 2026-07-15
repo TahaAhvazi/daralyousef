@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, CheckCheck, ClipboardList, MessageSquare } from "lucide-react";
+import { Bell, CheckCheck, ClipboardList, MessageSquare, MonitorSmartphone } from "lucide-react";
 
 import {
   useNotificationActions,
   useNotificationsList,
   useUnreadNotificationCount,
 } from "@/hooks/useNotifications";
+import { useWebPush } from "@/hooks/useWebPush";
+import { dismissPushPrompt } from "@/lib/webPush";
 import { notificationDisplay, notificationIconType } from "@/lib/notificationText";
 import { fromNow } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { useT } from "@/i18n/useT";
 import type { NotificationItem } from "@/types/api";
+import { Button } from "@/components/ui/Button";
 
 function NotificationRow({
   item,
@@ -65,11 +68,14 @@ export function NotificationBell() {
   const navigate = useNavigate();
   const { t, dir } = useT();
   const tb = t.staffUi.topbar;
+  const tt = t.staffUi.settings;
   const [open, setOpen] = useState(false);
+  const [promptHidden, setPromptHidden] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const { data: unread = 0 } = useUnreadNotificationCount();
   const { data } = useNotificationsList({ pageSize: 10 });
   const { markRead, markAllRead } = useNotificationActions();
+  const push = useWebPush();
 
   useEffect(() => {
     const h = (e: MouseEvent) => {
@@ -98,6 +104,8 @@ export function NotificationBell() {
         {unread > 99 ? "99+" : unread}
       </span>
     ) : null;
+
+  const showEnableBanner = push.showPrompt && !promptHidden;
 
   return (
     <div ref={ref} className="relative">
@@ -133,6 +141,41 @@ export function NotificationBell() {
               </button>
             ) : null}
           </div>
+
+          {showEnableBanner ? (
+            <div className="border-b border-border bg-brand/5 px-3.5 py-3">
+              <div className="flex gap-2.5">
+                <div className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-brand/15 text-brand">
+                  <MonitorSmartphone className="size-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[12.5px] font-semibold text-text">{tt.pushPromptTitle}</p>
+                  <p className="mt-0.5 text-[11.5px] leading-snug text-text-2">{tt.pushPromptBody}</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    <Button
+                      size="sm"
+                      className="!h-8 !text-[11.5px]"
+                      loading={push.isEnabling}
+                      onClick={() => push.enable()}
+                    >
+                      {tt.pushEnable}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="!h-8 !text-[11.5px]"
+                      onClick={() => {
+                        dismissPushPrompt();
+                        setPromptHidden(true);
+                      }}
+                    >
+                      {tt.pushLater}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           <div className="max-h-[min(24rem,60vh)] overflow-y-auto divide-y divide-border/60">
             {(data?.items ?? []).length === 0 ? (

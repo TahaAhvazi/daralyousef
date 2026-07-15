@@ -42,6 +42,23 @@ async def create_notification(
     )
     db.add(n)
     await db.flush()
+
+    # Desktop / mobile browser push (Chrome on Windows etc.) — non-blocking.
+    try:
+        from app.services.push_service import schedule_push_after_commit
+
+        schedule_push_after_commit(
+            user_id=user_id,
+            title=title,
+            body=body,
+            url=link or "/app/notifications",
+            tag=f"{type}-{n.id}",
+            notif_type=type,
+            notification_id=n.id,
+        )
+    except Exception:
+        pass
+
     return n
 
 

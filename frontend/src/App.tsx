@@ -1,49 +1,68 @@
+import { lazy, Suspense, useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 
 import { AppShell } from "@/layouts/AppShell";
 import { AuthLayout } from "@/layouts/AuthLayout";
 import { PortalLayout } from "@/layouts/PortalLayout";
-
-import ForgotPasswordPage from "@/pages/auth/ForgotPassword";
-import LoginPage from "@/pages/auth/Login";
-import RegisterPage from "@/pages/auth/Register";
-
 import { RoleBasedHome, RequirePermission } from "@/components/auth/RequirePermission";
-import WorkHomePage from "@/pages/dashboard/WorkHomePage";
-import CustomersPage from "@/pages/crm/CustomersPage";
-import LeadsPage from "@/pages/crm/LeadsPage";
-import OrdersPage from "@/pages/orders/OrdersPage";
-import OrderBoardPage from "@/pages/orders/OrderBoardPage";
-import OrderDetailPage from "@/pages/orders/OrderDetailPage";
-import NewOrderPage from "@/pages/orders/NewOrderPage";
-import QuotationsPage from "@/pages/finance/QuotationsPage";
-import InvoicesPage from "@/pages/finance/InvoicesPage";
-import InvoiceDetailPage from "@/pages/finance/InvoiceDetailPage";
-import MaterialsPage from "@/pages/inventory/MaterialsPage";
-import TicketsPage from "@/pages/support/TicketsPage";
-import ProductsPage from "@/pages/catalog/ProductsPage";
-import AuditLogPage from "@/pages/audit/AuditLogPage";
-import SettingsPage from "@/pages/settings/SettingsPage";
-import UsersPage from "@/pages/settings/UsersPage";
-
-import PortalHome from "@/pages/portal/PortalHome";
-import PortalOrderDetailPage from "@/pages/portal/PortalOrderDetailPage";
-import PortalOrders from "@/pages/portal/PortalOrders";
-import TicketDetailPage from "@/pages/support/TicketDetailPage";
-import MessagesPage from "@/pages/messages/MessagesPage";
-import NotificationsPage from "@/pages/notifications/NotificationsPage";
-
-import LandingPage from "@/pages/landing/LandingPage";
-import ServiceCategoryPage from "@/pages/landing/ServiceCategoryPage";
-
 import { ScrollLock } from "@/components/layout/ScrollLock";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 import { authApi } from "@/api/auth";
 import { useAuthStore } from "@/store/auth";
 import { applyThemeClass, useThemeStore } from "@/store/theme";
 import { useBrand } from "@/hooks/useBrand";
+
+const LoginPage = lazy(() => import("@/pages/auth/Login"));
+const RegisterPage = lazy(() => import("@/pages/auth/Register"));
+const ForgotPasswordPage = lazy(() => import("@/pages/auth/ForgotPassword"));
+const WorkHomePage = lazy(() => import("@/pages/dashboard/WorkHomePage"));
+const CustomersPage = lazy(() => import("@/pages/crm/CustomersPage"));
+const LeadsPage = lazy(() => import("@/pages/crm/LeadsPage"));
+const OrdersPage = lazy(() => import("@/pages/orders/OrdersPage"));
+const OrderBoardPage = lazy(() => import("@/pages/orders/OrderBoardPage"));
+const OrderDetailPage = lazy(() => import("@/pages/orders/OrderDetailPage"));
+const NewOrderPage = lazy(() => import("@/pages/orders/NewOrderPage"));
+const QuotationsPage = lazy(() => import("@/pages/finance/QuotationsPage"));
+const InvoicesPage = lazy(() => import("@/pages/finance/InvoicesPage"));
+const InvoiceDetailPage = lazy(() => import("@/pages/finance/InvoiceDetailPage"));
+const MaterialsPage = lazy(() => import("@/pages/inventory/MaterialsPage"));
+const TicketsPage = lazy(() => import("@/pages/support/TicketsPage"));
+const TicketDetailPage = lazy(() => import("@/pages/support/TicketDetailPage"));
+const ProductsPage = lazy(() => import("@/pages/catalog/ProductsPage"));
+const AuditLogPage = lazy(() => import("@/pages/audit/AuditLogPage"));
+const SettingsPage = lazy(() => import("@/pages/settings/SettingsPage"));
+const UsersPage = lazy(() => import("@/pages/settings/UsersPage"));
+const PortalHome = lazy(() => import("@/pages/portal/PortalHome"));
+const PortalOrderDetailPage = lazy(() => import("@/pages/portal/PortalOrderDetailPage"));
+const PortalOrders = lazy(() => import("@/pages/portal/PortalOrders"));
+const PortalProfilePage = lazy(() => import("@/pages/portal/PortalProfilePage"));
+const MessagesPage = lazy(() => import("@/pages/messages/MessagesPage"));
+const NotificationsPage = lazy(() => import("@/pages/notifications/NotificationsPage"));
+const LandingPage = lazy(() => import("@/pages/landing/LandingPage"));
+const ServiceCategoryPage = lazy(() => import("@/pages/landing/ServiceCategoryPage"));
+
+function RouteFallback() {
+  return (
+    <div className="page-shell space-y-4 p-4 sm:p-6">
+      <Skeleton className="h-8 w-48" />
+      <Skeleton className="h-4 w-72" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="card p-5 space-y-3">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-8 w-32" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LazyPage({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<RouteFallback />}>{children}</Suspense>;
+}
 
 function RequireAuth({
   children,
@@ -70,10 +89,6 @@ function PortalGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-/**
- * Side-effect: keep the browser tab title and favicon in sync with the
- * admin-managed brand. Falls back to i18n defaults when the API is unreachable.
- */
 function BrandHead() {
   const { name, logoUrl } = useBrand();
 
@@ -111,7 +126,6 @@ export default function App() {
 
   useEffect(() => { applyThemeClass(theme); }, [theme]);
 
-  // Hydrate user info on load if token exists
   useEffect(() => {
     if (!token) return;
     authApi.me().then(setUser).catch(() => {});
@@ -130,18 +144,17 @@ export default function App() {
             border: "1px solid rgb(var(--border))",
             fontSize: "13.5px",
             borderRadius: "12px",
+            boxShadow: "0 4px 14px rgb(var(--text) / .08)",
           },
         }}
       />
       <Routes>
-        {/* Auth */}
         <Route element={<AuthLayout />}>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/login" element={<LazyPage><LoginPage /></LazyPage>} />
+          <Route path="/register" element={<LazyPage><RegisterPage /></LazyPage>} />
+          <Route path="/forgot-password" element={<LazyPage><ForgotPasswordPage /></LazyPage>} />
         </Route>
 
-        {/* Staff app */}
         <Route
           path="/app"
           element={
@@ -150,29 +163,28 @@ export default function App() {
             </RequireAuth>
           }
         >
-          <Route index element={<RoleBasedHome />} />
-          <Route path="work" element={<WorkHomePage />} />
-          <Route path="customers" element={<RequirePermission perm="crm:read"><CustomersPage /></RequirePermission>} />
-          <Route path="leads" element={<RequirePermission perm="crm:read"><LeadsPage /></RequirePermission>} />
-          <Route path="orders" element={<RequirePermission perm={["orders:read", "orders:admin"]}><OrdersPage /></RequirePermission>} />
-          <Route path="orders/board" element={<RequirePermission perm={["production:read", "production:update"]}><OrderBoardPage /></RequirePermission>} />
-          <Route path="orders/new" element={<RequirePermission perm="orders:create"><NewOrderPage /></RequirePermission>} />
-          <Route path="orders/:id" element={<RequirePermission perm="orders:admin"><OrderDetailPage /></RequirePermission>} />
-          <Route path="quotations" element={<RequirePermission perm="finance:read"><QuotationsPage /></RequirePermission>} />
-          <Route path="invoices" element={<RequirePermission perm="finance:read"><InvoicesPage /></RequirePermission>} />
-          <Route path="invoices/:id" element={<RequirePermission perm="finance:read"><InvoiceDetailPage /></RequirePermission>} />
-          <Route path="materials" element={<RequirePermission perm="inventory:read"><MaterialsPage /></RequirePermission>} />
-          <Route path="tickets" element={<RequirePermission perm={["support:read", "support:reply"]}><TicketsPage /></RequirePermission>} />
-          <Route path="tickets/:id" element={<RequirePermission perm={["support:read", "support:reply"]}><TicketDetailPage /></RequirePermission>} />
-          <Route path="messages" element={<RequirePermission perm={["messages:read", "messages:send"]}><MessagesPage /></RequirePermission>} />
-          <Route path="notifications" element={<NotificationsPage />} />
-          <Route path="products" element={<RequirePermission perm="catalog:manage"><ProductsPage /></RequirePermission>} />
-          <Route path="audit" element={<RequirePermission perm="audit:read"><AuditLogPage /></RequirePermission>} />
-          <Route path="users" element={<RequirePermission perm="users:read"><UsersPage /></RequirePermission>} />
-          <Route path="settings" element={<SettingsPage />} />
+          <Route index element={<LazyPage><RoleBasedHome /></LazyPage>} />
+          <Route path="work" element={<LazyPage><WorkHomePage /></LazyPage>} />
+          <Route path="customers" element={<LazyPage><RequirePermission perm="crm:read"><CustomersPage /></RequirePermission></LazyPage>} />
+          <Route path="leads" element={<LazyPage><RequirePermission perm="crm:read"><LeadsPage /></RequirePermission></LazyPage>} />
+          <Route path="orders" element={<LazyPage><RequirePermission perm={["orders:read", "orders:admin"]}><OrdersPage /></RequirePermission></LazyPage>} />
+          <Route path="orders/board" element={<LazyPage><RequirePermission perm={["production:read", "production:update"]}><OrderBoardPage /></RequirePermission></LazyPage>} />
+          <Route path="orders/new" element={<LazyPage><RequirePermission perm="orders:create"><NewOrderPage /></RequirePermission></LazyPage>} />
+          <Route path="orders/:id" element={<LazyPage><RequirePermission perm={["orders:admin", "orders:read", "orders:update", "orders:create", "production:read", "production:update"]}><OrderDetailPage /></RequirePermission></LazyPage>} />
+          <Route path="quotations" element={<LazyPage><RequirePermission perm="finance:read"><QuotationsPage /></RequirePermission></LazyPage>} />
+          <Route path="invoices" element={<LazyPage><RequirePermission perm="finance:read"><InvoicesPage /></RequirePermission></LazyPage>} />
+          <Route path="invoices/:id" element={<LazyPage><RequirePermission perm="finance:read"><InvoiceDetailPage /></RequirePermission></LazyPage>} />
+          <Route path="materials" element={<LazyPage><RequirePermission perm="inventory:read"><MaterialsPage /></RequirePermission></LazyPage>} />
+          <Route path="tickets" element={<LazyPage><RequirePermission perm={["support:read", "support:reply"]}><TicketsPage /></RequirePermission></LazyPage>} />
+          <Route path="tickets/:id" element={<LazyPage><RequirePermission perm={["support:read", "support:reply"]}><TicketDetailPage /></RequirePermission></LazyPage>} />
+          <Route path="messages" element={<LazyPage><RequirePermission perm={["messages:read", "messages:send"]}><MessagesPage /></RequirePermission></LazyPage>} />
+          <Route path="notifications" element={<LazyPage><NotificationsPage /></LazyPage>} />
+          <Route path="products" element={<LazyPage><RequirePermission perm="catalog:manage"><ProductsPage /></RequirePermission></LazyPage>} />
+          <Route path="audit" element={<LazyPage><RequirePermission perm="audit:read"><AuditLogPage /></RequirePermission></LazyPage>} />
+          <Route path="users" element={<LazyPage><RequirePermission perm="users:read"><UsersPage /></RequirePermission></LazyPage>} />
+          <Route path="settings" element={<LazyPage><SettingsPage /></LazyPage>} />
         </Route>
 
-        {/* Customer portal */}
         <Route
           path="/portal"
           element={
@@ -181,19 +193,20 @@ export default function App() {
             </PortalGuard>
           }
         >
-          <Route index element={<PortalHome />} />
-          <Route path="orders" element={<PortalOrders />} />
-          <Route path="orders/new" element={<NewOrderPage />} />
-          <Route path="orders/:id" element={<PortalOrderDetailPage />} />
-          <Route path="invoices" element={<InvoicesPage />} />
-          <Route path="invoices/:id" element={<InvoiceDetailPage />} />
-          <Route path="quotations" element={<QuotationsPage />} />
-          <Route path="tickets" element={<TicketsPage />} />
-          <Route path="tickets/:id" element={<TicketDetailPage />} />
+          <Route index element={<LazyPage><PortalHome /></LazyPage>} />
+          <Route path="orders" element={<LazyPage><PortalOrders /></LazyPage>} />
+          <Route path="orders/new" element={<LazyPage><NewOrderPage /></LazyPage>} />
+          <Route path="orders/:id" element={<LazyPage><PortalOrderDetailPage /></LazyPage>} />
+          <Route path="invoices" element={<LazyPage><InvoicesPage /></LazyPage>} />
+          <Route path="invoices/:id" element={<LazyPage><InvoiceDetailPage /></LazyPage>} />
+          <Route path="quotations" element={<LazyPage><QuotationsPage /></LazyPage>} />
+          <Route path="tickets" element={<LazyPage><TicketsPage /></LazyPage>} />
+          <Route path="tickets/:id" element={<LazyPage><TicketDetailPage /></LazyPage>} />
+          <Route path="profile" element={<LazyPage><PortalProfilePage /></LazyPage>} />
         </Route>
 
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/services/:slug" element={<ServiceCategoryPage />} />
+        <Route path="/" element={<LazyPage><LandingPage /></LazyPage>} />
+        <Route path="/services/:slug" element={<LazyPage><ServiceCategoryPage /></LazyPage>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

@@ -3,7 +3,7 @@ import type {
   AuditLog, Customer, Company, DashboardSummary, Invoice, Lead, Material,
   NotificationItem, Opportunity, Order, Paginated, Payment, Product,
   ProductCategory, ProductMaterial, QuoteEstimate, Quotation, StockMovement, Ticket, TicketMessage,
-  Conversation, ChatMessage, Attachment, User,
+  Conversation, ChatMessage, Attachment, User, OrderNote,
   WorkflowStaff, Warehouse, Department, WorkflowBoard,
 } from "@/types/api";
 
@@ -25,8 +25,12 @@ export const customersApi = {
   list: (params?: { page?: number; page_size?: number; q?: string }) =>
     list<Customer>("/customers", params),
   get: (id: number) => http.get<Customer>(`/customers/${id}`).then((r) => r.data),
-  create: (data: Partial<Customer>) => http.post<Customer>("/customers", data).then((r) => r.data),
-  update: (id: number, data: Partial<Customer>) => http.patch<Customer>(`/customers/${id}`, data).then((r) => r.data),
+  create: (data: Partial<Customer> & { create_portal_access?: boolean; portal_password?: string }) =>
+    http.post<Customer>("/customers", data).then((r) => r.data),
+  update: (
+    id: number,
+    data: Partial<Customer> & { create_portal_access?: boolean; portal_password?: string },
+  ) => http.patch<Customer>(`/customers/${id}`, data).then((r) => r.data),
   remove: (id: number) => http.delete(`/customers/${id}`).then((r) => r.data),
   listCompanies: (params?: { page?: number; page_size?: number; q?: string }) =>
     list<Company>("/customers/companies", params),
@@ -106,6 +110,13 @@ export const ordersApi = {
   boardMove: (id: number, to_column: string, notes?: string) =>
     http.post<Order>(`/orders/${id}/board-move`, { to_column, notes }).then((r) => r.data),
   remove: (id: number) => http.delete(`/orders/${id}`).then((r) => r.data),
+  listNotes: (id: number) => http.get<OrderNote[]>(`/orders/${id}/notes`).then((r) => r.data),
+  createNote: (id: number, body: string) =>
+    http.post<OrderNote>(`/orders/${id}/notes`, { body }).then((r) => r.data),
+  updateNote: (id: number, noteId: number, body: string) =>
+    http.patch<OrderNote>(`/orders/${id}/notes/${noteId}`, { body }).then((r) => r.data),
+  deleteNote: (id: number, noteId: number) =>
+    http.delete(`/orders/${id}/notes/${noteId}`).then((r) => r.data),
 };
 
 // ── Finance ──────────────────────────────────────────────────────────────────
@@ -174,12 +185,18 @@ export const ticketsApi = {
 export const conversationsApi = {
   list: () => http.get<Conversation[]>("/conversations").then((r) => r.data),
   get: (id: number) => http.get<Conversation>(`/conversations/${id}`).then((r) => r.data),
+  byOrder: (orderId: number) =>
+    http.get<Conversation>(`/conversations/by-order/${orderId}`).then((r) => r.data),
   create: (data: { kind?: string; title?: string; order_id?: number; member_ids?: number[] }) =>
     http.post<Conversation>("/conversations", data).then((r) => r.data),
   send: (id: number, data: { body: string; order_id?: number }) =>
     http.post<ChatMessage>(`/conversations/${id}/messages`, data).then((r) => r.data),
   staff: () =>
-    http.get<{ id: number; full_name: string; email: string }[]>("/conversations/meta/staff").then((r) => r.data),
+    http
+      .get<{ id: number; full_name: string; email: string; avatar_url?: string | null }[]>(
+        "/conversations/meta/staff",
+      )
+      .then((r) => r.data),
   orders: () =>
     http.get<{ id: number; code: string; title?: string | null }[]>("/conversations/meta/orders").then((r) => r.data),
 };
@@ -209,6 +226,24 @@ export const notificationsApi = {
     http.get<{ count: number }>("/notifications/unread-count").then((r) => r.data),
   markRead: (id: number) => http.post(`/notifications/${id}/read`).then((r) => r.data),
   markAllRead: () => http.post("/notifications/read-all").then((r) => r.data),
+  pushVapidPublicKey: () =>
+    http
+      .get<{ public_key: string | null; configured: boolean }>("/notifications/push/vapid-public-key")
+      .then((r) => r.data),
+  pushStatus: () =>
+    http
+      .get<{ enabled: boolean; vapid_configured: boolean; subscription_count: number }>(
+        "/notifications/push/status",
+      )
+      .then((r) => r.data),
+  pushSubscribe: (data: {
+    endpoint: string;
+    keys: { p256dh: string; auth: string };
+    user_agent?: string;
+  }) => http.post("/notifications/push/subscribe", data).then((r) => r.data),
+  pushUnsubscribe: (endpoint: string) =>
+    http.post("/notifications/push/unsubscribe", { endpoint }).then((r) => r.data),
+  pushUnsubscribeAll: () => http.post("/notifications/push/unsubscribe-all").then((r) => r.data),
 };
 
 // ── Audit ────────────────────────────────────────────────────────────────────

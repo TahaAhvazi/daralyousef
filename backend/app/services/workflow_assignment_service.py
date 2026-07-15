@@ -250,6 +250,11 @@ async def replace_order_assignments(
             is_update=had_existing,
         )
 
+    # Keep project chat group in sync with assignees
+    from app.services import chat_service as chat_svc
+
+    await chat_svc.sync_order_conversation_members(db, order)
+
 
 async def load_assignments_map(
     db: AsyncSession,

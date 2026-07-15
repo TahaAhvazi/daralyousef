@@ -24,6 +24,7 @@ if TYPE_CHECKING:
 
     from app.models.department import Department
     from app.models.user import User
+    from app.models.order_note import OrderNote
 
 
 
@@ -124,6 +125,10 @@ class Order(IntPK, TimestampMixin, SoftDeleteMixin, Base):
     workflow_assignments: Mapped[List["OrderWorkflowAssignment"]] = relationship(
 
         back_populates="order", cascade="all, delete-orphan", order_by="OrderWorkflowAssignment.workflow_status")
+
+    project_notes: Mapped[List["OrderNote"]] = relationship(
+
+        back_populates="order", cascade="all, delete-orphan", order_by="OrderNote.id")
 
 
 

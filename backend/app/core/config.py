@@ -104,6 +104,11 @@ class Settings(BaseSettings):
     # ── Business calendar (invoice issue dates, etc.) ───────────────────────────
     BUSINESS_TIMEZONE: str = "Asia/Dubai"
 
+    # ── Web Push (Chrome / Edge / Firefox — Windows priority) ─────────────────
+    VAPID_PUBLIC_KEY: str = ""
+    VAPID_PRIVATE_KEY: str = ""
+    VAPID_SUBJECT: str = "mailto:noreply@daralyousif.iq"
+
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def parse_cors_origins(cls, value):

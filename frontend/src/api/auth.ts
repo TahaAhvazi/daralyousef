@@ -24,4 +24,16 @@ export const authApi = {
 
   updateProfile: (data: Partial<{ full_name: string; phone: string; theme: string; locale: string; avatar_url: string }>) =>
     http.patch<User>("/auth/me", data).then((r) => r.data),
+
+  uploadAvatar: (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return http
+      .post<User>("/auth/me/avatar", form, { headers: { "Content-Type": "multipart/form-data" } })
+      .then((r) => r.data);
+  },
+
+  removeAvatar: () => http.delete<User>("/auth/me/avatar").then((r) => r.data),
+
+  publicProfile: (uid: number) => http.get<User>(`/auth/users/${uid}/profile`).then((r) => r.data),
 };

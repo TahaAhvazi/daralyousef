@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { useT } from "@/i18n/useT";
 
-type Variant = "default" | "success" | "warning" | "danger" | "brand" | "accent";
+type Variant = "default" | "success" | "warning" | "danger" | "brand" | "accent" | "info";
 
 const VARIANTS: Record<Variant, string> = {
   default: "badge",
@@ -11,6 +11,7 @@ const VARIANTS: Record<Variant, string> = {
   danger: "badge badge-danger",
   brand: "badge badge-brand",
   accent: "badge badge-accent",
+  info: "badge badge-info",
 };
 
 export function Badge({
