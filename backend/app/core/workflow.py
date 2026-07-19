@@ -246,6 +246,7 @@ ORDER_BOARD_COLUMNS: Tuple[str, ...] = (
     "approval",
     "confirmed",
     "paid",
+    "warehouse",
     "design",
     "printing",
     "production",
@@ -265,6 +266,8 @@ _BOARD_COLUMN_INDEX = {c: i for i, c in enumerate(ORDER_BOARD_COLUMNS)}
 def derive_order_board_column(
     order_status: str,
     item_statuses: Iterable[str],
+    *,
+    stock_check_status: Optional[str] = None,
 ) -> str:
     """Map order + line items to a lifecycle kanban column."""
     if order_status == "cancelled":
@@ -282,7 +285,10 @@ def derive_order_board_column(
         return "approval"
 
     if order_status == "paid":
-        return "paid"
+        # After payment → warehouse queue until stock is approved
+        if stock_check_status == "approved":
+            return "paid"  # stock OK — ready to enter production stages
+        return "warehouse"
 
     if order_status in ("confirmed", "in_production"):
         if order_status == "confirmed":

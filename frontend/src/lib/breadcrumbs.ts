@@ -6,6 +6,9 @@ type PortalNavDict = Dict["portalUi"]["nav"];
 const STAFF_STATIC: Record<string, keyof NavDict | "notifications"> = {
   "/app": "dashboard",
   "/app/work": "dashboard",
+  "/app/hr": "humanResources",
+  "/app/hr/employees": "humanResources",
+  "/app/hr/payroll-report": "payrollReport",
   "/app/customers": "customers",
   "/app/leads": "leads",
   "/app/orders": "orders",

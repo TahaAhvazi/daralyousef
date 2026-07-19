@@ -134,6 +134,7 @@ export const ORDER_BOARD_COLUMNS = [
   "approval",
   "confirmed",
   "paid",
+  "warehouse",
   "design",
   "printing",
   "production",
@@ -143,7 +144,13 @@ export const ORDER_BOARD_COLUMNS = [
   "cancelled",
 ] as const;
 
-export const LIFECYCLE_PRE_PRODUCTION_COLUMNS = ["intake", "approval", "confirmed", "paid"] as const;
+export const LIFECYCLE_PRE_PRODUCTION_COLUMNS = [
+  "intake",
+  "approval",
+  "confirmed",
+  "paid",
+  "warehouse",
+] as const;
 
 export type OrderBoardColumn = (typeof ORDER_BOARD_COLUMNS)[number];
 
@@ -179,6 +186,7 @@ export function deriveOrderPipelineStage(statuses: Iterable<string>): string {
 export function deriveOrderBoardColumn(
   orderStatus: string,
   itemStatuses: Iterable<string>,
+  stockCheckStatus?: string | null,
 ): OrderBoardColumn {
   const items = [...itemStatuses];
   if (orderStatus === "cancelled") return "cancelled";
@@ -191,7 +199,9 @@ export function deriveOrderBoardColumn(
 
   if (orderStatus === "draft" || orderStatus === "pending_review") return "intake";
   if (orderStatus === "awaiting_customer" || orderStatus === "customer_approved") return "approval";
-  if (orderStatus === "paid") return "paid";
+  if (orderStatus === "paid") {
+    return stockCheckStatus === "approved" ? "paid" : "warehouse";
+  }
 
   if (orderStatus === "confirmed" || orderStatus === "in_production") {
     if (orderStatus === "confirmed") return "confirmed";
@@ -210,7 +220,12 @@ export function deriveOrderBoardColumn(
 }
 
 export function orderBoardColumn(
-  order: { status: string; board_column?: string; items?: { workflow_status?: string }[] },
+  order: {
+    status: string;
+    board_column?: string;
+    stock_check_status?: string | null;
+    items?: { workflow_status?: string }[];
+  },
 ): OrderBoardColumn {
   if (order.board_column && (ORDER_BOARD_COLUMNS as readonly string[]).includes(order.board_column)) {
     return order.board_column as OrderBoardColumn;
@@ -218,6 +233,7 @@ export function orderBoardColumn(
   return deriveOrderBoardColumn(
     order.status,
     (order.items ?? []).map((it) => it.workflow_status ?? "pending"),
+    order.stock_check_status,
   );
 }
 
@@ -247,7 +263,7 @@ export function isBackwardBoardMove(fromColumn: string, toColumn: string): boole
 
 export function isEnteringProduction(fromColumn: string, toColumn: string): boolean {
   return (
-    fromColumn === "paid" &&
+    (fromColumn === "paid" || fromColumn === "warehouse") &&
     (WORKFLOW_BOARD_STAGES as readonly string[]).includes(toColumn)
   );
 }
@@ -288,19 +304,44 @@ export function canDropOnBoardColumn(
     assignments_ready?: boolean;
     skipped_stages?: string[];
     stages_with_assignees?: string[];
+    stock_check_status?: string | null;
   },
   column: string,
   canOverride: boolean,
   canChangePaid = false,
+  canStockCheck = false,
 ): boolean {
   if (column === order.board_column) return false;
 
+  if (column === "warehouse") {
+    if (!(canStockCheck || canOverride || canChangePaid)) return false;
+    return order.board_column === "paid" || order.board_column === "confirmed";
+  }
+
   if (column === "paid") {
-    if (!canChangePaid) return false;
-    return order.board_column === "confirmed" || order.board_column === "paid";
+    if (!canChangePaid && !(canOverride && order.stock_check_status === "approved")) return false;
+    return (
+      order.board_column === "confirmed" ||
+      order.board_column === "paid" ||
+      order.board_column === "warehouse"
+    );
   }
 
   if (isEnteringProduction(order.board_column, column)) {
+    if (
+      order.board_column === "warehouse" &&
+      order.stock_check_status !== "approved" &&
+      !canOverride
+    ) {
+      return false;
+    }
+    if (
+      order.board_column === "paid" &&
+      order.stock_check_status !== "approved" &&
+      !canOverride
+    ) {
+      return false;
+    }
     return canEnterProductionColumn(order, column);
   }
 

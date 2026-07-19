@@ -60,7 +60,7 @@ def _default_cors_origin_regex() -> str:
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(BASE_DIR / ".env"),
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
@@ -108,6 +108,15 @@ class Settings(BaseSettings):
     VAPID_PUBLIC_KEY: str = ""
     VAPID_PRIVATE_KEY: str = ""
     VAPID_SUBJECT: str = "mailto:noreply@daralyousif.iq"
+
+    # ── Daftra integration (previous ERP — pull sync) ─────────────────────────
+    DAFTRA_ENABLED: bool = False
+    DAFTRA_BASE_URL: str = "https://yousifabd1996aa.daftra.com/api2"
+    DAFTRA_API_KEY: str = ""
+    DAFTRA_CLIENT_ID: str = ""
+    DAFTRA_CLIENT_SECRET: str = ""
+    # Default password for portal accounts created during Daftra customer sync
+    PORTAL_DEFAULT_PASSWORD: str = "yousef123"
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod

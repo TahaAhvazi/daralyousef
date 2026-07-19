@@ -113,7 +113,23 @@ function TileCard({
   big?: boolean;
 }) {
   return (
-    <Link to={tile.to} className="group block h-full focus-ring rounded-2xl">
+    <Link
+      to={tile.to}
+      data-tour={
+        tile.labelKey === "orderBoard"
+          ? "tile-order-board"
+          : tile.labelKey === "newOrder"
+            ? "tile-new-order"
+            : tile.labelKey === "invoices"
+              ? "tile-invoices"
+              : tile.labelKey === "customers"
+                ? "tile-customers"
+                : tile.labelKey === "materials"
+                  ? "tile-materials"
+                  : undefined
+      }
+      className="group block h-full focus-ring rounded-2xl"
+    >
       <Card interactive className="h-full ring-1 ring-transparent group-hover:ring-brand/20">
         <CardBody className={`flex h-full flex-col gap-3 ${big ? "p-5 sm:p-6" : "p-4 sm:p-5"}`}>
           <div className="flex items-center gap-3">

@@ -8,6 +8,8 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from sqlalchemy import text
+
 from app.api.v1.router import api_router
 from app.core.config import ensure_upload_dir, settings
 from app.core.exceptions import install_exception_handlers
@@ -21,6 +23,8 @@ setup_logging()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Creates missing tables + additive column migrations on every boot
+    # (safe for live redeploy of a DB that pre-dates Daftra sync).
     await init_db()
     yield
     await engine.dispose()
@@ -84,4 +88,22 @@ async def root():
 
 @app.get(f"{settings.API_V1_PREFIX}/health", tags=["root"])
 async def health():
-    return {"status": "ok", "time": datetime.now(timezone.utc).isoformat()}
+    db_ok = False
+    try:
+        async with SessionLocal() as db:
+            await db.execute(text("SELECT 1"))
+            db_ok = True
+    except Exception:
+        db_ok = False
+    daftra_configured = bool(
+        (settings.DAFTRA_API_KEY or "").strip()
+        or ((settings.DAFTRA_CLIENT_ID or "").strip() and (settings.DAFTRA_CLIENT_SECRET or "").strip())
+    )
+    return {
+        "status": "ok" if db_ok else "degraded",
+        "time": datetime.now(timezone.utc).isoformat(),
+        "database": "ok" if db_ok else "error",
+        "daftra_enabled": bool(settings.DAFTRA_ENABLED),
+        "daftra_configured": daftra_configured,
+        "env": settings.APP_ENV,
+    }

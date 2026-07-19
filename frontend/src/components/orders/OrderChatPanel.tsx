@@ -90,23 +90,37 @@ export function OrderChatPanel({ orderId }: { orderId: number }) {
             ) : (
               messages.map((msg) => {
                 const self = msg.author_user_id === me?.id;
+                const system = msg.author_user_id == null;
                 return (
-                  <div key={msg.id} className={cn("flex", self ? "justify-end" : "justify-start")}>
+                  <div
+                    key={msg.id}
+                    className={cn("flex", system ? "justify-center" : self ? "justify-end" : "justify-start")}
+                  >
                     <div
                       className={cn(
                         "max-w-[85%] rounded-2xl px-3.5 py-2 text-[13.5px] leading-relaxed shadow-soft",
-                        self
-                          ? "rounded-ee-md bg-brand text-white"
-                          : "rounded-es-md border border-border bg-surface text-text",
+                        system
+                          ? "max-w-[95%] rounded-lg border border-border/70 bg-surface-2/60 text-text-2 text-[12.5px]"
+                          : self
+                            ? "rounded-ee-md bg-brand text-white"
+                            : "rounded-es-md border border-border bg-surface text-text",
                       )}
                     >
-                      {!self && msg.author_name ? (
-                        <div className={cn("mb-0.5 text-[11px] font-semibold", self ? "text-white/80" : "text-brand")}>
+                      {!self && !system && msg.author_name ? (
+                        <div className="mb-0.5 text-[11px] font-semibold text-brand">
                           {msg.author_name}
                         </div>
                       ) : null}
+                      {system && msg.author_name ? (
+                        <div className="mb-0.5 text-[11px] font-semibold text-text-3">{msg.author_name}</div>
+                      ) : null}
                       <p className="whitespace-pre-wrap break-words">{msg.body}</p>
-                      <span className={cn("mt-1 block text-end text-[10px]", self ? "text-white/70" : "text-text-3")}>
+                      <span
+                        className={cn(
+                          "mt-1 block text-end text-[10px]",
+                          system ? "text-text-3" : self ? "text-white/70" : "text-text-3",
+                        )}
+                      >
                         {formatMessageTime(msg.created_at, locale)}
                       </span>
                     </div>

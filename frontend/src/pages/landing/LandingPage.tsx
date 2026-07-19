@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Menu, X } from "lucide-react";
@@ -15,10 +16,12 @@ import { SlicedVideoColumns } from "@/pages/landing/SlicedVideoColumns";
 const easeOut = [0.2, 0.7, 0.2, 1] as const;
 
 function LandingNav() {
-  const { t } = useT();
+  const { t, isRtl } = useT();
   const brand = useBrand();
   const mobileMenus = useLandingMobileMenus();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [showBrand, setShowBrand] = useState(false);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -29,19 +32,42 @@ function LandingNav() {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 24);
+      setShowBrand(y > 260);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55, ease: easeOut }}
-      className="landing-dar-nav"
+      className={`landing-dar-nav${scrolled ? " is-scrolled" : ""}`}
     >
       <div className="landing-shell flex h-full items-center justify-between gap-3 py-2 sm:py-3">
         <span className="sr-only">{brand.name}</span>
 
-        <div className="ms-auto flex items-center gap-2 sm:gap-3">
-          <LandingNavMenus />
+        <Link
+          to="/"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className={`landing-dar-nav-brand${showBrand ? " is-visible" : ""}`}
+          aria-label={brand.name}
+          tabIndex={showBrand ? 0 : -1}
+        >
+          <img src={landingLogoName} alt="" decoding="async" />
+        </Link>
 
+        <div className="hidden sm:flex flex-1 justify-center px-2">
+          <LandingNavMenus />
+        </div>
+
+        <div className="ms-auto sm:ms-0 flex items-center gap-2 sm:gap-3">
           <LanguageSwitcher variant="minimal" align="end" className="hidden xs:block" />
 
           <button
@@ -53,50 +79,56 @@ function LandingNav() {
             <Menu className="size-4" />
           </button>
 
-          <Link
-            to="/register"
-            className="group hidden xs:inline-flex items-center gap-2 rounded-full bg-[#0a1f4d] ps-4 pe-1.5 py-1.5 text-[12px] font-medium text-white ring-1 ring-white/20 hover:bg-[#081a40] transition-colors"
-          >
+          <Link to="/register" className="landing-dar-shine landing-dar-nav-cta group hidden xs:inline-flex">
             <span>{t.nav.startOrder}</span>
-            <span className="grid size-7 place-items-center rounded-full bg-[#f5c518] text-[#0a1f4d] group-hover:scale-105 transition-transform">
+            <span className="landing-dar-nav-cta-arrow" aria-hidden>
               <ArrowRight data-rtl-mirror="true" className="size-3.5" />
             </span>
           </Link>
         </div>
       </div>
 
-      <AnimatePresence>
-        {menuOpen ? (
-          <motion.div
-            className="fixed inset-0 z-[70] sm:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+      {/* Portal: the nav's backdrop-filter creates a containing block that
+          would clip a position:fixed drawer to the nav's own height. */}
+      {createPortal(
+        <AnimatePresence>
+          {menuOpen ? (
+            <motion.div
+              className="fixed inset-0 z-[70] sm:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
             <div
               className="absolute inset-0 bg-[#061535]/80 backdrop-blur-sm"
               onClick={() => setMenuOpen(false)}
               aria-hidden
             />
             <motion.nav
-              initial={{ opacity: 0, y: -12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ type: "spring", stiffness: 380, damping: 32 }}
-              className="absolute inset-x-4 top-16 rounded-2xl border border-white/15 bg-[#0d2d6b]/95 p-4 shadow-2xl backdrop-blur-xl"
+              initial={{ x: isRtl ? "-104%" : "104%" }}
+              animate={{ x: 0 }}
+              exit={{ x: isRtl ? "-104%" : "104%" }}
+              transition={{ type: "spring", stiffness: 340, damping: 34 }}
+              className="landing-dar-drawer"
             >
-              <div className="mb-3 flex items-center justify-between">
-                <span className="text-[13px] font-medium text-white/75">{brand.name}</span>
+              <div className="landing-dar-drawer-head">
+                <img
+                  src={landingLogoName}
+                  alt={brand.name}
+                  className="landing-dar-drawer-logo"
+                  decoding="async"
+                />
                 <button
                   type="button"
                   onClick={() => setMenuOpen(false)}
-                  className="grid size-9 place-items-center rounded-full text-white/80 hover:bg-white/10"
+                  className="landing-dar-drawer-close"
                   aria-label={t.nav.closeMenu}
                 >
                   <X className="size-5" />
                 </button>
               </div>
-              <ul className="space-y-1">
+
+              <ul className="landing-dar-drawer-list">
                 {mobileMenus.map((menu) => (
                   <LandingMobileMenuSection
                     key={menu.id}
@@ -105,20 +137,25 @@ function LandingNav() {
                   />
                 ))}
               </ul>
-              <div className="mt-4 border-t border-white/10 pt-4">
+
+              <div className="landing-dar-drawer-foot">
                 <LanguageSwitcher variant="minimal" align="end" className="w-full" />
+                <Link
+                  to="/register"
+                  onClick={() => setMenuOpen(false)}
+                  className="landing-dar-shine landing-dar-drawer-cta"
+                >
+                  {t.nav.startOrder}
+                  <ArrowRight data-rtl-mirror="true" className="size-4" />
+                </Link>
+                <p className="landing-dar-drawer-tagline">{brand.tagline}</p>
               </div>
-              <Link
-                to="/register"
-                onClick={() => setMenuOpen(false)}
-                className="mt-4 flex h-11 items-center justify-center rounded-full bg-[#f5c518] text-[13px] font-semibold text-[#0a1f4d]"
-              >
-                {t.nav.startOrder}
-              </Link>
             </motion.nav>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>,
+        document.body,
+      )}
     </motion.header>
   );
 }
@@ -145,7 +182,13 @@ export default function LandingPage() {
 
       <main className="landing-dar-main">
         <section className="landing-dar-hero" aria-label="Hero">
+          <div className="landing-dar-glow" aria-hidden>
+            <span />
+            <span />
+          </div>
+
           <div className="landing-dar-brand">
+            <div className="landing-dar-halo" aria-hidden />
             <Link
               to="/"
               className="landing-dar-logo-link"

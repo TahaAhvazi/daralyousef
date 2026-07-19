@@ -80,13 +80,42 @@ class InvoiceOut(ORMModel, InvoiceBase):
     issued_at: Optional[datetime] = None
     items: List[LineItemOut] = []
     created_at: datetime
+    customer_name: Optional[str] = None
+    last_activity: Optional[str] = None
+    sold_by: Optional[str] = None
+    salesperson_id: Optional[int] = None
 
 
 class InvoiceDetailOut(InvoiceOut):
-    customer_name: Optional[str] = None
     customer_email: Optional[str] = None
     order_code: Optional[str] = None
+    created_by_name: Optional[str] = None
+    created_by_id: Optional[int] = None
+    warehouse_name: Optional[str] = None
+    stock_issued: bool = False
+    stock_issue_code: Optional[str] = None
+    stock_issue_at: Optional[datetime] = None
 
+
+class InvoiceActivityEvent(BaseModel):
+    id: str
+    kind: str  # created|payment|update|stock_issue|other
+    action: str
+    title: str
+    detail: Optional[str] = None
+    occurred_at: datetime
+    user_id: Optional[int] = None
+    user_name: Optional[str] = None
+    user_email: Optional[str] = None
+
+
+class InvoiceActivityOut(BaseModel):
+    items: List[InvoiceActivityEvent]
+
+
+class InvoiceStockIssueIn(BaseModel):
+    warehouse_name: Optional[str] = None
+    notes: Optional[str] = None
 
 class InvoiceUpdate(BaseModel):
     portal_visible: Optional[bool] = None

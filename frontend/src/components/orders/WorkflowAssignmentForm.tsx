@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQueries } from "@tanstack/react-query";
 
 import { ordersApi } from "@/api/modules";
@@ -8,6 +9,7 @@ import {
   type WorkflowAssignmentStage,
 } from "@/lib/workflow";
 import { useT } from "@/i18n/useT";
+import type { WorkflowStaff } from "@/types/api";
 
 export type { WorkflowAssignmentDraft, WorkflowAssignmentStage };
 export {
@@ -27,10 +29,17 @@ interface WorkflowAssignmentFormProps {
   disabled?: boolean;
 }
 
+function staffMatchesQuery(u: WorkflowStaff, q: string): boolean {
+  if (!q) return true;
+  const hay = `${u.full_name} ${u.email}`.toLowerCase();
+  return hay.includes(q);
+}
+
 export function WorkflowAssignmentForm({ value, onChange, disabled }: WorkflowAssignmentFormProps) {
   const { t } = useT();
   const wa = t.staffUi.workflowAssignments;
   const stageLabels: Record<WorkflowAssignmentStage, string> = wa.stages;
+  const [staffSearch, setStaffSearch] = useState<Partial<Record<WorkflowAssignmentStage, string>>>({});
 
   const staffQueries = useQueries({
     queries: WORKFLOW_ASSIGNMENT_STAGES.map((stage) => ({
@@ -64,6 +73,12 @@ export function WorkflowAssignmentForm({ value, onChange, disabled }: WorkflowAs
           const row = value.find((d) => d.workflow_status === stage);
           const skipped = row?.skipped ?? false;
           const selected = new Set(row?.assignee_ids ?? []);
+          const q = (staffSearch[stage] ?? "").trim().toLowerCase();
+          // Match name/email; keep already-selected people visible while filtering
+          const list = staff.filter(
+            (u) => !q || selected.has(u.id) || staffMatchesQuery(u, q),
+          );
+
           return (
             <div
               key={stage}
@@ -95,34 +110,50 @@ export function WorkflowAssignmentForm({ value, onChange, disabled }: WorkflowAs
                 </label>
               </div>
               {!skipped ? (
-                <div className="space-y-1 max-h-36 overflow-y-auto pr-1">
-                  {staffQueries[idx]?.isLoading ? (
-                    <p className="text-[11.5px] text-text-3">{t.common.loading}</p>
-                  ) : staff.length === 0 ? (
-                    <p className="text-[11.5px] text-text-3 italic">{wa.noStaff}</p>
-                  ) : (
-                    staff.map((u) => (
-                      <label
-                        key={u.id}
-                        className={cn(
-                          "flex items-center gap-2 rounded-md px-2 py-1.5 text-[12.5px] cursor-pointer",
-                          "hover:bg-surface-2/80",
-                          selected.has(u.id) && "bg-brand/10 text-brand",
-                        )}
-                      >
-                        <input
-                          type="checkbox"
-                          className="size-3.5 accent-[rgb(var(--brand))]"
-                          checked={selected.has(u.id)}
-                          disabled={disabled}
-                          onChange={() => toggleAssignee(stage, u.id)}
-                        />
-                        <span className="truncate">{u.full_name}</span>
-                      </label>
-                    ))
-                  )}
+                <div className="space-y-1.5">
+                  {staff.length > 0 ? (
+                    <input
+                      type="search"
+                      value={staffSearch[stage] ?? ""}
+                      disabled={disabled}
+                      placeholder={t.staffUi.common.search}
+                      onChange={(e) =>
+                        setStaffSearch((prev) => ({ ...prev, [stage]: e.target.value }))
+                      }
+                      className="w-full rounded-md border border-border bg-bg px-2.5 py-1.5 text-[12.5px] text-text placeholder:text-text-3 outline-none focus:border-brand/50"
+                    />
+                  ) : null}
+                  <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
+                    {staffQueries[idx]?.isLoading ? (
+                      <p className="text-[11.5px] text-text-3">{t.common.loading}</p>
+                    ) : staff.length === 0 ? (
+                      <p className="text-[11.5px] text-text-3 italic">{wa.noStaff}</p>
+                    ) : list.length === 0 ? (
+                      <p className="text-[11.5px] text-text-3 italic">{t.staffUi.common.noResults}</p>
+                    ) : (
+                      list.map((u) => (
+                        <label
+                          key={u.id}
+                          className={cn(
+                            "flex items-center gap-2 rounded-md px-2 py-1.5 text-[12.5px] cursor-pointer",
+                            "hover:bg-surface-2/80",
+                            selected.has(u.id) && "bg-brand/10 text-brand",
+                          )}
+                        >
+                          <input
+                            type="checkbox"
+                            className="size-3.5 accent-[rgb(var(--brand))]"
+                            checked={selected.has(u.id)}
+                            disabled={disabled}
+                            onChange={() => toggleAssignee(stage, u.id)}
+                          />
+                          <span className="min-w-0 flex-1 truncate">{u.full_name}</span>
+                        </label>
+                      ))
+                    )}
+                  </div>
                   {selected.size > 0 ? (
-                    <p className="text-[10.5px] text-text-3 pt-1">
+                    <p className="text-[10.5px] text-text-3 pt-0.5">
                       {wa.selectedCount.replace("{n}", String(selected.size))}
                     </p>
                   ) : (

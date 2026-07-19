@@ -33,6 +33,13 @@ export function canChangeOrderPaidStatus(user: User | null | undefined): boolean
   return hasRole(user, "accountant", "general_manager");
 }
 
+/** Warehouse or executives — approve materials before production. */
+export function canStockCheckOrder(user: User | null | undefined): boolean {
+  if (!user) return false;
+  if (user.is_superuser) return true;
+  return hasRole(user, "warehouse", "general_manager", "ceo", "cto");
+}
+
 /** Full order detail, pricing, customer info, order-level status changes. */
 export function canManageOrdersAdmin(user: User | null | undefined): boolean {
   return !!user?.is_superuser || hasPermission(user, "orders:admin");
@@ -41,7 +48,7 @@ export function canManageOrdersAdmin(user: User | null | undefined): boolean {
 /** Open project page for overview, chat, and shift notes. */
 export function canOpenOrderDetail(user: User | null | undefined): boolean {
   if (!user) return false;
-  if (user.is_superuser || hasRole(user, "ceo", "accountant")) return true;
+  if (user.is_superuser || hasRole(user, "ceo", "accountant", "warehouse", "general_manager")) return true;
   return hasAnyPermission(
     user,
     "orders:admin",
@@ -142,6 +149,11 @@ export function canConfirmOrderReceipt(user: User | null | undefined): boolean {
 
 export function canCreateOrders(user: User | null | undefined): boolean {
   return hasPermission(user, "orders:create");
+}
+
+/** Mark attendance, bonuses, draft/confirm payslips. */
+export function canManageHr(user: User | null | undefined): boolean {
+  return hasPermission(user, "hr:manage");
 }
 
 const CLOSED_TICKET_STATUSES = new Set(["closed", "resolved"]);

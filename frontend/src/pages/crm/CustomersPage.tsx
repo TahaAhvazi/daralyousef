@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Eye, EyeOff, Pencil, Plus, Search, Trash2, Users } from "lucide-react";
 import toast from "react-hot-toast";
@@ -19,24 +19,28 @@ import { useAuthStore } from "@/store/auth";
 import { canCreateCrm, canDeleteCrm, canUpdateCrm } from "@/lib/permissions";
 import { staffBreadcrumbs } from "@/lib/breadcrumbs";
 import { apiErrorMessage } from "@/lib/apiErrors";
+import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { useT } from "@/i18n/useT";
 import type { Customer } from "@/types/api";
 
 export default function CustomersPage() {
   const { t } = useT();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const tt = t.staffUi.customers;
   const common = t.staffUi.common;
   const user = useAuthStore((s) => s.user);
   const [page, setPage] = useState(1);
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(() => searchParams.get("q") ?? "");
+  const debouncedQ = useDebouncedValue(q.trim(), 300);
   const [openCreate, setOpenCreate] = useState(false);
   const [editCustomer, setEditCustomer] = useState<Customer | null>(null);
 
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({
-    queryKey: ["customers", page, q],
-    queryFn: () => customersApi.list({ page, page_size: 20, q: q || undefined }),
+    queryKey: ["customers", page, debouncedQ],
+    queryFn: () => customersApi.list({ page, page_size: 20, q: debouncedQ || undefined }),
     placeholderData: (prev) => prev,
   });
 
@@ -53,15 +57,15 @@ export default function CustomersPage() {
       key: "name",
       header: tt.colCustomer,
       render: (c) => (
-        <div className="flex items-center gap-3">
+        <Link to={`/app/customers/${c.id}`} className="flex items-center gap-3 hover:opacity-90">
           <div className="size-9 rounded-full bg-grad-brand grid place-items-center text-white text-[12px] font-semibold">
             {c.full_name.split(" ").map((s) => s[0]).slice(0, 2).join("")}
           </div>
           <div>
-            <div className="font-medium">{c.full_name}</div>
+            <div className="font-medium text-brand">{c.full_name}</div>
             <div className="text-[11.5px] text-text-3">{c.email ?? t.common.none}</div>
           </div>
-        </div>
+        </Link>
       ),
     },
     { key: "code", header: tt.colCode, hideOnMobile: true, render: (c) => <span className="font-mono text-[12px]">{c.code}</span> },
@@ -154,6 +158,7 @@ export default function CustomersPage() {
         rows={data?.items ?? []}
         loading={isLoading}
         rowKey={(r) => r.id}
+        onRowClick={(row) => navigate(`/app/customers/${row.id}`)}
         empty={
           <EmptyState
             icon={<Users className="size-7" />}

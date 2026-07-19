@@ -200,6 +200,21 @@ async def change_order_workflow(
         )
 
     await _sync_order_status_from_items(db, order)
+
+    from app.services.order_lifecycle import format_status_chat, post_order_chat
+
+    await post_order_chat(
+        db,
+        order,
+        body=format_status_chat(
+            action="Production stage updated",
+            actor_name=user.full_name,
+            from_status=current,
+            to_status=to_status,
+            notes=notes,
+        ),
+        actor=user,
+    )
     return order
 
 
@@ -265,12 +280,16 @@ async def _sync_order_status_from_items(db: AsyncSession, order: Order) -> None:
         order.status = "confirmed"
 
 
+_TERMINAL_BOARD_COLUMNS = frozenset({"completed", "cancelled"})
+
+
 async def get_workflow_board(
     db: AsyncSession,
     user: User,
     *,
     department_id: Optional[int] = None,
     department_slug: Optional[str] = None,
+    include_done: bool = False,
 ) -> Dict[str, object]:
     if not (user.is_staff or user.is_superuser):
         raise ForbiddenError("Staff access required")
@@ -288,14 +307,35 @@ async def get_workflow_board(
     can_override = await assign_svc.user_can_override_assignments(db, user)
 
     board: Dict[str, List[tuple[Order, dict]]] = {col: [] for col in ORDER_BOARD_COLUMNS}
+    terminal_counts: Dict[str, int] = {col: 0 for col in _TERMINAL_BOARD_COLUMNS}
 
     dept_slug_filter = department_slug
     dept_id_filter = department_id
 
     for order in orders:
         item_statuses = [it.workflow_status for it in order.items]
-        col = derive_order_board_column(order.status, item_statuses)
+        col = derive_order_board_column(
+            order.status,
+            item_statuses,
+            stock_check_status=getattr(order, "stock_check_status", None),
+        )
         if col not in board:
+            continue
+
+        if col in _TERMINAL_BOARD_COLUMNS and not include_done:
+            # Count for stats, skip card payload + assignment work
+            if dept_slug_filter or dept_id_filter:
+                stage = derive_order_pipeline_stage(
+                    {s for s in item_statuses if s not in ("completed", "cancelled")}
+                ) if item_statuses else "pending"
+                slugs = {WORKFLOW_DEPARTMENT_SLUG.get(stage)}
+                if dept_slug_filter and dept_slug_filter not in slugs:
+                    continue
+                if dept_id_filter:
+                    expected = await _department_id_for_slug(db, WORKFLOW_DEPARTMENT_SLUG.get(stage, ""))
+                    if expected != dept_id_filter:
+                        continue
+            terminal_counts[col] = terminal_counts.get(col, 0) + 1
             continue
 
         if dept_slug_filter or dept_id_filter:
@@ -334,6 +374,7 @@ async def get_workflow_board(
             "prev_column": previous_board_column(col),
             "can_revert": False,
             "revert_requires_reason": False,
+            "stock_check_status": getattr(order, "stock_check_status", None),
         }
 
         prev_col = meta["prev_column"]
@@ -403,10 +444,13 @@ async def get_workflow_board(
             "occurred_at": ev.occurred_at,
         })
 
-    total = sum(len(v) for v in board.values())
+    by_column = {k: len(v) for k, v in board.items()}
+    for col, n in terminal_counts.items():
+        by_column[col] = by_column.get(col, 0) + n
+    total = sum(by_column.values())
     stats = {
         "total": total,
-        "by_column": {k: len(v) for k, v in board.items()},
+        "by_column": by_column,
     }
 
     return {"columns": board, "stats": stats, "recent_activity": activity}
@@ -427,7 +471,11 @@ async def move_order_to_board_column(
     await assert_order_access(db, user, order)
 
     item_statuses = [it.workflow_status for it in order.items]
-    current = derive_order_board_column(order.status, item_statuses)
+    current = derive_order_board_column(
+        order.status,
+        item_statuses,
+        stock_check_status=getattr(order, "stock_check_status", None),
+    )
     if current == to_column:
         return order
 
@@ -463,26 +511,65 @@ async def move_order_to_board_column(
             raise ValidationError("Only managers can move orders back to earlier lifecycle stages")
 
     from app.schemas.order import OrderStatusChange
+    from app.services.order_lifecycle import format_status_chat, order_stock_approved, post_order_chat
     from app.services.order_service import _change_order_status_with_paid, change_order_status, user_can_change_paid_status
+
+    async def _chat_move(result: Order, label: str) -> Order:
+        await post_order_chat(
+            db,
+            result,
+            body=format_status_chat(
+                action=label,
+                actor_name=user.full_name,
+                from_status=current,
+                to_status=to_column,
+                notes=notes,
+            ),
+            actor=user,
+        )
+        return result
+
+    if to_column == "warehouse":
+        # Explicit move into warehouse queue (usually automatic after paid)
+        if order.status not in ("paid", "confirmed") and not can_override:
+            raise ValidationError("Order must be paid before warehouse review")
+        if order.status == "confirmed" and can_override:
+            await _change_order_status_with_paid(
+                db, order, user,
+                OrderStatusChange(to_status="paid", notes=notes or "Moved to warehouse by manager"),
+            )
+            order = await _load_order_with_items(db, order_id)
+        if order.status == "paid" and order.stock_check_status != "approved":
+            order.stock_check_status = "pending"
+        return await _chat_move(order, "Moved to warehouse stock check")
 
     if to_column == "paid":
         if not await user_can_change_paid_status(db, user):
-            raise ForbiddenError("Only accountant or general manager can change paid status")
+            # Allow warehouse to send back to "paid ready" only if already approved — else accountant
+            if not (order_stock_approved(order) and can_override):
+                raise ForbiddenError("Only accountant or general manager can change paid status")
         if current in WORKFLOW_BOARD_STAGES and backward:
             if not can_override:
                 raise ValidationError("Only managers can move production orders back to paid")
             await change_order_workflow(db, order_id, user, to_status="pending", notes=notes)
             order = await _load_order_with_items(db, order_id)
-        return await _change_order_status_with_paid(
+        if current == "warehouse" and order_stock_approved(order):
+            # Stay paid; column derived as paid when stock approved
+            return await _chat_move(order, "Stock ready — in paid queue for production")
+        result = await _change_order_status_with_paid(
             db, order, user,
             OrderStatusChange(to_status="paid", notes=notes),
         )
+        if result.stock_check_status != "approved":
+            result.stock_check_status = "pending"
+        return await _chat_move(result, "Payment / paid column updated")
 
     if to_column == "cancelled":
-        return await change_order_status(
+        result = await change_order_status(
             db, order, user,
             OrderStatusChange(to_status="cancelled", notes=notes),
         )
+        return await _chat_move(result, "Order cancelled")
 
     if to_column == "completed":
         if order.status in PRODUCTION_ORDER_STATUSES:
@@ -492,10 +579,11 @@ async def move_order_to_board_column(
                 if not can_override:
                     raise
             order = await _load_order_with_items(db, order_id)
-        return await change_order_status(
+        result = await change_order_status(
             db, order, user,
             OrderStatusChange(to_status="delivered", notes=notes),
         )
+        return await _chat_move(result, "Order marked completed / delivered")
 
     if to_column in WORKFLOW_BOARD_STAGES:
         if current == "confirmed" and not can_override:
@@ -503,16 +591,41 @@ async def move_order_to_board_column(
                 "Order must be marked as paid before production",
                 code="order_payment_required",
             )
+        if current == "warehouse" and not order_stock_approved(order) and not can_override:
+            raise ValidationError(
+                "Warehouse must approve stock before production starts",
+                code="stock_check_required",
+            )
+        if (
+            current == "paid"
+            and not order_stock_approved(order)
+            and not can_override
+        ):
+            raise ValidationError(
+                "Warehouse must approve stock before production starts",
+                code="stock_check_required",
+            )
         if order.status == "paid":
             order.status = "in_production"
             await db.flush()
         elif order.status not in PRODUCTION_ORDER_STATUSES:
-            if can_override and order.status == "confirmed":
+            if can_override and order.status in ("confirmed", "paid"):
                 order.status = "in_production"
                 await db.flush()
             else:
                 raise ValidationError("Order must be paid before entering production")
-        return await change_order_workflow(db, order_id, user, to_status=to_column, notes=notes)
+        # GM override into production also marks stock approved if still pending
+        if can_override and not order_stock_approved(order):
+            from datetime import datetime, timezone
+
+            order.stock_check_status = "approved"
+            order.stock_checked_at = order.stock_checked_at or datetime.now(timezone.utc)
+            order.stock_checked_by_id = order.stock_checked_by_id or user.id
+            order.stock_check_notes = order.stock_check_notes or (
+                notes or "Stock check skipped by manager override"
+            )
+        result = await change_order_workflow(db, order_id, user, to_status=to_column, notes=notes)
+        return result  # change_order_workflow already chats
 
     status_map = {
         "intake": "pending_review",
@@ -530,6 +643,7 @@ async def move_order_to_board_column(
             for item in order.items:
                 if item.workflow_status not in ("completed", "cancelled"):
                     item.workflow_status = "pending"
-        return order
+            order.stock_check_status = None
+        return await _chat_move(order, f"Lifecycle moved to {to_column}")
 
     raise ValidationError(f"Unsupported board column: {to_column}")

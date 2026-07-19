@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { SidebarNav } from "@/components/layout/SidebarNav";
 import { Topbar } from "@/components/layout/Topbar";
+import { ProductTourHost } from "@/components/tour/ProductTour";
 import { Drawer } from "@/components/ui/Drawer";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { useNotificationStream } from "@/hooks/useNotificationStream";
@@ -68,7 +69,7 @@ export function AppShell() {
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <Topbar onMenuOpen={() => setMobileNavOpen(true)} />
-        <main className="min-h-0 flex-1 overflow-hidden">
+        <main className="min-h-0 flex-1 overflow-hidden" data-tour="app-main">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -87,6 +88,7 @@ export function AppShell() {
           </AnimatePresence>
         </main>
       </div>
+      <ProductTourHost />
     </div>
   );
 }

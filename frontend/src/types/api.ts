@@ -20,6 +20,7 @@ export interface User {
   phone?: string | null;
   avatar_url?: string | null;
   department?: string | null;
+  department_id?: number | null;
   title?: string | null;
   is_active: boolean;
   is_staff: boolean;
@@ -27,6 +28,7 @@ export interface User {
   theme: string;
   locale: string;
   last_login_at?: string | null;
+  daftra_id?: string | null;
   roles: Role[];
   permissions: string[];
 }
@@ -247,6 +249,15 @@ export interface Order {
   tax_total: number;
   discount_total: number;
   grand_total: number;
+  daftra_id?: string | null;
+  daftra_number?: string | null;
+  daftra_workflow_type_id?: string | null;
+  stock_check_status?: string | null;
+  stock_checked_at?: string | null;
+  stock_checked_by_id?: number | null;
+  stock_check_notes?: string | null;
+  materials_deducted?: boolean;
+  stock_approved?: boolean;
   items: OrderItem[];
   events: OrderStatusEvent[];
   workflow_assignments?: WorkflowAssignment[];
@@ -268,6 +279,8 @@ export interface WorkflowBoardOrder {
   item_count: number;
   items_summary: string;
   updated_at: string;
+  daftra_id?: string | null;
+  daftra_number?: string | null;
   stage_assignee_id?: number | null;
   stage_assignee_name?: string | null;
   stage_assignee_ids?: number[];
@@ -283,6 +296,7 @@ export interface WorkflowBoardOrder {
   prev_column?: string | null;
   can_revert?: boolean;
   revert_requires_reason?: boolean;
+  stock_check_status?: string | null;
 }
 
 export interface WorkflowBoardActivity {
@@ -361,6 +375,27 @@ export interface Invoice {
   customer_name?: string | null;
   customer_email?: string | null;
   order_code?: string | null;
+  last_activity?: string | null;
+  sold_by?: string | null;
+  salesperson_id?: number | null;
+  created_by_name?: string | null;
+  created_by_id?: number | null;
+  warehouse_name?: string | null;
+  stock_issued?: boolean;
+  stock_issue_code?: string | null;
+  stock_issue_at?: string | null;
+}
+
+export interface InvoiceActivityEvent {
+  id: string;
+  kind: string;
+  action: string;
+  title: string;
+  detail?: string | null;
+  occurred_at: string;
+  user_id?: number | null;
+  user_name?: string | null;
+  user_email?: string | null;
 }
 
 export interface Payment {
@@ -559,12 +594,38 @@ export interface OnlineUser {
 export interface ActivityFeedItem {
   id: number;
   occurred_at: string;
+  user_id?: number | null;
   user_email?: string | null;
+  user_name?: string | null;
   action: string;
   module: string;
   entity_type?: string | null;
   entity_id?: number | null;
   summary: string;
+}
+
+export interface ScheduleItem {
+  id: string;
+  kind: "order_deadline" | "follow_up";
+  title: string;
+  subtitle?: string | null;
+  reference_code?: string | null;
+  reference_id?: number | null;
+  owner_name?: string | null;
+  starts_at: string;
+  ends_at?: string | null;
+  status?: string | null;
+  overdue: boolean;
+}
+
+export interface LowStockItem {
+  id: number;
+  name: string;
+  sku: string;
+  on_hand: number;
+  reorder_level: number;
+  unit: string;
+  stock_status: "critical" | "low" | "ok";
 }
 
 export interface DashboardSummary {
@@ -574,7 +635,10 @@ export interface DashboardSummary {
   department_load: DepartmentLoad[];
   online_users: OnlineUser[];
   activity_feed: ActivityFeedItem[];
-  low_stock: Array<{ id: number; name: string; sku: string; on_hand: number; reorder_level: number; unit: string }>;
+  upcoming_schedules: ScheduleItem[];
+  schedules_total: number;
+  low_stock: LowStockItem[];
+  low_stock_total: number;
   overdue_invoices: Array<{ id: number; code: string; customer_id: number; due_date: string; balance: number; currency: string }>;
   pending_approvals: Array<{ id: number; order_id?: number | null; version: number; title?: string | null }>;
 }
@@ -591,4 +655,330 @@ export interface BrandSettings {
   brand_color_dark: string;
   accent_color: string;
   accent_color_dark: string;
+}
+
+export interface HrDashboardSummary {
+  contracts_by_status: Array<{ status: string; count: number }>;
+  contracts_total: number;
+  pending_requests: Array<{
+    id: number;
+    employee_id: number;
+    employee_name: string;
+    employee_avatar?: string | null;
+    request_type: string;
+    subject: string;
+    status: string;
+    starts_on?: string | null;
+    ends_on?: string | null;
+    created_at: string;
+  }>;
+  pending_requests_total: number;
+  payroll: {
+    currency: string;
+    period_start: string;
+    period_end: string;
+    total_gross: number;
+    total_deductions: number;
+    total_net: number;
+    payslip_count: number;
+  };
+  expiring_contracts: Array<{
+    id: number;
+    code: string;
+    employee_id: number;
+    employee_name: string;
+    employee_avatar?: string | null;
+    title?: string | null;
+    start_date: string;
+    end_date: string;
+    status: string;
+  }>;
+  attendance: Array<{ status: string; count: number; pct: number }>;
+  attendance_total: number;
+  workforce?: {
+    employees_total: number;
+    employees_active: number;
+    employees_inactive: number;
+    synced_from_daftra: number;
+    with_department: number;
+    with_title: number;
+    with_contract: number;
+    by_department: Array<{ id?: number | null; name: string; count: number }>;
+    by_title: Array<{ id?: number | null; name: string; count: number }>;
+  };
+}
+
+export interface Designation {
+  id: number;
+  name: string;
+  description?: string | null;
+  is_active: boolean;
+  department_id?: number | null;
+  daftra_id?: string | null;
+  daftra_department_id?: string | null;
+  currency_code?: string | null;
+}
+
+export interface StaffProfile {
+  employee_code?: string | null;
+  staff_type?: string | null;
+  can_access_system?: boolean;
+  address1?: string | null;
+  address2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postal_code?: string | null;
+  country_code?: string | null;
+  home_phone?: string | null;
+  business_phone?: string | null;
+  fax?: string | null;
+  nationality?: string | null;
+  citizenship_status?: string | null;
+  official_id?: string | null;
+  gender?: string | null;
+  birth_date?: string | null;
+  hire_date?: string | null;
+  residence_expiry?: string | null;
+  hourly_rate?: number | null;
+  hourly_rate_currency?: string | null;
+  employment_type_id?: string | null;
+  employment_level_id?: string | null;
+  notes?: string | null;
+  daftra_id?: string | null;
+}
+
+export interface EmployeeContractDetail {
+  id: number;
+  code: string;
+  employee_id: number;
+  title?: string | null;
+  job_title?: string | null;
+  job_level?: string | null;
+  description?: string | null;
+  status: string;
+  start_date: string;
+  end_date?: string | null;
+  join_date?: string | null;
+  signed_at?: string | null;
+  probation_end?: string | null;
+  salary: number;
+  currency: string;
+  salary_template?: string | null;
+  is_primary: boolean;
+  notes?: string | null;
+}
+
+export interface EmployeeHrProfile {
+  id: number;
+  full_name: string;
+  email: string;
+  phone?: string | null;
+  avatar_url?: string | null;
+  title?: string | null;
+  department?: string | null;
+  department_id?: number | null;
+  is_active: boolean;
+  is_staff?: boolean;
+  daftra_id?: string | null;
+  last_login_at?: string | null;
+  created_at?: string | null;
+  roles: string[];
+  role_slugs?: string[];
+  profile?: StaffProfile | null;
+  primary_contract?: EmployeeContractDetail | null;
+  contracts: EmployeeContractDetail[];
+  payslips: Array<{
+    id: number;
+    code: string;
+    period_start: string;
+    period_end: string;
+    gross_pay: number;
+    deductions: number;
+    net_pay: number;
+    base_salary?: number;
+    overtime?: number;
+    absence?: number;
+    bonus?: number;
+    currency: string;
+    paid: boolean;
+    paid_at?: string | null;
+    status?: string;
+    source?: string;
+    notes?: string | null;
+    daftra_id?: string | null;
+  }>;
+  attendance: Array<{
+    id: number;
+    work_date: string;
+    status: string;
+    check_in?: string | null;
+    check_out?: string | null;
+    notes?: string | null;
+  }>;
+  attendance_summary: Array<{ status: string; count: number; pct: number }>;
+  requests: Array<{
+    id: number;
+    employee_id: number;
+    employee_name: string;
+    employee_avatar?: string | null;
+    request_type: string;
+    subject: string;
+    status: string;
+    starts_on?: string | null;
+    ends_on?: string | null;
+    created_at: string;
+  }>;
+  projects: Array<{
+    order_id: number;
+    code: string;
+    title?: string | null;
+    status: string;
+    priority: string;
+    deadline?: string | null;
+    workflow_status?: string | null;
+    role: "assignee" | "owner" | string;
+    on_board: boolean;
+    grand_total: number;
+    currency: string;
+  }>;
+  activity: Array<{
+    id: string;
+    occurred_at: string;
+    kind: string;
+    summary: string;
+    meta?: string | null;
+  }>;
+  payroll_totals: {
+    currency: string;
+    period_start: string;
+    period_end: string;
+    total_gross: number;
+    total_deductions: number;
+    total_net: number;
+    payslip_count: number;
+  };
+  payroll_overview?: {
+    currency: string;
+    period_start: string;
+    period_end: string;
+    average_gross: number;
+    average_net: number;
+    total_net: number;
+    total_gross: number;
+    total_deductions: number;
+    total_base_salary: number;
+    total_overtime: number;
+    total_absence: number;
+    total_bonus?: number;
+    payslip_count: number;
+    months: Array<{
+      year: number;
+      month: number;
+      label: string;
+      base_salary: number;
+      overtime: number;
+      absence: number;
+      bonus?: number;
+      gross_pay: number;
+      deductions: number;
+      net_pay: number;
+    }>;
+  } | null;
+}
+
+export interface AttendanceMonthDay {
+  date: string;
+  day: number;
+  weekday: number;
+  status?: string | null;
+  check_in?: string | null;
+  check_out?: string | null;
+  notes?: string | null;
+  deduction_amount?: number | null;
+  record_id?: number | null;
+}
+
+export interface AttendanceMonth {
+  employee_id: number;
+  year: number;
+  month: number;
+  daily_rate: number;
+  currency: string;
+  base_salary: number;
+  counts: Record<string, number>;
+  days: AttendanceMonthDay[];
+}
+
+export interface PayrollAdjustment {
+  id: number;
+  employee_id: number;
+  period_year: number;
+  period_month: number;
+  kind: string;
+  amount: number;
+  currency: string;
+  reason?: string | null;
+  created_by_id?: number | null;
+  created_at: string;
+}
+
+export interface PayslipDraftPreview {
+  employee_id: number;
+  year: number;
+  month: number;
+  period_start: string;
+  period_end: string;
+  currency: string;
+  base_salary: number;
+  daily_rate: number;
+  absent_days: number;
+  absence_deduction: number;
+  overtime: number;
+  bonus: number;
+  extra_deduction: number;
+  gross_pay: number;
+  deductions: number;
+  net_pay: number;
+  adjustments: PayrollAdjustment[];
+  draft_payslip?: {
+    id: number;
+    code: string;
+    status: string;
+    paid: boolean;
+    net_pay: number;
+    currency: string;
+  } | null;
+}
+
+export interface PayrollReport {
+  period_start: string;
+  period_end: string;
+  currency: string;
+  total_gross: number;
+  total_deductions: number;
+  total_bonus: number;
+  total_net: number;
+  headcount: number;
+  payslip_count: number;
+  rows: Array<{
+    payslip_id: number;
+    employee_id: number;
+    employee_name: string;
+    department?: string | null;
+    code: string;
+    period_start: string;
+    period_end: string;
+    base_salary: number;
+    overtime: number;
+    absence: number;
+    bonus: number;
+    gross_pay: number;
+    deductions: number;
+    net_pay: number;
+    currency: string;
+    status: string;
+    source: string;
+    paid: boolean;
+    paid_at?: string | null;
+  }>;
 }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Boxes, Filter, Pencil, Plus, Search, Trash2, TrendingUp } from "lucide-react";
 import toast from "react-hot-toast";
@@ -18,6 +19,7 @@ import {
   canDeleteInventory,
   canUpdateInventory,
 } from "@/lib/permissions";
+import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { useAuthStore } from "@/store/auth";
 import { useT } from "@/i18n/useT";
 import type { Material } from "@/types/api";
@@ -30,19 +32,32 @@ function materialStatus(m: Material, labels: { low: string; ok: string; out: str
 
 export default function MaterialsPage() {
   const { t } = useT();
+  const [searchParams] = useSearchParams();
   const tt = t.staffUi.materials;
   const user = useAuthStore((s) => s.user);
   const qc = useQueryClient();
   const [q, setQ] = useState("");
-  const [low, setLow] = useState(false);
+  const debouncedQ = useDebouncedValue(q.trim(), 300);
+  const [low, setLow] = useState(() => searchParams.get("low_stock") === "1");
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
   const [editMaterial, setEditMaterial] = useState<Material | null>(null);
   const [movementFor, setMovementFor] = useState<Material | null>(null);
 
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQ, low]);
+
   const { data, isLoading } = useQuery({
-    queryKey: ["materials", page, q, low],
-    queryFn: () => inventoryApi.materials({ page, page_size: 25, q: q || undefined, low_stock: low }),
+    queryKey: ["materials", page, debouncedQ, low],
+    queryFn: () =>
+      inventoryApi.materials({
+        page,
+        page_size: 25,
+        q: debouncedQ || undefined,
+        low_stock: low,
+      }),
+    placeholderData: (prev) => prev,
   });
 
   const items = data?.items ?? [];
@@ -208,7 +223,7 @@ export default function MaterialsPage() {
             placeholder={tt.searchPh}
             className="w-full lg:w-72"
             value={q}
-            onChange={(e) => { setPage(1); setQ(e.target.value); }}
+            onChange={(e) => setQ(e.target.value)}
           />
         </div>
 

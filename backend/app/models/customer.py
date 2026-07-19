@@ -43,6 +43,7 @@ class Customer(IntPK, TimestampMixin, SoftDeleteMixin, Base):
     title: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     tags: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    daftra_id: Mapped[Optional[str]] = mapped_column(String(40), unique=True, index=True, nullable=True)
 
     user: Mapped[Optional["User"]] = relationship(back_populates="customer_profile")
     company: Mapped[Optional[Company]] = relationship(back_populates="customers")

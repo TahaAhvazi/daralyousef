@@ -22,6 +22,11 @@ import landingLogoName from "@/assets/landing-logo-name.png";
 import { useBrand } from "@/hooks/useBrand";
 import { useT } from "@/i18n/useT";
 import { LANDING_COLUMN_SERVICES } from "@/pages/landing/serviceCategories";
+import {
+  DotWaveCanvas,
+  LandingTestimonialsSection,
+  LandingWhyUsSection,
+} from "@/pages/landing/LandingShowcaseSections";
 
 const easeOut = [0.2, 0.7, 0.2, 1] as const;
 
@@ -204,6 +209,32 @@ function LandingFooter() {
   );
 }
 
+function ServicesMarquee({ isAr }: { isAr: boolean }) {
+  const names = LANDING_COLUMN_SERVICES.map((s) => (isAr ? s.titleAr : s.titleEn));
+
+  const row = (ariaHidden: boolean) => (
+    <div className="landing-dar-marquee-row" aria-hidden={ariaHidden || undefined}>
+      {names.map((name, i) => (
+        <span key={`${name}-${i}`} className="landing-dar-marquee-item">
+          {name}
+          <span className="landing-dar-marquee-dot" aria-hidden>
+            ✦
+          </span>
+        </span>
+      ))}
+    </div>
+  );
+
+  return (
+    <div className="landing-dar-marquee" role="presentation">
+      <div className="landing-dar-marquee-track">
+        {row(false)}
+        {row(true)}
+      </div>
+    </div>
+  );
+}
+
 export function LandingScrollSections() {
   const { t, locale } = useT();
   const reduceMotion = useReducedMotion();
@@ -236,6 +267,8 @@ export function LandingScrollSections() {
       >
         <ChevronDown className="size-5 animate-bounce" aria-hidden />
       </motion.a>
+
+      <ServicesMarquee isAr={isAr} />
 
       <section id="services" className="landing-dar-section">
         <div className="landing-shell">
@@ -272,6 +305,8 @@ export function LandingScrollSections() {
       </section>
 
       <section id="how" className="landing-dar-section landing-dar-section--alt">
+        <DotWaveCanvas baseColor="#1a3f96" highlightColor="#0a1f4d" density={550} />
+
         <div className="landing-shell">
           <Reveal className="landing-dar-section-head">
             <p className="landing-dar-eyebrow">{t.how.eyebrow}</p>
@@ -301,6 +336,8 @@ export function LandingScrollSections() {
         </div>
       </section>
 
+      <LandingWhyUsSection />
+
       <section className="landing-dar-section landing-dar-section--stats">
         <div className="landing-shell">
           <div className="landing-dar-stats">
@@ -311,7 +348,11 @@ export function LandingScrollSections() {
         </div>
       </section>
 
+      <LandingTestimonialsSection />
+
       <section id="faq" className="landing-dar-section landing-dar-section--alt">
+        <DotWaveCanvas baseColor="#1a3f96" highlightColor="#0a1f4d" density={550} />
+
         <div className="landing-shell landing-dar-faq-shell">
           <Reveal className="landing-dar-section-head">
             <p className="landing-dar-eyebrow">{t.faq.eyebrow}</p>
@@ -334,8 +375,10 @@ export function LandingScrollSections() {
                       <span>{item.q}</span>
                       <ChevronDown className="landing-dar-faq-chevron size-5" aria-hidden />
                     </button>
-                    <div className="landing-dar-faq-panel" hidden={!isOpen}>
-                      <p>{item.a}</p>
+                    <div className="landing-dar-faq-panel-wrap">
+                      <div className="landing-dar-faq-panel">
+                        <p>{item.a}</p>
+                      </div>
                     </div>
                   </div>
                 </Reveal>
@@ -346,6 +389,8 @@ export function LandingScrollSections() {
       </section>
 
       <section className="landing-dar-section landing-dar-section--cta">
+        <DotWaveCanvas baseColor="#9db8e8" highlightColor="#f5c518" density={550} />
+
         <div className="landing-shell">
           <Reveal className="landing-dar-cta-band">
             <div className="landing-dar-cta-copy">

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Filter, Package, Pencil, Plus, Search, Trash2, TrendingUp } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 import { catalogApi } from "@/api/modules";
@@ -18,6 +18,7 @@ import {
 } from "@/lib/catalog";
 import { formatMoney, formatNumber } from "@/lib/format";
 import { canManageCatalog } from "@/lib/permissions";
+import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { useAuthStore } from "@/store/auth";
 import { useT } from "@/i18n/useT";
 import type { Product } from "@/types/api";
@@ -39,22 +40,28 @@ export default function ProductsPage() {
   const qc = useQueryClient();
 
   const [q, setQ] = useState("");
+  const debouncedQ = useDebouncedValue(q.trim(), 300);
   const [categoryId, setCategoryId] = useState<number | "">("");
   const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
 
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQ, categoryId]);
+
   const { data: categories } = useQuery({ queryKey: ["categories"], queryFn: catalogApi.categories });
   const { data: prods, isLoading } = useQuery({
-    queryKey: ["products", page, q, categoryId],
+    queryKey: ["products", page, debouncedQ, categoryId],
     queryFn: () =>
       catalogApi.products({
         page,
         page_size: 25,
-        q: q || undefined,
+        q: debouncedQ || undefined,
         category_id: categoryId ? Number(categoryId) : undefined,
         active_only: false,
       }),
+    placeholderData: (prev) => prev,
   });
 
   const items = prods?.items ?? [];
@@ -225,7 +232,7 @@ export default function ProductsPage() {
             placeholder={tt.searchPh}
             className="w-full lg:w-72"
             value={q}
-            onChange={(e) => { setQ(e.target.value); setPage(1); }}
+            onChange={(e) => setQ(e.target.value)}
           />
         </div>
 

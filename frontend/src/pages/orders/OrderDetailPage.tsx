@@ -12,12 +12,14 @@ import { Input, Select, Textarea } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Tabs } from "@/components/ui/Tabs";
 import { formatDate, formatDateTime, formatMoney } from "@/lib/format";
-import { canAdvanceOrderStage, canChangeOrderPaidStatus, canConfirmOrderReceipt, canManageOrdersAdmin, canOverrideProductionWorkflow, hasAnyPermission, isOrderReceiptConfirmable } from "@/lib/permissions";
+import { canAdvanceOrderStage, canChangeOrderPaidStatus, canConfirmOrderReceipt, canManageOrdersAdmin, canOverrideProductionWorkflow, canStockCheckOrder, hasAnyPermission, isOrderReceiptConfirmable } from "@/lib/permissions";
 import { OrderPaymentToggle } from "@/components/orders/OrderPaymentToggle";
 import { isOrderPaymentConfirmed, PRODUCTION_ORDER_STATUSES } from "@/lib/orderStatuses";
 import { BoardRevertReasonModal } from "@/components/orders/BoardRevertReasonModal";
 import { OrderChatPanel } from "@/components/orders/OrderChatPanel";
 import { OrderNotesPanel } from "@/components/orders/OrderNotesPanel";
+import { OrderStockCheckPanel } from "@/components/orders/OrderStockCheckPanel";
+import { OrderLifecycleGuide } from "@/components/orders/OrderLifecycleGuide";
 import {
   WORKFLOW_ASSIGNMENT_STAGES,
   ORDER_BOARD_COLUMNS,
@@ -405,6 +407,7 @@ function buildBoardMoveContext(order: Order, boardColumn: string) {
     can_revert: !!prevColumn,
     prev_column: prevColumn,
     revert_requires_reason: inProduction,
+    stock_check_status: order.stock_check_status ?? null,
   };
 }
 
@@ -441,12 +444,14 @@ export default function OrderDetailPage() {
   const isOrderAdmin = canManageOrdersAdmin(user);
   const canOverride = canOverrideProductionWorkflow(user);
   const canPaid = canChangeOrderPaidStatus(user);
+  const canStock = canStockCheckOrder(user);
   const so = t.staffUi.orders;
   const collab = t.staffUi.orderCollab;
   const [tab, setTab] = useState<"overview" | "chat" | "notes">("overview");
   const canEditBoardColumn =
     isOrderAdmin ||
     canOverride ||
+    canStock ||
     hasAnyPermission(user, "production:update", "orders:update");
   const [revertModal, setRevertModal] = useState<{ toColumn: string } | null>(null);
 
@@ -475,13 +480,23 @@ export default function OrderDetailPage() {
 
   const currentColumn = orderBoardColumn(order);
   const paymentConfirmed = isOrderPaymentConfirmed(order.status);
-  const showPaymentEditor = canPaid && (currentColumn === "confirmed" || currentColumn === "paid");
+  const showPaymentEditor =
+    canPaid &&
+    (currentColumn === "confirmed" || currentColumn === "paid" || currentColumn === "warehouse");
   const boardContext = buildBoardMoveContext(order, currentColumn);
 
   const requestBoardMove = (toColumn: string, notes?: string) => {
     if (toColumn === currentColumn) return;
-    if (!canDropOnBoardColumn(boardContext, toColumn, canOverride, canPaid)) {
+    if (!canDropOnBoardColumn(boardContext, toColumn, canOverride, canPaid, canStock)) {
       if (isEnteringProduction(currentColumn, toColumn)) {
+        if (
+          (currentColumn === "warehouse" || currentColumn === "paid") &&
+          order.stock_check_status !== "approved" &&
+          !canOverride
+        ) {
+          toast.error(t.staffUi.orderLifecycle.stockCheck.waitForWarehouse, { duration: 5000 });
+          return;
+        }
         const stageLabel = columnLabels[toColumn] ?? toColumn;
         if ((boardContext.skipped_stages ?? []).includes(toColumn)) {
           toast.error(bb.stageMarkedNa.replace("{stage}", stageLabel), { duration: 5000 });
@@ -599,9 +614,11 @@ export default function OrderDetailPage() {
           </Card>
 
           <OrderApprovalTimeline events={order.events} showTeamLink />
+          <OrderLifecycleGuide order={order} />
         </div>
 
         <div className="lg:col-span-2 flex flex-col gap-3 min-w-0">
+          <OrderStockCheckPanel order={order} />
           <section className="shrink-0">
             <h2 className="text-[14px] font-semibold mb-2">
               {dt.lineItemsCount.replace("{n}", String(order.items.length))}

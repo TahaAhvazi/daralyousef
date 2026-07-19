@@ -18,7 +18,7 @@ from app.schemas.common import OkResponse, PaginatedResponse
 from app.core.workflow import ASSIGNMENT_STAGES, WORKFLOW_BOARD_STAGES, derive_order_pipeline_stage
 from app.schemas.order import (
     CustomerOrderResponse, OrderBoardMove, OrderCreate, OrderItemOut, OrderItemWorkflowChange, OrderOut,
-    OrderProposal, OrderReceiptConfirm, OrderPaymentToggle, OrderRelease, OrderSummaryOut, OrderStatusChange, OrderUpdate,
+    OrderProposal, OrderReceiptConfirm, OrderPaymentToggle, OrderRelease, OrderStockCheck, OrderSummaryOut, OrderStatusChange, OrderUpdate,
     OrderWorkflowChange, WorkflowBoardActivityOut, WorkflowBoardOrderOut, WorkflowBoardOut,
     WorkflowBoardStatsOut,
     WorkflowAssignmentCreate, WorkflowStaffOut,
@@ -87,6 +87,8 @@ def _board_order(order, meta: dict) -> WorkflowBoardOrderOut:
         item_count=len(order.items),
         items_summary=summary,
         updated_at=order.updated_at,
+        daftra_id=getattr(order, "daftra_id", None),
+        daftra_number=getattr(order, "daftra_number", None),
         stage_assignee_id=meta.get("stage_assignee_id"),
         stage_assignee_name=meta.get("stage_assignee_name"),
         stage_assignee_ids=meta.get("stage_assignee_ids", []),
@@ -102,6 +104,7 @@ def _board_order(order, meta: dict) -> WorkflowBoardOrderOut:
         prev_column=meta.get("prev_column"),
         can_revert=meta.get("can_revert", False),
         revert_requires_reason=meta.get("revert_requires_reason", False),
+        stock_check_status=meta.get("stock_check_status"),
     )
 
 
@@ -109,11 +112,16 @@ def _board_order(order, meta: dict) -> WorkflowBoardOrderOut:
 async def workflow_board(
     department_id: Optional[int] = None,
     department_slug: Optional[str] = None,
+    include_done: bool = False,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(require_any_permission("production:read", "production:update", "orders:admin", "orders:read")),
 ):
     result = await workflow_svc.get_workflow_board(
-        db, user, department_id=department_id, department_slug=department_slug
+        db,
+        user,
+        department_id=department_id,
+        department_slug=department_slug,
+        include_done=include_done,
     )
     return WorkflowBoardOut(
         columns={
@@ -340,6 +348,31 @@ async def toggle_order_payment(
     await audit(
         db, action="payment_toggle", module="orders", user=user, entity_type="order",
         entity_id=order.id, new={"paid": data.paid}, request=request,
+    )
+    await db.commit()
+    order = await orders_svc.get_order_by_id(db, oid)
+    return await orders_svc.serialize_order(db, order)
+
+
+@router.post("/{oid}/stock-check", response_model=OrderOut)
+async def stock_check_order(
+    oid: int,
+    data: OrderStockCheck,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(require_any_permission(
+        "inventory:update", "orders:admin", "production:update",
+    )),
+):
+    """Warehouse (or manager) approves/rejects material availability before production."""
+    from app.services.order_lifecycle import submit_stock_check
+
+    order = await orders_svc.get_order_by_id(db, oid)
+    await _assert_staff_can_view_order(db, user, order)
+    await submit_stock_check(db, order, user, approved=data.approved, notes=data.notes)
+    await audit(
+        db, action="stock_check", module="orders", user=user, entity_type="order",
+        entity_id=order.id, new={"approved": data.approved, "notes": data.notes}, request=request,
     )
     await db.commit()
     order = await orders_svc.get_order_by_id(db, oid)

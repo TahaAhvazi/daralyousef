@@ -81,6 +81,20 @@ async def propose_order_to_customer(
         actor_id=user.id,
         notes=msg,
     ))
+    from app.services.order_lifecycle import format_status_chat, post_order_chat
+
+    await post_order_chat(
+        db,
+        order,
+        body=format_status_chat(
+            action="Pricing proposal sent" if order.status == "awaiting_customer" else "Pricing saved",
+            actor_name=user.full_name,
+            from_status=old,
+            to_status=order.status,
+            notes=msg,
+        ),
+        actor=user,
+    )
     return order
 
 
@@ -111,6 +125,20 @@ async def customer_respond_to_proposal(
         actor_id=user.id,
         notes=note,
     ))
+    from app.services.order_lifecycle import format_status_chat, post_order_chat
+
+    await post_order_chat(
+        db,
+        order,
+        body=format_status_chat(
+            action="Customer approved proposal" if data.approved else "Customer requested changes",
+            actor_name=user.full_name,
+            from_status=old,
+            to_status=order.status,
+            notes=note,
+        ),
+        actor=user,
+    )
     return order
 
 
@@ -166,6 +194,20 @@ async def confirm_order_receipt(
         actor_id=user.id,
         notes=note,
     ))
+    from app.services.order_lifecycle import format_status_chat, post_order_chat
+
+    await post_order_chat(
+        db,
+        order,
+        body=format_status_chat(
+            action="Delivery confirmed — order completed",
+            actor_name=user.full_name,
+            from_status=old,
+            to_status="delivered",
+            notes=note,
+        ),
+        actor=user,
+    )
     return order
 
 
@@ -218,8 +260,21 @@ async def release_order_to_production(
                 assignee_ids.append(row.assignee_id)
 
     from app.services.notification_service import notify_order_released
+    from app.services.order_lifecycle import format_status_chat, post_order_chat
 
     await notify_order_released(db, order, user, assignee_ids)
+    await post_order_chat(
+        db,
+        order,
+        body=format_status_chat(
+            action="Order released — awaiting accountant payment confirmation",
+            actor_name=user.full_name,
+            from_status=old,
+            to_status="confirmed",
+            notes=data.notes,
+        ),
+        actor=user,
+    )
     return order
 
 

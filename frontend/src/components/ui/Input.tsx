@@ -110,7 +110,7 @@ export function Select({
     <FieldShell label={label} hint={hint} error={error} required={rest.required} wrapperClassName={wrapperClassName}>
       <select
         className={cn(
-          "input pe-9 appearance-none min-w-0 w-full truncate text-[13.5px] font-medium text-text",
+          "input min-w-0 w-full truncate text-[13.5px] font-medium text-text",
           className,
         )}
         {...(rest as any)}

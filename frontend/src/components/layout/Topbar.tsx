@@ -11,6 +11,7 @@ import { useT } from "@/i18n/useT";
 import { LanguageSwitcher } from "@/components/brand/LanguageSwitcher";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { BrandMark } from "@/components/brand/BrandMark";
+import { TourReplayButton } from "@/components/tour/ProductTour";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { useBrand } from "@/hooks/useBrand";
 import { staffBreadcrumbs } from "@/lib/breadcrumbs";
@@ -82,6 +83,7 @@ export function Topbar({ onMenuOpen }: { onMenuOpen?: () => void }) {
             <Search className="size-4" />
           </button>
           <LanguageSwitcher variant="ghost" align={dir === "rtl" ? "start" : "end"} />
+          <TourReplayButton />
           <button
             onClick={toggle}
             className="btn btn-ghost h-10 w-10 p-0"

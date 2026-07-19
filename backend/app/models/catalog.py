@@ -53,6 +53,7 @@ class Product(IntPK, TimestampMixin, SoftDeleteMixin, Base):
     is_customizable: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     pricing_model: Mapped[str] = mapped_column(String(20), default="variable", nullable=False)
     """fixed | variable | custom_quote"""
+    daftra_id: Mapped[Optional[str]] = mapped_column(String(40), unique=True, index=True, nullable=True)
 
     category: Mapped[Optional[ProductCategory]] = relationship(back_populates="products")
     pricing_rules: Mapped[List["PricingRule"]] = relationship(back_populates="product", cascade="all, delete-orphan")

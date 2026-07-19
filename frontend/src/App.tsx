@@ -41,6 +41,24 @@ const PortalProfilePage = lazy(() => import("@/pages/portal/PortalProfilePage"))
 const MessagesPage = lazy(() => import("@/pages/messages/MessagesPage"));
 const NotificationsPage = lazy(() => import("@/pages/notifications/NotificationsPage"));
 const LandingPage = lazy(() => import("@/pages/landing/LandingPage"));
+const HrPage = lazy(() => import("@/pages/hr/HrPage"));
+const EmployeeDetailPage = lazy(() => import("@/pages/hr/EmployeeDetailPage"));
+const PayrollReportPage = lazy(() => import("@/pages/hr/PayrollReportPage"));
+const CustomerDetailPage = lazy(() => import("@/pages/crm/CustomerDetailPage"));
+const CreditNotesPage = lazy(() => import("@/pages/finance/CreditNotesPage"));
+const SalesReturnsPage = lazy(() => import("@/pages/finance/SalesReturnsPage"));
+const RecurringInvoicesPage = lazy(() => import("@/pages/finance/RecurringInvoicesPage"));
+const PaymentsPage = lazy(() => import("@/pages/finance/PaymentsPage"));
+const NewInvoicePage = lazy(() => import("@/pages/finance/NewInvoicePage"));
+const InstallmentsPage = lazy(() => import("@/pages/finance/InstallmentsPage"));
+const PosPage = lazy(() => import("@/pages/finance/PosPage"));
+const PosSessionsPage = lazy(() => import("@/pages/finance/PosSessionsPage"));
+const ExpensesPage = lazy(() => import("@/pages/finance/ExpensesPage"));
+const SalesSettingsPage = lazy(() => import("@/pages/finance/SalesSettingsPage"));
+const TemplatesPage = lazy(() => import("@/pages/finance/TemplatesPage"));
+const SalesReportsPage = lazy(() => import("@/pages/finance/SalesReportsPage"));
+const VendorsPage = lazy(() => import("@/pages/inventory/VendorsPage"));
+const PurchasesPage = lazy(() => import("@/pages/inventory/PurchasesPage"));
 const ServiceCategoryPage = lazy(() => import("@/pages/landing/ServiceCategoryPage"));
 
 function RouteFallback() {
@@ -165,7 +183,11 @@ export default function App() {
         >
           <Route index element={<LazyPage><RoleBasedHome /></LazyPage>} />
           <Route path="work" element={<LazyPage><WorkHomePage /></LazyPage>} />
+          <Route path="hr" element={<LazyPage><RequirePermission perm={["hr:read", "users:read", "dashboard:read"]}><HrPage /></RequirePermission></LazyPage>} />
+          <Route path="hr/payroll-report" element={<LazyPage><RequirePermission perm={["hr:read", "users:read", "dashboard:read"]}><PayrollReportPage /></RequirePermission></LazyPage>} />
+          <Route path="hr/employees/:id" element={<LazyPage><RequirePermission perm={["hr:read", "users:read", "dashboard:read"]}><EmployeeDetailPage /></RequirePermission></LazyPage>} />
           <Route path="customers" element={<LazyPage><RequirePermission perm="crm:read"><CustomersPage /></RequirePermission></LazyPage>} />
+          <Route path="customers/:id" element={<LazyPage><RequirePermission perm="crm:read"><CustomerDetailPage /></RequirePermission></LazyPage>} />
           <Route path="leads" element={<LazyPage><RequirePermission perm="crm:read"><LeadsPage /></RequirePermission></LazyPage>} />
           <Route path="orders" element={<LazyPage><RequirePermission perm={["orders:read", "orders:admin"]}><OrdersPage /></RequirePermission></LazyPage>} />
           <Route path="orders/board" element={<LazyPage><RequirePermission perm={["production:read", "production:update"]}><OrderBoardPage /></RequirePermission></LazyPage>} />
@@ -173,7 +195,21 @@ export default function App() {
           <Route path="orders/:id" element={<LazyPage><RequirePermission perm={["orders:admin", "orders:read", "orders:update", "orders:create", "production:read", "production:update"]}><OrderDetailPage /></RequirePermission></LazyPage>} />
           <Route path="quotations" element={<LazyPage><RequirePermission perm="finance:read"><QuotationsPage /></RequirePermission></LazyPage>} />
           <Route path="invoices" element={<LazyPage><RequirePermission perm="finance:read"><InvoicesPage /></RequirePermission></LazyPage>} />
+          <Route path="invoices/new" element={<LazyPage><RequirePermission perm="finance:create"><NewInvoicePage /></RequirePermission></LazyPage>} />
           <Route path="invoices/:id" element={<LazyPage><RequirePermission perm="finance:read"><InvoiceDetailPage /></RequirePermission></LazyPage>} />
+          <Route path="credit-notes" element={<LazyPage><RequirePermission perm="finance:read"><CreditNotesPage /></RequirePermission></LazyPage>} />
+          <Route path="returns" element={<LazyPage><RequirePermission perm="finance:read"><SalesReturnsPage /></RequirePermission></LazyPage>} />
+          <Route path="recurring-invoices" element={<LazyPage><RequirePermission perm="finance:read"><RecurringInvoicesPage /></RequirePermission></LazyPage>} />
+          <Route path="payments" element={<LazyPage><RequirePermission perm="finance:read"><PaymentsPage /></RequirePermission></LazyPage>} />
+          <Route path="installments" element={<LazyPage><RequirePermission perm="finance:read"><InstallmentsPage /></RequirePermission></LazyPage>} />
+          <Route path="pos" element={<LazyPage><RequirePermission perm={["finance:create", "finance:read"]}><PosPage /></RequirePermission></LazyPage>} />
+          <Route path="pos/sessions" element={<LazyPage><RequirePermission perm={["finance:create", "finance:read"]}><PosSessionsPage /></RequirePermission></LazyPage>} />
+          <Route path="expenses" element={<LazyPage><RequirePermission perm="finance:read"><ExpensesPage /></RequirePermission></LazyPage>} />
+          <Route path="sales-settings" element={<LazyPage><RequirePermission perm="finance:update"><SalesSettingsPage /></RequirePermission></LazyPage>} />
+          <Route path="templates" element={<LazyPage><RequirePermission perm="finance:read"><TemplatesPage /></RequirePermission></LazyPage>} />
+          <Route path="reports/sales" element={<LazyPage><RequirePermission perm={["finance:read", "dashboard:read"]}><SalesReportsPage /></RequirePermission></LazyPage>} />
+          <Route path="vendors" element={<LazyPage><RequirePermission perm="inventory:read"><VendorsPage /></RequirePermission></LazyPage>} />
+          <Route path="purchases" element={<LazyPage><RequirePermission perm="inventory:read"><PurchasesPage /></RequirePermission></LazyPage>} />
           <Route path="materials" element={<LazyPage><RequirePermission perm="inventory:read"><MaterialsPage /></RequirePermission></LazyPage>} />
           <Route path="tickets" element={<LazyPage><RequirePermission perm={["support:read", "support:reply"]}><TicketsPage /></RequirePermission></LazyPage>} />
           <Route path="tickets/:id" element={<LazyPage><RequirePermission perm={["support:read", "support:reply"]}><TicketDetailPage /></RequirePermission></LazyPage>} />

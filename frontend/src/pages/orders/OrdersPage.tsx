@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Eye, ListChecks, Plus, Search, Columns3 } from "lucide-react";
 
@@ -15,6 +15,7 @@ import { PageToolbar, TOOLBAR_INPUT, TOOLBAR_SELECT } from "@/components/ui/Page
 import { Pagination } from "@/components/ui/Pagination";
 import { formatDate, formatMoney } from "@/lib/format";
 import { canOpenOrderDetail } from "@/lib/permissions";
+import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { useAuthStore } from "@/store/auth";
 import { useT } from "@/i18n/useT";
 import type { Order } from "@/types/api";
@@ -25,17 +26,29 @@ import { ORDER_LIST_FILTER_STATUSES } from "@/lib/orderStatuses";
 export default function OrdersPage() {
   const { t } = useT();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const user = useAuthStore((s) => s.user);
   const canOpenDetail = canOpenOrderDetail(user);
   const tt = t.staffUi.orders;
   const common = t.staffUi.common;
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(() => searchParams.get("q") ?? "");
+  const debouncedQ = useDebouncedValue(q.trim(), 300);
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
 
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQ, status]);
+
   const { data, isLoading } = useQuery({
-    queryKey: ["orders", page, q, status],
-    queryFn: () => ordersApi.list({ page, page_size: 20, q: q || undefined, status: status || undefined }),
+    queryKey: ["orders", page, debouncedQ, status],
+    queryFn: () =>
+      ordersApi.list({
+        page,
+        page_size: 20,
+        q: debouncedQ || undefined,
+        status: status || undefined,
+      }),
     placeholderData: (p) => p,
   });
 
@@ -103,7 +116,7 @@ export default function OrdersPage() {
           iconLeft={<Search className="size-4" />}
           placeholder={tt.searchPh}
           value={q}
-          onChange={(e) => { setPage(1); setQ(e.target.value); }}
+          onChange={(e) => setQ(e.target.value)}
           className={TOOLBAR_INPUT}
         />
         <Select

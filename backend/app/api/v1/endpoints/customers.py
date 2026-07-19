@@ -99,6 +99,9 @@ async def list_customers(
             Customer.email.ilike(f"%{q}%"),
             Customer.phone.ilike(f"%{q}%"),
             Customer.code.ilike(f"%{q}%"),
+            Customer.daftra_id.ilike(f"%{q}%"),
+            Customer.tags.ilike(f"%{q}%"),
+            Customer.city.ilike(f"%{q}%"),
         ))
     total = await db.scalar(select(func.count()).select_from(stmt.subquery()))
     rows = (await db.execute(

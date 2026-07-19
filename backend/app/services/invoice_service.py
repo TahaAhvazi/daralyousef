@@ -135,13 +135,40 @@ async def build_pdf_context(db: AsyncSession, invoice: Invoice, lang: str) -> In
         brand_color=brand.brand_color if brand else "#2D498A",
         logo_path=_resolve_logo_path(brand.logo_url if brand else None),
         items=items,
+        sold_by=_parse_sold_by(invoice.notes),
+        warehouse=_parse_warehouse(invoice.notes),
     )
 
 
+def _parse_sold_by(notes: Optional[str]) -> Optional[str]:
+    if not notes:
+        return None
+    for line in notes.splitlines():
+        raw = line.strip()
+        for p in ("Salesperson:", "مسؤول المبيعات:", "salesperson:"):
+            if raw.lower().startswith(p.lower()):
+                return raw[len(p):].strip(" :：") or None
+    return None
+
+
+def _parse_warehouse(notes: Optional[str]) -> Optional[str]:
+    if not notes:
+        return None
+    for line in notes.splitlines():
+        raw = line.strip()
+        for p in ("Warehouse:", "المستودع:"):
+            if raw.lower().startswith(p.lower()):
+                return raw[len(p):].strip(" :：") or None
+    return None
+
+
 async def render_invoice_pdf(db: AsyncSession, invoice_id: int, lang: str) -> bytes:
+    import asyncio
+
     inv = await _load_invoice(db, invoice_id)
     ctx = await build_pdf_context(db, inv, lang)
-    return generate_invoice_pdf(ctx)
+    # ReportLab is synchronous — run off the event loop so other requests stay responsive.
+    return await asyncio.to_thread(generate_invoice_pdf, ctx)
 
 
 def default_due_date(issue: date, days: int = 30) -> date:

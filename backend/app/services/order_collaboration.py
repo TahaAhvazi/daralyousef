@@ -9,8 +9,8 @@ from app.models.order import Order, OrderWorkflowAssignment
 from app.models.rbac import Role, UserRole
 from app.models.user import User
 
-# Can leave notes on every project (hand-off / finance oversight).
-GLOBAL_NOTE_ROLE_SLUGS = frozenset({"ceo", "accountant"})
+# Can leave notes / always invited to project chat
+GLOBAL_NOTE_ROLE_SLUGS = frozenset({"ceo", "accountant", "general_manager", "warehouse"})
 
 
 async def _role_slugs(db: AsyncSession, user: User) -> set[str]:
@@ -59,6 +59,9 @@ async def assert_can_access_order_collaboration(
     if await user_has_global_note_access(db, user):
         return
     if await user_is_order_assignee(db, user, order.id):
+        return
+    # Production operators with board access
+    if "production:read" in perms or "production:update" in perms:
         return
     raise ForbiddenError("You do not have access to this project")
 

@@ -46,6 +46,8 @@ const STATUS_MAP: Record<string, Variant> = {
   partial: "warning",
   unpaid: "danger",
   overdue: "danger",
+  late: "danger",
+  overpaid: "brand",
   accepted: "success",
   rejected: "danger",
   new: "brand",

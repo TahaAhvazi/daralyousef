@@ -69,6 +69,13 @@ class Invoice(IntPK, TimestampMixin, SoftDeleteMixin, Base):
     portal_visible: Mapped[bool] = mapped_column(default=False, server_default="0", nullable=False)
     pdf_lang: Mapped[Optional[str]] = mapped_column(String(4), nullable=True)
     issued_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    daftra_id: Mapped[Optional[str]] = mapped_column(String(40), unique=True, index=True, nullable=True)
+    created_by_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True,
+    )
+    salesperson_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True,
+    )
 
     items: Mapped[List["InvoiceItem"]] = relationship(
         back_populates="invoice", cascade="all, delete-orphan", order_by="InvoiceItem.id")
@@ -103,6 +110,7 @@ class Payment(IntPK, TimestampMixin, Base):
     reference: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     actor_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    daftra_id: Mapped[Optional[str]] = mapped_column(String(40), unique=True, index=True, nullable=True)
 
     invoice: Mapped[Optional[Invoice]] = relationship(back_populates="payments")
 
@@ -117,3 +125,4 @@ class Expense(IntPK, TimestampMixin, SoftDeleteMixin, Base):
     spent_at: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     actor_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     receipt_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    daftra_id: Mapped[Optional[str]] = mapped_column(String(40), unique=True, index=True, nullable=True)

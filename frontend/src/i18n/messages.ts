@@ -184,6 +184,8 @@ export type Dict = {
     welcome: string;
     signInSubtitle: string;
     email: string;
+    emailOrPhone: string;
+    emailOrPhoneHint: string;
     password: string;
     remember: string;
     forgot: string;
@@ -306,8 +308,31 @@ export type Dict = {
       markAllRead: string;
       noNotifications: string;
     };
+    tour: {
+      ariaLabel: string;
+      replay: string;
+      skip: string;
+      next: string;
+      back: string;
+      finish: string;
+      progress: string;
+      steps: Record<string, { title: string; body: string }>;
+    };
     nav: {
-      // sections
+      // modules (accordion headers)
+      modDashboard: string;
+      modSales: string;
+      modPos: string;
+      modInstallments: string;
+      modCrm: string;
+      modHrm: string;
+      modInventory: string;
+      modOperations: string;
+      modAccounting: string;
+      modReports: string;
+      modTemplates: string;
+      modSettings: string;
+      // legacy section keys (kept for breadcrumbs / older refs)
       overview: string;
       crm: string;
       operations: string;
@@ -316,6 +341,8 @@ export type Dict = {
       insights: string;
       // items
       dashboard: string;
+      humanResources: string;
+      payrollReport: string;
       auditLog: string;
       customers: string;
       companies: string;
@@ -323,13 +350,26 @@ export type Dict = {
       opportunities: string;
       orders: string;
       newOrder: string;
+      manageOrders: string;
+      createOrder: string;
       orderBoard: string;
       quotations: string;
+      manageQuotations: string;
       invoices: string;
+      manageInvoices: string;
+      createInvoice: string;
+      creditNotes: string;
+      salesReturns: string;
+      recurringInvoices: string;
+      customerPayments: string;
+      salesSettings: string;
       payments: string;
+      expenses: string;
       products: string;
       materials: string;
       movements: string;
+      purchases: string;
+      vendors: string;
       tickets: string;
       messages: string;
       design: string;
@@ -338,6 +378,237 @@ export type Dict = {
       users: string;
       myEmployees: string;
       settings: string;
+      posTerminal: string;
+      posSessions: string;
+      installmentPlans: string;
+      salesReports: string;
+      docTemplates: string;
+    };
+    hr: {
+      title: string;
+      description: string;
+      contractsTitle: string;
+      contractsSub: string;
+      contractsTotal: string;
+      viewDetails: string;
+      showAll: string;
+      newEmployee: string;
+      pendingTitle: string;
+      pendingSub: string;
+      pendingEmpty: string;
+      pendingBadge: string;
+      payrollTitle: string;
+      totalGross: string;
+      totalDeductions: string;
+      totalNet: string;
+      payslips: string;
+      last7Days: string;
+      last30Days: string;
+      last90Days: string;
+      lastNDays: string;
+      expiringTitle: string;
+      expiringSub: string;
+      expiringEmpty: string;
+      attendanceTitle: string;
+      payrollReportTitle: string;
+      payrollReportSub: string;
+      payrollReportExport: string;
+      payrollReportFrom: string;
+      payrollReportTo: string;
+      payrollReportDept: string;
+      payrollReportAllDepts: string;
+      payrollReportHeadcount: string;
+      payrollReportBonus: string;
+      payrollReportEmpty: string;
+      workforceTitle: string;
+      workforceSub: string;
+      employeesTotal: string;
+      employeesActive: string;
+      employeesInactive: string;
+      syncedDaftra: string;
+      withDepartment: string;
+      withTitle: string;
+      withContract: string;
+      byDepartment: string;
+      byTitle: string;
+      viewEmployees: string;
+      contractStatuses: {
+        active: string;
+        expired: string;
+        under_review: string;
+        replacement: string;
+        cancelled: string;
+        suspended: string;
+        draft: string;
+      };
+      attendanceStatuses: {
+        present: string;
+        absent: string;
+        late: string;
+        on_leave: string;
+      };
+      requestTypes: {
+        leave: string;
+        permission: string;
+        overtime: string;
+        document: string;
+        other: string;
+      };
+      employee: {
+        notFound: string;
+        notFoundHint: string;
+        backToHr: string;
+        editInUsers: string;
+        editEmployee: string;
+        deleteEmployee: string;
+        newEmployee: string;
+        defaultSubtitle: string;
+        inactive: string;
+        contractCode: string;
+        statPresent: string;
+        statPayslips: string;
+        statRequests: string;
+        statContracts: string;
+        statProjects: string;
+        tabDetails: string;
+        tabProjects: string;
+        tabAttendance: string;
+        tabPayroll: string;
+        tabRequests: string;
+        tabActivity: string;
+        projectsTitle: string;
+        projectsSub: string;
+        projectsEmpty: string;
+        projectOnBoard: string;
+        projectOffBoard: string;
+        projectRoleAssignee: string;
+        projectRoleOwner: string;
+        openOrder: string;
+        openBoard: string;
+        stageLabel: string;
+        contractInfo: string;
+        profileInfo: string;
+        contactInfo: string;
+        fieldAddress: string;
+        fieldAddress2: string;
+        fieldCity: string;
+        fieldState: string;
+        fieldPostal: string;
+        fieldCountry: string;
+        fieldNationality: string;
+        fieldCitizenship: string;
+        fieldOfficialId: string;
+        fieldGender: string;
+        fieldHireDate: string;
+        fieldBirthDate: string;
+        fieldResidenceExpiry: string;
+        fieldHourlyRate: string;
+        fieldCodeStaff: string;
+        fieldStaffType: string;
+        fieldSystemAccess: string;
+        fieldHomePhone: string;
+        fieldBusinessPhone: string;
+        fieldMobile: string;
+        fieldFax: string;
+        fieldEmail: string;
+        fieldLastLogin: string;
+        fieldCreated: string;
+        fieldNotes: string;
+        fieldDaftraId: string;
+        timeline: string;
+        salaryData: string;
+        allContracts: string;
+        fieldEmployee: string;
+        fieldJobTitle: string;
+        fieldJobLevel: string;
+        fieldCode: string;
+        fieldPrimary: string;
+        fieldDescription: string;
+        fieldStart: string;
+        fieldJoin: string;
+        fieldSigned: string;
+        fieldEnd: string;
+        fieldProbation: string;
+        fieldDuration: string;
+        fieldCurrency: string;
+        fieldSalary: string;
+        fieldTemplate: string;
+        fieldNetPeriod: string;
+        yes: string;
+        no: string;
+        attendanceSummary: string;
+        attendanceLog: string;
+        attendanceLogSub: string;
+        attendanceEmpty: string;
+        attendanceCalendar: string;
+        markWeekdaysPresent: string;
+        dailyRate: string;
+        saveAttendance: string;
+        checkIn: string;
+        checkOut: string;
+        deductionOverride: string;
+        clearDay: string;
+        attendanceSaved: string;
+        attendanceSaveFailed: string;
+        payrollThisMonth: string;
+        payrollThisMonthSub: string;
+        absentDays: string;
+        absenceDeduction: string;
+        rowBonus: string;
+        extraDeduction: string;
+        adjustments: string;
+        addAdjustment: string;
+        adjAmount: string;
+        adjReason: string;
+        kindBonus: string;
+        kindDeduction: string;
+        kindOvertime: string;
+        generateDraft: string;
+        confirmPaid: string;
+        draftStatus: string;
+        noAdjustments: string;
+        actions: string;
+        addPayslip: string;
+        editPayslip: string;
+        runPayroll: string;
+        unpayPayslip: string;
+        deletePayslip: string;
+        markPaid: string;
+        confirmDeletePayslip: string;
+        runFromAttendance: string;
+        payrollMonth: string;
+        totalGross: string;
+        totalDeductions: string;
+        totalNet: string;
+        avgGross: string;
+        avgNet: string;
+        payrollOverview: string;
+        payrollOverviewSub: string;
+        payrollChart: string;
+        payrollMatrix: string;
+        rowSalary: string;
+        rowOvertime: string;
+        rowAbsence: string;
+        rowTotal: string;
+        colTotal: string;
+        payslips: string;
+        payslipList: string;
+        payslipEmpty: string;
+        voucherId: string;
+        voucherPeriod: string;
+        voucherAmount: string;
+        voucherStatus: string;
+        paid: string;
+        unpaid: string;
+        requestsTitle: string;
+        requestsEmpty: string;
+        activityTitle: string;
+        activitySub: string;
+        activityEmpty: string;
+        salaryTemplates: { monthly: string; weekly: string; daily: string };
+        requestStatuses: { pending: string; approved: string; rejected: string; cancelled: string };
+        activityKinds: { request: string; payslip: string; attendance: string; audit: string };
+      };
     };
     common: {
       cancel: string;
@@ -388,7 +659,32 @@ export type Dict = {
     };
     dashboard: {
       title: string;
+      greeting: string;
+      defaultUser: string;
       description: string;
+      quickAccessTitle: string;
+      quickAccessDescription: string;
+      customerSearchLabel: string;
+      orderSearchLabel: string;
+      searchCustomers: string;
+      searchOrders: string;
+      schedulesTitle: string;
+      schedulesSub: string;
+      schedulesEmpty: string;
+      scheduleOrder: string;
+      scheduleFollowUp: string;
+      scheduleBy: string;
+      scheduleNoOwner: string;
+      lowStockPanelTitle: string;
+      lowStockPanelSub: string;
+      stockCritical: string;
+      stockLow: string;
+      stockOk: string;
+      stockAvailable: string;
+      currentActivityTitle: string;
+      currentActivitySub: string;
+      todayFilter: string;
+      showAll: string;
       revenueTitle: string;
       revenueSubtitle: string; // "Today {today} · MTD {mtd}"
       paid: string;
@@ -599,6 +895,7 @@ export type Dict = {
       activityEmpty: string;
       sourcePortal: string;
       sourceStaff: string;
+      sourceDaftra: string;
       lastUpdated: string;
       zoomIn: string;
       zoomOut: string;
@@ -626,6 +923,11 @@ export type Dict = {
       filterMine: string;
       filterOverdue: string;
       hideEmpty: string;
+      showDone: string;
+      selectStage: string;
+      prevPage: string;
+      nextPage: string;
+      pageOf: string;
       showingCount: string;
       mineBadge: string;
       overdueBadge: string;
@@ -639,6 +941,7 @@ export type Dict = {
         approval: string;
         confirmed: string;
         paid: string;
+        warehouse: string;
         design: string;
         printing: string;
         production: string;
@@ -646,6 +949,34 @@ export type Dict = {
         delivery: string;
         completed: string;
         cancelled: string;
+      };
+    };
+    orderLifecycle: {
+      guideTitle: string;
+      guideSubtitle: string;
+      gmHint: string;
+      roleSales: string;
+      roleAccountant: string;
+      roleWarehouse: string;
+      roleDesigner: string;
+      rolePrint: string;
+      roleCnc: string;
+      roleFinish: string;
+      roleDelivery: string;
+      roleDone: string;
+      stockCheck: {
+        title: string;
+        subtitle: string;
+        waitingHint: string;
+        waitForWarehouse: string;
+        notesLabel: string;
+        notesPlaceholder: string;
+        approve: string;
+        reject: string;
+        approvedLabel: string;
+        rejectedLabel: string;
+        approvedToast: string;
+        rejectedToast: string;
       };
     };
     messages: {
@@ -722,7 +1053,7 @@ export type Dict = {
       description: string;
       cancel: string;
       submit: string;
-      created: string; // "Order {code} created"
+      created: string;
       detailsTitle: string;
       detailsSub: string;
       customerLabel: string;
@@ -752,7 +1083,6 @@ export type Dict = {
       uploadCta: string;
       uploadHint: string;
       uploadsDone: string;
-      // line row
       product: string;
       selectProduct: string;
       quantity: string;
@@ -762,8 +1092,32 @@ export type Dict = {
       addProduct: string;
       reviewTitle: string;
       reviewSub: string;
-      itemCount: string; // "{count} item(s)"
-      itemFallback: string; // "Item {n}"
+      itemCount: string;
+      itemFallback: string;
+      preview: string;
+      saveDraft: string;
+      saveSubmit: string;
+      template: string;
+      defaultTemplate: string;
+      newCustomer: string;
+      orderNumber: string;
+      orderNumberHint: string;
+      orderDate: string;
+      salesperson: string;
+      selectSalesperson: string;
+      colItem: string;
+      colDescription: string;
+      colDiscount: string;
+      colTax: string;
+      colLineTotal: string;
+      tabSettlement: string;
+      tabWarehouse: string;
+      tabAttachments: string;
+      orderDiscount: string;
+      orderDiscountPct: string;
+      settlement: string;
+      warehouse: string;
+      selectWarehouse: string;
     };
     workflowAssignments: {
       title: string;
@@ -845,6 +1199,189 @@ export type Dict = {
       orderSectionSub: string;
       noOrderInvoices: string;
       shareWithPortal: string;
+      list: {
+        newInvoice: string;
+        reports: string;
+        settings: string;
+        searchTitle: string;
+        filterCustomer: string;
+        anyCustomer: string;
+        filterCode: string;
+        searchCustomerPh: string;
+        searchInvoicePh: string;
+        searchInvoiceHint: string;
+        filterStatus: string;
+        anyStatus: string;
+        searchBtn: string;
+        clearFilters: string;
+        tabResults: string;
+        tabAll: string;
+        tabLate: string;
+        tabDue: string;
+        tabUnpaid: string;
+        tabDraft: string;
+        tabOverpaid: string;
+        sortNewest: string;
+        sortOldest: string;
+        sortAmountDesc: string;
+        sortAmountAsc: string;
+        sortDue: string;
+        soldBy: string;
+        activityCreated: string;
+        activityPayment: string;
+        linkedOrder: string;
+        balance: string;
+        actions: string;
+        open: string;
+        recordPayment: string;
+        statuses: {
+          unpaid: string;
+          partial: string;
+          paid: string;
+          draft: string;
+          late: string;
+          overpaid: string;
+        };
+      };
+      createForm: {
+        title: string;
+        description: string;
+        preview: string;
+        saveDraft: string;
+        saveSubmit: string;
+        template: string;
+        defaultTemplate: string;
+        customer: string;
+        selectCustomer: string;
+        newCustomer: string;
+        invoiceNumber: string;
+        invoiceNumberHint: string;
+        invoiceDate: string;
+        issueDate: string;
+        dueDate: string;
+        salesperson: string;
+        selectSalesperson: string;
+        paymentTerms: string;
+        lineItems: string;
+        lineItemsSub: string;
+        addLine: string;
+        colItem: string;
+        colDescription: string;
+        colUnitPrice: string;
+        colQty: string;
+        colDiscount: string;
+        colTax: string;
+        colLineTotal: string;
+        selectItem: string;
+        customItem: string;
+        noTax: string;
+        itemFallback: string;
+        subtotal: string;
+        tax: string;
+        grandTotal: string;
+        tabSettlement: string;
+        tabDeposit: string;
+        tabWarehouse: string;
+        tabAttachments: string;
+        orderDiscount: string;
+        orderDiscountPct: string;
+        discountTypePct: string;
+        discountTypeFixed: string;
+        settlement: string;
+        settlementHint: string;
+        settlementNotePh: string;
+        deposit: string;
+        advancePayment: string;
+        advancePaymentHint: string;
+        depositAmount: string;
+        payMethodCash: string;
+        payMethodCard: string;
+        payMethodTransfer: string;
+        payMethodDeposit: string;
+        warehouse: string;
+        selectWarehouse: string;
+        attachmentsHint: string;
+        notesTerms: string;
+        alreadyPaid: string;
+        alreadyPaidQ: string;
+        alreadyPaidHint: string;
+      };
+      detail: {
+        invoiceTitle: string;
+        print: string;
+        edit: string;
+        pdf: string;
+        addPayment: string;
+        creditNote: string;
+        undoCreditNote: string;
+        confirmDeleteCreditNote: string;
+        creditNoteDeleted: string;
+        return: string;
+        copy: string;
+        addInstallment: string;
+        more: string;
+        allPayments: string;
+        tabInvoice: string;
+        tabDetails: string;
+        tabStock: string;
+        tabActivity: string;
+        docTitle: string;
+        docNumber: string;
+        docDate: string;
+        docBillTo: string;
+        docItem: string;
+        docDescription: string;
+        docUnitPrice: string;
+        docQty: string;
+        docLineTotal: string;
+        amountDue: string;
+        customer: string;
+        soldBy: string;
+        warehouse: string;
+        order: string;
+        noWarehouse: string;
+        stockHint: string;
+        linkedInstallments: string;
+        activityCreated: string;
+        activityPayment: string;
+        noActivityExtra: string;
+        amount: string;
+        method: string;
+        installmentCount: string;
+        firstDue: string;
+        saved: string;
+        paymentRecorded: string;
+        installmentCreated: string;
+        copied: string;
+        creditReason: string;
+        creditCreated: string;
+        returnCreated: string;
+        issueDate: string;
+        totalAmount: string;
+        createdBy: string;
+        lastAction: string;
+        actionCreated: string;
+        salesperson: string;
+        salesRecord: string;
+        shippingData: string;
+        productsList: string;
+        qtyRequired: string;
+        qtyReceived: string;
+        underDelivery: string;
+        noStockVoucher: string;
+        createStockVoucher: string;
+        stockIssued: string;
+        stockIssueBy: string;
+        undoStockVoucher: string;
+        confirmUndoStock: string;
+        stockIssueUndone: string;
+        filterActions: string;
+        allActions: string;
+        periodFrom: string;
+        periodTo: string;
+        activityStock: string;
+        activityUpdate: string;
+      };
     };
     materials: {
       title: string;
@@ -1059,11 +1596,15 @@ export type Dict = {
       colUser: string;
       colRoles: string;
       colDept: string;
+      colTitle: string;
       colStatus: string;
       colLastLogin: string;
       active: string;
       inactive: string;
       emptyTitle: string;
+      emptyDesc: string;
+      allDepartments: string;
+      resultCount: string;
     };
     settings: {
       title: string;
@@ -1145,6 +1686,29 @@ export type Dict = {
       previewBadgeBrand: string;
       previewBadgeAccent: string;
       previewBadgeSuccess: string;
+      daftraTitle: string;
+      daftraSub: string;
+      daftraTest: string;
+      daftraSync: string;
+      daftraEnabled: string;
+      daftraDisabled: string;
+      daftraConfigured: string;
+      daftraNotConfigured: string;
+      daftraBaseUrl: string;
+      daftraMapped: string;
+      daftraLastSync: string;
+      daftraNever: string;
+      daftraTestOk: string;
+      daftraTestFail: string;
+      daftraSyncOk: string;
+      daftraSyncFail: string;
+      daftraSyncStarted: string;
+      daftraSyncRunning: string;
+      daftraCreated: string;
+      daftraUpdated: string;
+      daftraSkipped: string;
+      daftraErrors: string;
+      daftraPages: string;
     };
     placedVia: Record<string, string>;
     priorities: Record<string, string>;
@@ -1354,6 +1918,8 @@ const en: Dict = {
     welcome: "Welcome back",
     signInSubtitle: "Sign in to your Dar Al-Yousef workspace.",
     email: "Email",
+    emailOrPhone: "Email or phone",
+    emailOrPhoneHint: "Staff: work email · Customers: phone number · default password yousef123",
     password: "Password",
     remember: "Remember me",
     forgot: "Forgot password?",
@@ -1504,7 +2070,202 @@ const en: Dict = {
       markAllRead: "Mark all as read",
       noNotifications: "You're all caught up",
     },
+    tour: {
+      ariaLabel: "Product guided tour",
+      replay: "How this system works",
+      skip: "Skip tour",
+      next: "Next",
+      back: "Back",
+      finish: "Got it",
+      progress: "Step {n} of {total}",
+      steps: {
+        welcome: {
+          title: "Welcome — this is your staff system",
+          body: "Assume you know nothing yet: this guided walkthrough explains every panel you can open, what it is for, and how an order travels from sales to delivery. Tap the glowing circle or Next. Replay anytime with the amber ? icon.",
+        },
+        sidebar: {
+          title: "Navigation sidebar",
+          body: "Everything lives in this left menu. Modules are grouped by department (Sales, CRM, Inventory, Operations…). Click a group header to expand it, then click a page. Your role only shows the modules you are allowed to use.",
+        },
+        navDashboard: {
+          title: "Dashboard / Work home",
+          body: "Your starting screen. Executives see company KPIs and alerts. Other roles see a work home with shortcuts to the pages they use most (new order, board, invoices, materials…). Check it each morning for what needs attention.",
+        },
+        navSales: {
+          title: "Sales module",
+          body: "The commercial heart of the system. Here you manage sales orders, create new jobs, send quotations, issue invoices, track customer payments, credit notes, returns, and recurring invoices. Almost every production job starts in Sales.",
+        },
+        manageOrders: {
+          title: "Manage sales orders",
+          body: "The order list shows every job: status, customer, amounts, and workflow stage. Open an order to edit lines, assign production people, chat with the team, approve/reject portal requests, and follow the lifecycle (intake → paid → warehouse → production → delivery).",
+        },
+        createOrder: {
+          title: "Create a sales order",
+          body: "1) Choose or create a customer. 2) Add products/services and quantities. 3) Assign who handles each production stage (or mark N/A). 4) Save. Portal orders wait for customer approval before release. Stock is validated at create, then reserved later at warehouse approval.",
+        },
+        navQuotations: {
+          title: "Quotations (price offers)",
+          body: "Send a formal price offer before the customer commits. When they accept, convert it into a sales order / invoice. Use this when the deal is not final yet — it keeps pricing professional and trackable.",
+        },
+        navInvoices: {
+          title: "Invoices",
+          body: "Official billing documents. Search by invoice code, customer name, code, phone, or email. Open an invoice to see lines, PDF, payment status, and linked order. After an order is released, finance uses invoices to confirm money received.",
+        },
+        createInvoice: {
+          title: "Create an invoice",
+          body: "Build a standalone invoice (or from an order/quotation). Pick the customer, add lines, tax/notes, then save or send. Keep amounts accurate — payment confirmation and reports depend on this data.",
+        },
+        accountantPay: {
+          title: "Your key step: mark Paid",
+          body: "Open the related order or invoice, attach payment proof or a clear note, then mark Paid. Until payment is confirmed, the job stays blocked before warehouse and production. This is the finance gate in the order flow.",
+        },
+        navPaymentsSales: {
+          title: "Customer payments",
+          body: "A ledger of money received from customers — cash, transfer, card, etc. Use it to reconcile what was paid against open invoices and installment plans. Always record payments here so reports stay correct.",
+        },
+        navPos: {
+          title: "Point of Sale (POS)",
+          body: "Fast counter sales: open a POS session, scan/add items, take payment, and print a receipt. Sessions track cash drawer open/close. Use POS for walk-in retail; use Sales Orders for custom print/production jobs.",
+        },
+        navInstallments: {
+          title: "Installment plans",
+          body: "When a customer pays in installments, create and track the schedule here: due dates, amounts paid vs remaining, and overdue alerts. Link plans to invoices so collections stay organized.",
+        },
+        navCrm: {
+          title: "CRM — customers & service",
+          body: "Customer Relationship Management: people and companies you sell to, sales leads, support tickets, and internal messages. Good CRM data makes order entry faster and support clearer.",
+        },
+        navCustomers: {
+          title: "Customers",
+          body: "Master customer records: name, code, phone, email, city, tags, and history. Always search by name/code/phone when creating orders or invoices so you don’t duplicate customers. Open a profile to see related orders and invoices.",
+        },
+        navLeads: {
+          title: "Leads (potential customers)",
+          body: "People or companies who showed interest but are not customers yet. Track follow-ups here, then convert a lead into a customer when the deal becomes real.",
+        },
+        navTickets: {
+          title: "Support tickets",
+          body: "Customer or internal issues (delays, quality, questions). Assign an owner, reply, and close when resolved. Use tickets so problems don’t get lost in chat or phone calls.",
+        },
+        navMessages: {
+          title: "Messages",
+          body: "Team messaging inside the system. Use it for short coordination; for order-specific decisions prefer the order chat so the history stays on that job.",
+        },
+        navHrm: {
+          title: "HRM — people & payroll",
+          body: "Human Resources: employees, contracts, attendance, payroll summaries, and staff user accounts. Managers use this to see who works where and who can log into the portal.",
+        },
+        navHr: {
+          title: "Human Resources",
+          body: "Employee directory synced with operations: departments, job titles, contracts, attendance, and payslip overview. Open an employee to review details. Job titles often map to system roles (designer, accountant, warehouse…).",
+        },
+        navUsers: {
+          title: "Staff users & access",
+          body: "Who can log into this staff app and with which permissions. Create or disable users carefully — wrong access can show finance or override production. Staff often use their email plus the portal default password until they change it.",
+        },
+        navWarehouse: {
+          title: "Inventory & purchases",
+          body: "Everything about stock: raw materials, finished products catalog, purchase orders, and vendors. After an order is Paid, warehouse must approve stock before design/production starts.",
+        },
+        navMaterials: {
+          title: "Materials (stock items)",
+          body: "Raw materials and consumables with quantities on hand. Keep levels updated — the system checks stock when creating orders and again at warehouse approval. Low stock here means jobs can be blocked.",
+        },
+        warehouseCheck: {
+          title: "Your key step: stock check",
+          body: "On a Paid order, open the stock-check panel: Approve to reserve materials, or Reject with a reason. Production cannot start until stock is approved (managers may override). This protects the shop from starting jobs without materials.",
+        },
+        navPurchases: {
+          title: "Purchases",
+          body: "Buy stock from suppliers: create purchase documents, receive goods, and increase material quantities. Use purchases whenever inventory is low before promising delivery dates to customers.",
+        },
+        navVendors: {
+          title: "Vendors (suppliers)",
+          body: "Supplier directory — who you buy materials from. Keep contacts and terms here so purchasing is consistent and linked to purchase documents.",
+        },
+        navProducts: {
+          title: "Products catalog",
+          body: "Sellable products/services offered to customers (print products, packages, etc.). Catalog items appear when building orders and invoices. Managing the catalog needs catalog permission.",
+        },
+        navBoard: {
+          title: "Operations — Project Board",
+          body: "The live production kanban. Every released job appears as a card moving through stages. This is where designers and operators do day-to-day work after sales and warehouse gates are cleared.",
+        },
+        boardFlow: {
+          title: "How the board works",
+          body: "Stages: intake → approval → confirmed → paid → warehouse → design → print → CNC → finish → delivery → done. Assignees drag a card to the next stage or use forward/back. Only advance when your work is really finished. Managers/GM can jump or reverse stages when needed.",
+        },
+        navAccounting: {
+          title: "Accounting module",
+          body: "Money in and money out beyond the sales invoice list: payments received, expenses, and credit notes. Use it to keep books tidy for the end of day/month.",
+        },
+        navExpenses: {
+          title: "Expenses",
+          body: "Record company costs (rent, supplies, shipping, misc.). Categorize clearly so sales reports and profit views stay meaningful.",
+        },
+        navReports: {
+          title: "Reports",
+          body: "Sales and performance summaries — what sold, what was collected, trends over time. Leaders and accountants use this for decisions; don’t rely on memory when numbers are available here.",
+        },
+        navAudit: {
+          title: "Audit log",
+          body: "A security/history trail of important actions (who changed what). Use it when investigating mistakes, disputes, or unexpected status changes on orders and invoices.",
+        },
+        navTemplates: {
+          title: "Document templates",
+          body: "Layouts for PDFs (invoices, quotations, etc.). Update company header, terms, and branding here so printed/shared documents look consistent.",
+        },
+        navSettings: {
+          title: "Settings",
+          body: "Personal and company preferences: language, appearance, and sales/document options you are allowed to change. If something looks wrong globally, check Settings (and Sales Settings) before assuming a bug.",
+        },
+        topbarHelp: {
+          title: "Replay this tour anytime",
+          body: "The amber ? in the top bar restarts this walkthrough. Use it for new teammates or when you forget where a panel lives. The tour only highlights modules your account can open.",
+        },
+        flowSummary: {
+          title: "Full order journey (memorize this)",
+          body: "1) Sales creates the order & assigns the team. 2) Customer/admin approves if needed. 3) Accountant marks Paid (with proof). 4) Warehouse approves stock. 5) Design → print → CNC → finish on the Project Board. 6) Delivery confirms handover. Every move is logged in order chat — read it before asking “where is this job?”",
+        },
+        done: {
+          title: "You’re ready to explore",
+          body: "You now know what each panel is for. Start with your daily module, follow the order flow above, and tap ? whenever you need this guide again. When unsure, open the order chat and the board stage — the system already shows the next owner.",
+        },
+        sales_welcome: {
+          title: "Sales — start here",
+          body: "You own intake: customers, quotations, orders, pricing, team assignment, and releasing work. This tour also shows CRM and how money/warehouse/production continue after you.",
+        },
+        accountant_welcome: {
+          title: "Finance — start here",
+          body: "You own invoices, payments, expenses, and the Paid gate. Without your confirmation (with proof), warehouse and production stay blocked. We’ll also show related sales and report panels.",
+        },
+        warehouse_welcome: {
+          title: "Warehouse — start here",
+          body: "You own materials, purchases, vendors, and the stock-check gate after payment. Approve only when materials are really available — then production can begin safely.",
+        },
+        production_welcome: {
+          title: "Production — start here",
+          body: "You own your stage on the Project Board. We’ll show the board, how to advance work, and nearby tools (orders, materials, messages) so you know the full picture around your station.",
+        },
+        executive_welcome: {
+          title: "Leadership — full system tour",
+          body: "You’ll walk every major module and the full order lifecycle. You can override stages when the team needs an exception — use that power carefully and leave a note in chat.",
+        },
+      },
+    },
     nav: {
+      modDashboard: "Dashboard",
+      modSales: "Sales",
+      modPos: "Point of Sale",
+      modInstallments: "Installments",
+      modCrm: "CRM",
+      modHrm: "HRM",
+      modInventory: "Inventory & Purchases",
+      modOperations: "Operations",
+      modAccounting: "Accounting",
+      modReports: "Reports",
+      modTemplates: "Templates",
+      modSettings: "Settings",
       overview: "Overview",
       crm: "CRM",
       operations: "Operations",
@@ -1512,6 +2273,8 @@ const en: Dict = {
       service: "Service",
       insights: "Administration",
       dashboard: "Dashboard",
+      humanResources: "Human Resources",
+      payrollReport: "Payroll report",
       auditLog: "Audit Log",
       customers: "Customers",
       companies: "Companies",
@@ -1519,13 +2282,26 @@ const en: Dict = {
       opportunities: "Opportunities",
       orders: "Orders",
       newOrder: "New Order",
+      manageOrders: "Manage Sales Orders",
+      createOrder: "Create Sales Order",
       orderBoard: "Project Board",
       quotations: "Quotations",
+      manageQuotations: "Manage Quotations",
       invoices: "Invoices",
+      manageInvoices: "Manage Invoices",
+      createInvoice: "Create Invoice",
+      creditNotes: "Credit Notes",
+      salesReturns: "Returned Invoices",
+      recurringInvoices: "Recurring Invoices",
+      customerPayments: "Customer Payments",
+      salesSettings: "Sales Settings",
       payments: "Payments",
+      expenses: "Expenses",
       products: "Products",
       materials: "Materials",
       movements: "Stock Movements",
+      purchases: "Purchases",
+      vendors: "Vendors",
       tickets: "Tickets",
       messages: "Messages",
       design: "Design Studio",
@@ -1534,6 +2310,247 @@ const en: Dict = {
       users: "Users & Roles",
       myEmployees: "My Employees",
       settings: "Settings",
+      posTerminal: "POS Terminal",
+      posSessions: "POS Sessions",
+      installmentPlans: "Installment Plans",
+      salesReports: "Sales Reports",
+      docTemplates: "Document Templates",
+    },
+    hr: {
+      title: "Human Resources",
+      description: "Contracts, payroll, attendance, workforce directory and pending employee requests.",
+      contractsTitle: "Contracts summary",
+      contractsSub: "Status breakdown across all employee contracts",
+      contractsTotal: "{n} contracts total",
+      viewDetails: "View details",
+      showAll: "Show all",
+      newEmployee: "New employee",
+      pendingTitle: "Pending requests",
+      pendingSub: "Leave and HR requests awaiting action",
+      pendingEmpty: "No pending requests yet.",
+      pendingBadge: "Pending",
+      payrollTitle: "Payroll summary",
+      totalGross: "Total paid wages",
+      totalDeductions: "Total deductions",
+      totalNet: "Net wages",
+      payslips: "Payslips",
+      last7Days: "Last 7 days",
+      last30Days: "Last 30 days",
+      last90Days: "Last 90 days",
+      lastNDays: "Last {n} days",
+      expiringTitle: "Expiring contracts",
+      expiringSub: "Contracts ending within the next 45 days",
+      expiringEmpty: "No contracts expiring soon.",
+      attendanceTitle: "Attendance summary",
+      payrollReportTitle: "Payroll report",
+      payrollReportSub: "Complete salary payments across the organization",
+      payrollReportExport: "Export CSV",
+      payrollReportFrom: "From",
+      payrollReportTo: "To",
+      payrollReportDept: "Department",
+      payrollReportAllDepts: "All departments",
+      payrollReportHeadcount: "Employees paid",
+      payrollReportBonus: "Total bonuses",
+      payrollReportEmpty: "No payslips in this period.",
+      workforceTitle: "Workforce directory",
+      workforceSub: "Employees synced into the system — by department and job title",
+      employeesTotal: "Total employees",
+      employeesActive: "Active",
+      employeesInactive: "Inactive",
+      syncedDaftra: "Synced from Daftra",
+      withDepartment: "With department",
+      withTitle: "With job title",
+      withContract: "With contract",
+      byDepartment: "By department",
+      byTitle: "By job title",
+      viewEmployees: "Open employees",
+      contractStatuses: {
+        active: "Active",
+        expired: "Expired",
+        under_review: "Under review",
+        replacement: "Replacement",
+        cancelled: "Cancelled",
+        suspended: "Suspended",
+        draft: "Draft",
+      },
+      attendanceStatuses: {
+        present: "Present",
+        absent: "Absent",
+        late: "Late",
+        on_leave: "On leave",
+      },
+      requestTypes: {
+        leave: "Leave",
+        permission: "Permission",
+        overtime: "Overtime",
+        document: "Document",
+        other: "Other",
+      },
+      employee: {
+        notFound: "Employee not found",
+        notFoundHint: "This employee profile is unavailable or is not a staff account.",
+        backToHr: "Back to HR",
+        editInUsers: "Manage in Users",
+        editEmployee: "Edit employee",
+        deleteEmployee: "Delete",
+        newEmployee: "New employee",
+        defaultSubtitle: "Employee profile",
+        inactive: "Inactive",
+        contractCode: "Contract",
+        statPresent: "Present",
+        statPayslips: "Payslips",
+        statRequests: "Requests",
+        statContracts: "Contracts",
+        statProjects: "Projects",
+        tabDetails: "Details",
+        tabProjects: "Projects",
+        tabAttendance: "Attendance",
+        tabPayroll: "Payroll",
+        tabRequests: "Requests",
+        tabActivity: "Activity",
+        projectsTitle: "Assigned projects",
+        projectsSub: "Orders this employee owns or is assigned to on the project board",
+        projectsEmpty: "No project assignments yet.",
+        projectOnBoard: "On board",
+        projectOffBoard: "Off board",
+        projectRoleAssignee: "Assignee",
+        projectRoleOwner: "Owner",
+        openOrder: "Open order",
+        openBoard: "Project board",
+        stageLabel: "Stage",
+        contractInfo: "Contract information",
+        profileInfo: "Employee profile",
+        contactInfo: "Contact & phones",
+        fieldAddress: "Address",
+        fieldAddress2: "Address line 2",
+        fieldCity: "City",
+        fieldState: "State / province",
+        fieldPostal: "Postal code",
+        fieldCountry: "Country",
+        fieldNationality: "Nationality",
+        fieldCitizenship: "Citizenship status",
+        fieldOfficialId: "Official ID",
+        fieldGender: "Gender",
+        fieldHireDate: "Hire date",
+        fieldBirthDate: "Birth date",
+        fieldResidenceExpiry: "Residence expiry",
+        fieldHourlyRate: "Hourly rate",
+        fieldCodeStaff: "Staff code",
+        fieldStaffType: "Staff type",
+        fieldSystemAccess: "System access",
+        fieldHomePhone: "Home phone",
+        fieldBusinessPhone: "Business phone",
+        fieldMobile: "Mobile",
+        fieldFax: "Fax",
+        fieldEmail: "Email",
+        fieldLastLogin: "Last login",
+        fieldCreated: "Created",
+        fieldNotes: "Notes",
+        fieldDaftraId: "Daftra ID",
+        timeline: "Dates & timeline",
+        salaryData: "Salary data",
+        allContracts: "All contracts",
+        fieldEmployee: "Employee",
+        fieldJobTitle: "Job title",
+        fieldJobLevel: "Job level",
+        fieldCode: "Code",
+        fieldPrimary: "Primary contract",
+        fieldDescription: "Description",
+        fieldStart: "Start date",
+        fieldJoin: "Join date",
+        fieldSigned: "Signing date",
+        fieldEnd: "End date",
+        fieldProbation: "Probation end",
+        fieldDuration: "Duration",
+        fieldCurrency: "Currency",
+        fieldSalary: "Basic salary",
+        fieldTemplate: "Salary template",
+        fieldNetPeriod: "Net (period)",
+        yes: "Yes",
+        no: "No",
+        attendanceSummary: "Attendance summary",
+        attendanceLog: "Attendance log",
+        attendanceLogSub: "Recent check-ins and absences",
+        attendanceEmpty: "No attendance records yet.",
+        attendanceCalendar: "Attendance calendar",
+        markWeekdaysPresent: "Mark weekdays present",
+        dailyRate: "Daily rate (salary ÷ 30)",
+        saveAttendance: "Save day",
+        checkIn: "Check-in",
+        checkOut: "Check-out",
+        deductionOverride: "Deduction override",
+        clearDay: "Clear",
+        attendanceSaved: "Saved",
+        attendanceSaveFailed: "Could not save",
+        payrollThisMonth: "This month payroll",
+        payrollThisMonthSub: "Built from attendance, bonuses and deductions",
+        absentDays: "Absent days",
+        absenceDeduction: "Absence deduction",
+        rowBonus: "Bonus",
+        extraDeduction: "Extra deductions",
+        adjustments: "Adjustments",
+        addAdjustment: "Add",
+        adjAmount: "Amount",
+        adjReason: "Reason",
+        kindBonus: "Bonus",
+        kindDeduction: "Deduction",
+        kindOvertime: "Overtime",
+        generateDraft: "Generate draft payslip",
+        confirmPaid: "Confirm & mark paid",
+        draftStatus: "Draft",
+        noAdjustments: "No adjustments this month.",
+        actions: "Actions",
+        addPayslip: "Add payslip",
+        editPayslip: "Edit payslip",
+        runPayroll: "Run payroll",
+        unpayPayslip: "Revert to draft",
+        deletePayslip: "Delete",
+        markPaid: "Mark as paid",
+        confirmDeletePayslip: "Delete this payslip?",
+        runFromAttendance: "Run from attendance",
+        payrollMonth: "Payroll month",
+        totalGross: "Total paid wages",
+        totalDeductions: "Total deductions",
+        totalNet: "Total net salary",
+        avgGross: "Average gross salary",
+        avgNet: "Average net salary",
+        payrollOverview: "Contracts overview",
+        payrollOverviewSub: "Salary totals and trends for this employee",
+        payrollChart: "Net salary trend",
+        payrollMatrix: "Monthly breakdown",
+        rowSalary: "Salary",
+        rowOvertime: "Overtime",
+        rowAbsence: "Absence",
+        rowTotal: "Total",
+        colTotal: "Total",
+        payslips: "Payslips",
+        payslipList: "Payroll vouchers",
+        payslipEmpty: "No payslips yet.",
+        voucherId: "ID",
+        voucherPeriod: "Period",
+        voucherAmount: "Total amount",
+        voucherStatus: "Status",
+        paid: "Paid",
+        unpaid: "Unpaid",
+        requestsTitle: "Employee requests",
+        requestsEmpty: "No requests yet.",
+        activityTitle: "Activity log",
+        activitySub: "Requests, payslips, attendance and system actions",
+        activityEmpty: "No activity yet.",
+        salaryTemplates: { monthly: "Monthly", weekly: "Weekly", daily: "Daily" },
+        requestStatuses: {
+          pending: "Pending",
+          approved: "Approved",
+          rejected: "Rejected",
+          cancelled: "Cancelled",
+        },
+        activityKinds: {
+          request: "Request",
+          payslip: "Payslip",
+          attendance: "Attendance",
+          audit: "System",
+        },
+      },
     },
     common: {
       cancel: "Cancel",
@@ -1584,7 +2601,32 @@ const en: Dict = {
     },
     dashboard: {
       title: "Dashboard overview",
+      greeting: "Welcome back, {name}",
+      defaultUser: "there",
       description: "Numbers that need attention first — then charts and activity below.",
+      quickAccessTitle: "Quick access",
+      quickAccessDescription: "Search records or jump directly to the work you need.",
+      customerSearchLabel: "Customer search",
+      orderSearchLabel: "Order search",
+      searchCustomers: "Search by customer name, email or phone…",
+      searchOrders: "Search by order code or title…",
+      schedulesTitle: "Latest schedules",
+      schedulesSub: "Upcoming order deadlines and follow-ups",
+      schedulesEmpty: "No upcoming schedules.",
+      scheduleOrder: "Work order",
+      scheduleFollowUp: "Follow-up",
+      scheduleBy: "By {name}",
+      scheduleNoOwner: "Unassigned",
+      lowStockPanelTitle: "Low stock materials",
+      lowStockPanelSub: "Items at or below reorder level",
+      stockCritical: "Out of stock",
+      stockLow: "Low stock",
+      stockOk: "In stock",
+      stockAvailable: "{count} {unit} available",
+      currentActivityTitle: "Current activity",
+      currentActivitySub: "Live actions across the system",
+      todayFilter: "Today",
+      showAll: "Show all",
       revenueTitle: "Revenue · last 30 days",
       revenueSubtitle: "Today {today} · MTD {mtd}",
       paid: "Paid",
@@ -1616,10 +2658,10 @@ const en: Dict = {
       kpis: {
         revenueToday: "Revenue Today",
         revenueMTD: "Revenue MTD",
-        activeOrders: "Active Orders",
-        delayedOrders: "Delayed Orders",
-        onlineNow: "Online Now",
-        pendingApprovals: "Pending Approvals",
+        activeOrders: "Active",
+        delayedOrders: "Delayed",
+        onlineNow: "Online",
+        pendingApprovals: "Approvals",
         revenueTodayHint: "Paid invoices",
         revenueMTDHint: "Month to date",
         activeHint: "In flight",
@@ -1804,6 +2846,7 @@ const en: Dict = {
       activityEmpty: "No recent status changes.",
       sourcePortal: "Customer portal",
       sourceStaff: "Staff",
+      sourceDaftra: "Daftra",
       lastUpdated: "Updated",
       zoomIn: "Zoom in",
       zoomOut: "Zoom out",
@@ -1832,6 +2875,11 @@ const en: Dict = {
       filterMine: "My jobs",
       filterOverdue: "Overdue",
       hideEmpty: "Hide empty",
+      showDone: "Show done",
+      selectStage: "Stages",
+      prevPage: "Previous page",
+      nextPage: "Next page",
+      pageOf: "Page {page} of {pages}",
       showingCount: "Showing {shown} of {total}",
       mineBadge: "Mine",
       overdueBadge: "Overdue",
@@ -1844,7 +2892,8 @@ const en: Dict = {
         intake: "New request",
         approval: "Approval",
         confirmed: "Confirmed",
-        paid: "Paid",
+        paid: "Paid — ready",
+        warehouse: "Warehouse check",
         design: "Design",
         printing: "Printing",
         production: "Production",
@@ -1852,6 +2901,34 @@ const en: Dict = {
         delivery: "Ready for delivery",
         completed: "Completed",
         cancelled: "Cancelled",
+      },
+    },
+    orderLifecycle: {
+      guideTitle: "Order journey",
+      guideSubtitle: "From intake to delivery — each role owns a step.",
+      gmHint: "General Manager can move any stage forward or back from the board or this page.",
+      roleSales: "Sales / admin — create, price, release",
+      roleAccountant: "Accountant — confirm payment",
+      roleWarehouse: "Warehouse — verify & reserve materials",
+      roleDesigner: "Designer — artwork",
+      rolePrint: "Print operator",
+      roleCnc: "CNC / production",
+      roleFinish: "Finishing / Flex-UV",
+      roleDelivery: "Delivery / warehouse hand-off",
+      roleDone: "Customer or staff confirms receipt",
+      stockCheck: {
+        title: "Warehouse stock check",
+        subtitle: "Confirm materials are available before production starts.",
+        waitingHint: "Review BOM materials, then approve to reserve stock — or reject with a reason.",
+        waitForWarehouse: "Waiting for warehouse to approve stock…",
+        notesLabel: "Notes",
+        notesPlaceholder: "Optional note (required when rejecting)…",
+        approve: "Approve stock",
+        reject: "Reject",
+        approvedLabel: "Stock approved — production can start",
+        rejectedLabel: "Stock rejected",
+        approvedToast: "Stock approved",
+        rejectedToast: "Stock check rejected",
       },
     },
     messages: {
@@ -1924,8 +3001,8 @@ const en: Dict = {
       },
     },
     newOrder: {
-      title: "New order",
-      description: "Configure services, see live pricing, and submit.",
+      title: "Create sales order",
+      description: "Customer, line items, discounts and attachments in one form.",
       cancel: "Cancel",
       submit: "Submit order",
       created: "Order {code} created",
@@ -1941,17 +3018,17 @@ const en: Dict = {
       priorities: { low: "Low", normal: "Normal", high: "High", urgent: "Urgent" },
       notes: "Notes",
       lineItemsTitle: "Line items",
-      lineItemsSub: "Choose a product and configure it — pricing updates live.",
-      addLine: "Add line",
+      lineItemsSub: "Product, price, quantity, discount and tax.",
+      addLine: "Add",
       noItems: "No items yet.",
       noItemsHintBefore: "Click ",
-      noItemsHintLink: "Add line",
+      noItemsHintLink: "Add",
       noItemsHintAfter: " to begin.",
       summaryTitle: "Order summary",
       summarySub: "Live total",
       subtotal: "Subtotal",
       tax: "Tax",
-      grandTotal: "Grand total",
+      grandTotal: "Total",
       instantQuote: "Instant quote",
       attachTitle: "Attach files",
       attachSub: "Designs, references, source files",
@@ -1959,16 +3036,40 @@ const en: Dict = {
       uploadHint: "Any file type (images, PDF, PSD, AI, ZIP, DOCX, …) — up to 50 MB each",
       uploadsDone: "Files uploaded",
       product: "Product",
-      selectProduct: "Select product…",
-      quantity: "Quantity",
+      selectProduct: "Select item…",
+      quantity: "Qty",
       unit: "Unit",
       unitPrice: "Unit price",
       livePricing: "Live pricing breakdown",
-      addProduct: "Add new product",
+      addProduct: "New product",
       reviewTitle: "Review order",
       reviewSub: "Confirm details before submitting",
       itemCount: "{count} item(s)",
       itemFallback: "Item {n}",
+      preview: "Preview",
+      saveDraft: "Save as draft",
+      saveSubmit: "Save",
+      template: "Document template",
+      defaultTemplate: "Default template",
+      newCustomer: "New",
+      orderNumber: "Sales order no.",
+      orderNumberHint: "Auto on save",
+      orderDate: "Order date",
+      salesperson: "Salesperson",
+      selectSalesperson: "Select salesperson…",
+      colItem: "Item",
+      colDescription: "Description",
+      colDiscount: "Discount %",
+      colTax: "Tax %",
+      colLineTotal: "Total",
+      tabSettlement: "Discount & settlement",
+      tabWarehouse: "Warehouse",
+      tabAttachments: "Attach documents",
+      orderDiscount: "Order discount",
+      orderDiscountPct: "Order discount %",
+      settlement: "Settlement adjustment",
+      warehouse: "Warehouse",
+      selectWarehouse: "Select warehouse…",
     },
     workflowAssignments: {
       title: "Production assignments",
@@ -2051,6 +3152,189 @@ const en: Dict = {
       orderSectionSub: "Generate professional PDF invoices for this project at any stage.",
       noOrderInvoices: "No invoices for this order yet.",
       shareWithPortal: "Share with customer portal when generating",
+      list: {
+        newInvoice: "New invoice",
+        reports: "Reports",
+        settings: "Settings",
+        searchTitle: "Search",
+        filterCustomer: "Customer",
+        anyCustomer: "Any customer",
+        filterCode: "Search invoices",
+        searchCustomerPh: "Name, code, phone…",
+        searchInvoicePh: "Invoice #, customer name or code…",
+        searchInvoiceHint: "Matches invoice number, customer name, code, phone, or email",
+        filterStatus: "Status",
+        anyStatus: "Any status",
+        searchBtn: "Search",
+        clearFilters: "Clear filters",
+        tabResults: "Results",
+        tabAll: "All",
+        tabLate: "Late",
+        tabDue: "Due",
+        tabUnpaid: "Unpaid",
+        tabDraft: "Draft",
+        tabOverpaid: "Overpaid",
+        sortNewest: "Sort: newest",
+        sortOldest: "Sort: oldest",
+        sortAmountDesc: "Sort: amount high → low",
+        sortAmountAsc: "Sort: amount low → high",
+        sortDue: "Sort: due date",
+        soldBy: "Sold by",
+        activityCreated: "Created",
+        activityPayment: "Payment added",
+        linkedOrder: "Order",
+        balance: "Balance",
+        actions: "Actions",
+        open: "Open",
+        recordPayment: "Record payment",
+        statuses: {
+          unpaid: "Unpaid",
+          partial: "Partial",
+          paid: "Paid",
+          draft: "Draft",
+          late: "Late",
+          overpaid: "Overpaid",
+        },
+      },
+      createForm: {
+        title: "Create invoice",
+        description: "Customer, lines, discount, deposit and payment in one form.",
+        preview: "Preview",
+        saveDraft: "Save as draft",
+        saveSubmit: "Save without printing",
+        template: "Invoice template",
+        defaultTemplate: "Default template",
+        customer: "Customer",
+        selectCustomer: "Select customer…",
+        newCustomer: "New",
+        invoiceNumber: "Invoice no.",
+        invoiceNumberHint: "Auto on save",
+        invoiceDate: "Invoice date",
+        issueDate: "Issue date",
+        dueDate: "Due date",
+        salesperson: "Salesperson",
+        selectSalesperson: "Select salesperson…",
+        paymentTerms: "Payment terms (days)",
+        lineItems: "Line items",
+        lineItemsSub: "Item, price, quantity, discount and tax.",
+        addLine: "Add",
+        colItem: "Item",
+        colDescription: "Description",
+        colUnitPrice: "Unit price",
+        colQty: "Qty",
+        colDiscount: "Discount %",
+        colTax: "Tax",
+        colLineTotal: "Total",
+        selectItem: "Select item…",
+        customItem: "Custom item name",
+        noTax: "No tax",
+        itemFallback: "Item",
+        subtotal: "Subtotal",
+        tax: "Tax",
+        grandTotal: "Total",
+        tabSettlement: "Discount & settlement",
+        tabDeposit: "Deposit",
+        tabWarehouse: "Warehouse",
+        tabAttachments: "Attach documents",
+        orderDiscount: "Discount",
+        orderDiscountPct: "Discount %",
+        discountTypePct: "Percentage (%)",
+        discountTypeFixed: "Fixed amount",
+        settlement: "Settlement",
+        settlementHint: "Manual adjustment added to the invoice total.",
+        settlementNotePh: "Note",
+        deposit: "Deposit",
+        advancePayment: "Advance payment",
+        advancePaymentHint: "Amount expected as advance on this invoice.",
+        depositAmount: "Amount",
+        payMethodCash: "Cash",
+        payMethodCard: "Card",
+        payMethodTransfer: "Transfer",
+        payMethodDeposit: "Deposit",
+        warehouse: "Warehouse",
+        selectWarehouse: "Select warehouse…",
+        attachmentsHint: "Attach files from the invoice detail page after saving.",
+        notesTerms: "Notes / terms",
+        alreadyPaid: "Already paid",
+        alreadyPaidQ: "Already paid?",
+        alreadyPaidHint: "Marks the invoice as fully paid when saving.",
+      },
+      detail: {
+        invoiceTitle: "Invoice",
+        print: "Print",
+        edit: "Edit",
+        pdf: "PDF",
+        addPayment: "Add payment",
+        creditNote: "Credit note",
+        undoCreditNote: "Undo / delete",
+        confirmDeleteCreditNote: "Cancel credit note {code}? Linked invoice balances will be restored.",
+        creditNoteDeleted: "Credit note cancelled",
+        return: "Return",
+        copy: "Copy",
+        addInstallment: "Add installment plan",
+        more: "More",
+        allPayments: "All payments",
+        tabInvoice: "Invoice",
+        tabDetails: "Details",
+        tabStock: "Stock vouchers",
+        tabActivity: "Activity log",
+        docTitle: "Invoice",
+        docNumber: "Invoice number",
+        docDate: "Invoice date",
+        docBillTo: "Bill to",
+        docItem: "Item",
+        docDescription: "Description",
+        docUnitPrice: "Unit price",
+        docQty: "Qty",
+        docLineTotal: "Total",
+        amountDue: "Amount due",
+        customer: "Customer",
+        soldBy: "Sold by",
+        warehouse: "Warehouse",
+        order: "Order",
+        noWarehouse: "No warehouse selected",
+        stockHint: "Warehouse movements linked to this invoice appear here when inventory vouchers are posted.",
+        linkedInstallments: "Linked installment plans",
+        activityCreated: "Invoice created",
+        activityPayment: "Payment added",
+        noActivityExtra: "No payments recorded yet.",
+        amount: "Amount",
+        method: "Method",
+        installmentCount: "Number of installments",
+        firstDue: "First due date",
+        saved: "Invoice updated",
+        paymentRecorded: "Payment recorded",
+        installmentCreated: "Installment plan created",
+        copied: "Copied as {code}",
+        creditReason: "Credit against invoice",
+        creditCreated: "Credit note {code} created",
+        returnCreated: "Return created",
+        issueDate: "Issue date",
+        totalAmount: "Total amount",
+        createdBy: "Created by",
+        lastAction: "Last action",
+        actionCreated: "Created",
+        salesperson: "Salesperson",
+        salesRecord: "Sales record",
+        shippingData: "Shipping data",
+        productsList: "Products list",
+        qtyRequired: "Required qty",
+        qtyReceived: "Received qty",
+        underDelivery: "Under delivery",
+        noStockVoucher: "No warehouse voucher yet",
+        createStockVoucher: "Create stock issue",
+        stockIssued: "Stock issue voucher created",
+        stockIssueBy: "Warehouse issue · {warehouse} · by {user}",
+        undoStockVoucher: "Undo / delete",
+        confirmUndoStock: "Cancel this warehouse voucher? You can create it again later if needed.",
+        stockIssueUndone: "Warehouse voucher cancelled",
+        filterActions: "Actions",
+        allActions: "All actions",
+        periodFrom: "From",
+        periodTo: "To",
+        activityStock: "Stock issue",
+        activityUpdate: "Update",
+      },
     },
     materials: {
       title: "Materials & inventory",
@@ -2287,8 +3571,8 @@ const en: Dict = {
     },
     users: {
       title: "My employees",
-      description: "Add team members and assign any role.",
-      searchPh: "Search…",
+      description: "Team directory — departments, job titles, and roles. Synced staff appear here after Daftra import.",
+      searchPh: "Search name, email, phone, title…",
       staffOnly: "Staff only",
       filterEmployees: "Employees",
       filterPortal: "Portal customers",
@@ -2312,14 +3596,18 @@ const en: Dict = {
       updated: "Employee updated",
       deleted: "Employee removed",
       confirmDelete: "Remove this employee?",
-      colUser: "User",
+      colUser: "Employee",
       colRoles: "Roles",
       colDept: "Department",
+      colTitle: "Job title",
       colStatus: "Status",
       colLastLogin: "Last login",
       active: "Active",
       inactive: "Inactive",
       emptyTitle: "No employees found",
+      emptyDesc: "Import staff from Settings → Daftra Sync, or add an employee manually.",
+      allDepartments: "All departments",
+      resultCount: "{n} employees",
     },
     settings: {
       title: "Settings",
@@ -2402,6 +3690,29 @@ const en: Dict = {
       previewBadgeBrand: "Brand",
       previewBadgeAccent: "Accent",
       previewBadgeSuccess: "Success",
+      daftraTitle: "Daftra sync",
+      daftraSub: "Import clients, invoices, subscriptions, products, payments, expenses, refund receipts (credit notes), job designations, staff, payslips and work orders (project board) from Daftra. Data is stored locally — the app keeps working if Daftra is offline. Customers get portal access (phone + default password).",
+      daftraTest: "Test connection",
+      daftraSync: "Sync now",
+      daftraEnabled: "Enabled",
+      daftraDisabled: "Disabled on server",
+      daftraConfigured: "API key configured",
+      daftraNotConfigured: "API key missing",
+      daftraBaseUrl: "API base URL",
+      daftraMapped: "Imported records",
+      daftraLastSync: "Last sync",
+      daftraNever: "Never",
+      daftraTestOk: "Connection OK",
+      daftraTestFail: "Connection failed",
+      daftraSyncOk: "Sync finished",
+      daftraSyncFail: "Sync finished with errors",
+      daftraSyncStarted: "Sync started in the background — this can take several minutes for large accounts.",
+      daftraSyncRunning: "Syncing…",
+      daftraCreated: "created",
+      daftraUpdated: "updated",
+      daftraSkipped: "skipped",
+      daftraErrors: "errors",
+      daftraPages: "pages",
     },
     placedVia: {
       portal: "portal",
@@ -2621,6 +3932,8 @@ const ar: Dict = {
     welcome: "أهلاً برجوعك",
     signInSubtitle: "سجّل دخولك لمساحة دار اليوسف الخاصة بك.",
     email: "البريد الإلكتروني",
+    emailOrPhone: "البريد أو رقم الموبايل",
+    emailOrPhoneHint: "الموظفين: الإيميل · الزبائن: رقم الموبايل · كلمة المرور الافتراضية yousef123",
     password: "كلمة المرور",
     remember: "تذكرني",
     forgot: "نسيت كلمة المرور؟",
@@ -2771,7 +4084,202 @@ const ar: Dict = {
       markAllRead: "تعليم الكل كمقروء",
       noNotifications: "ما في إشعارات جديدة",
     },
+    tour: {
+      ariaLabel: "جولة تعريفية بالنظام",
+      replay: "كيف يشتغل النظام",
+      skip: "تخطي الجولة",
+      next: "التالي",
+      back: "رجوع",
+      finish: "تمام",
+      progress: "خطوة {n} من {total}",
+      steps: {
+        welcome: {
+          title: "أهلاً — هذا نظام الموظفين",
+          body: "افترض إنك ما تعرف شي بعد: هالجولة تشرح كل پنل تقدر تفتحه، ليش موجود، وكيف الطلب يمشي من المبيعات للتسليم. اضغط الدائرة المضيئة أو «التالي». تقدر تعيد الجولة بأي وقت من أيقونة ؟ الصفراء.",
+        },
+        sidebar: {
+          title: "القائمة الجانبية",
+          body: "كل شيء موجود بهالقائمة. الوحدات مجمّعة حسب القسم (مبيعات، CRM، مخزون، عمليات…). اضغط رأس المجموعة لفتحها ثم اختر الصفحة. دورك يعرض فقط الوحدات المسموح لك فيها.",
+        },
+        navDashboard: {
+          title: "لوحة التحكم / صفحة العمل",
+          body: "شاشتك الأولى. الإدارة تشوف مؤشرات وتنبيهات الشركة. باقي الأدوار تشوف اختصارات لصفحاتهم اليومية (طلب جديد، اللوحة، فواتير، مواد…). راجعها كل صباح لتعرف وش يحتاج انتباه.",
+        },
+        navSales: {
+          title: "وحدة المبيعات",
+          body: "قلب العمل التجاري: إدارة أوامر البيع، إنشاء طلبات، عروض أسعار، فواتير، مدفوعات العملاء، إشعارات دائن، مرتجعات، وفواتير متكررة. أغلب شغل الإنتاج يبدأ من هنا.",
+        },
+        manageOrders: {
+          title: "إدارة أوامر البيع",
+          body: "قائمة كل الطلبات: الحالة، الزبون، المبالغ، ومرحلة المسار. افتح الطلب لتعديل الأصناف، تعيين فريق الإنتاج، الدردشة، الموافقة/الرفض، ومتابعة المسار (استلام → دفع → مخزن → إنتاج → تسليم).",
+        },
+        createOrder: {
+          title: "إنشاء أمر بيع",
+          body: "١) اختر أو أنشئ زبون. ٢) أضف المنتجات/الخدمات والكميات. ٣) عيّن مسؤول كل مرحلة إنتاج (أو N/A). ٤) احفظ. طلبات البوابة تنتظر موافقة الزبون. المخزون يُفحص عند الإنشاء ويُحجز لاحقاً بموافقة المخزن.",
+        },
+        navQuotations: {
+          title: "عروض الأسعار",
+          body: "أرسل عرض سعر رسمي قبل ما يلتزم الزبون. عند القبول حوّله لطلب بيع/فاتورة. استخدمه لما الصفقة لسه مو نهائية — يحفظ التسعير بشكل مرتب وقابل للتتبع.",
+        },
+        navInvoices: {
+          title: "الفواتير",
+          body: "مستندات الفوترة الرسمية. ابحث برمز الفاتورة أو اسم الزبون أو الرمز أو الهاتف أو الإيميل. افتح الفاتورة للأسطر وPDF وحالة الدفع والطلب المرتبط. بعد إطلاق الطلب، المالية تؤكد الاستلام من هنا.",
+        },
+        createInvoice: {
+          title: "إنشاء فاتورة",
+          body: "ابنِ فاتورة مستقلة (أو من طلب/عرض). اختر الزبون، أضف الأسطر والضريبة/الملاحظات، ثم احفظ أو أرسل. خلك دقيق بالمبالغ — تأكيد الدفع والتقارير تعتمد عليها.",
+        },
+        accountantPay: {
+          title: "خطوتك الأساسية: تعليم مدفوع",
+          body: "افتح الطلب أو الفاتورة، أرفق إثبات دفع أو ملاحظة واضحة، ثم علّم «مدفوع». بدون تأكيد الدفع يبقى الشغل موقوفاً قبل المخزن والإنتاج. هذي بوابة المالية في مسار الطلب.",
+        },
+        navPaymentsSales: {
+          title: "مدفوعات العملاء",
+          body: "سجلّ الأموال المستلمة — نقد، تحويل، بطاقة… استخدمه لمطابقة المدفوع مع الفواتير المفتوحة وخطط الأقساط. سجّل كل دفعة هنا عشان التقارير تطلع صحيحة.",
+        },
+        navPos: {
+          title: "نقاط البيع (POS)",
+          body: "بيع سريع من الكاونتر: افتح جلسة، أضف أصناف، خذ الدفع، واطبع إيصال. الجلسات تتابع درج النقد. استخدم POS للبيع الفوري، وأوامر البيع للشغل المخصص/الإنتاج.",
+        },
+        navInstallments: {
+          title: "إدارة الأقساط",
+          body: "لما الزبون يدفع على أقساط، أنشئ الجدول هنا: تواريخ الاستحقاق، المدفوع مقابل المتبقي، وتنبيهات التأخير. اربط الخطط بالفواتير عشان التحصيل يكون مرتب.",
+        },
+        navCrm: {
+          title: "CRM — الزبائن والخدمة",
+          body: "إدارة علاقات العملاء: الأشخاص والشركات، العملاء المحتملون، تذاكر الدعم، والرسائل الداخلية. بيانات CRM الجيدة تسرّع إنشاء الطلبات وتوضح الدعم.",
+        },
+        navCustomers: {
+          title: "العملاء",
+          body: "سجلّ العملاء الأساسي: الاسم، الرمز، الهاتف، الإيميل، المدينة، الوسوم، والتاريخ. ابحث دائماً بالاسم/الرمز/الهاتف عند إنشاء طلب أو فاتورة حتى ما تكرّر العميل. افتح الملف لتشوف الطلبات والفواتير المرتبطة.",
+        },
+        navLeads: {
+          title: "العملاء المحتملون",
+          body: "أشخاص أو شركات مهتمة بس لسه مو عملاء. تابع المتابعة هنا، ثم حوّل الـ Lead لعميل لما الصفقة تصير جدية.",
+        },
+        navTickets: {
+          title: "تذاكر الدعم",
+          body: "مشاكل الزبون أو الداخلية (تأخير، جودة، استفسار). عيّن مسؤول، رد، وأغلق لما تنحل. استخدم التذاكر عشان المشاكل ما تضيع بالشات أو المكالمات.",
+        },
+        navMessages: {
+          title: "الرسائل",
+          body: "مراسلة الفريق داخل النظام. للتنسيق القصير مناسبة؛ ولقرارات الطلب استخدم دردشة الطلب عشان التاريخ يبقى على نفس الشغل.",
+        },
+        navHrm: {
+          title: "الموارد البشرية",
+          body: "الموظفون، العقود، الحضور، ملخص الرواتب، وحسابات دخول الموظفين. المدراء يستخدمونه لمعرفة مين يشتغل وين ومين يقدر يدخل النظام.",
+        },
+        navHr: {
+          title: "صفحة الموارد البشرية",
+          body: "دليل الموظفين: الأقسام، المسميات، العقود، الحضور، والرواتب. افتح موظف للتفاصيل. المسميات غالباً ترتبط بأدوار النظام (مصمم، محاسب، مخزن…).",
+        },
+        navUsers: {
+          title: "المستخدمون والصلاحيات",
+          body: "مين يقدر يدخل تطبيق الموظفين وبأي صلاحيات. أنشئ أو عطّل بحذر — صلاحية غلط تكشف المالية أو تسمح بتجاوز الإنتاج. غالباً الإيميل + كلمة مرور البوابة الافتراضية إلى أن يغيّرها.",
+        },
+        navWarehouse: {
+          title: "المخزون والمشتريات",
+          body: "كل شيء عن المخزون: المواد، كتالوج المنتجات، المشتريات، والموردين. بعد ما الطلب يصير «مدفوع»، المخزن لازم يوافق على المخزون قبل التصميم/الإنتاج.",
+        },
+        navMaterials: {
+          title: "المواد (المخزون)",
+          body: "المواد الخام والمستلزمات مع الكميات المتاحة. حدّث المستويات — النظام يفحص المخزون عند إنشاء الطلب ومرة ثانية بموافقة المخزن. نقص المخزون هنا يوقف الشغل.",
+        },
+        warehouseCheck: {
+          title: "خطوتك الأساسية: فحص المخزون",
+          body: "على الطلب المدفوع، افتح لوحة الفحص: وافق لحجز المواد، أو ارفض مع سبب. الإنتاج ما يبدأ بدون موافقة المخزن (المدير قد يتجاوز). هذي تحمي الورشة من بدء شغل بدون مواد.",
+        },
+        navPurchases: {
+          title: "المشتريات",
+          body: "اشترِ من الموردين: أنشئ مستند شراء، استلم البضاعة، وزد كميات المواد. استخدم المشتريات لما المخزون ينقص قبل ما تعد الزبون بموعد تسليم.",
+        },
+        navVendors: {
+          title: "الموردون",
+          body: "دليل الموردين — منين تشتري المواد. احتفظ بجهات الاتصال والشروط هنا عشان المشتريات تكون متسقة ومرتبطة بمستندات الشراء.",
+        },
+        navProducts: {
+          title: "كتالوج المنتجات",
+          body: "المنتجات/الخدمات القابلة للبيع (طباعة، باقات…). تظهر عند بناء الطلبات والفواتير. إدارة الكتالوج تحتاج صلاحية الكتالوج.",
+        },
+        navBoard: {
+          title: "العمليات — لوحة المشاريع",
+          body: "كانبان الإنتاج الحي. كل شغل مطلق يظهر كبطاقة تتحرك بين المراحل. هنا يشتغل المصممون والمشغّلون يومياً بعد ما بوابات المبيعات والمخزن تنفتح.",
+        },
+        boardFlow: {
+          title: "كيف تشتغل اللوحة",
+          body: "المراحل: استلام → موافقة → تأكيد → دفع → مخزن → تصميم → طباعة → CNC → تشطيب → تسليم → إنجاز. المكلّف يسحب البطاقة أو يستخدم تقدم/رجوع. قدّم المرحلة فقط لما تخلص فعلاً. المدراء يقدرون يتخطّون أو يرجعون عند الحاجة.",
+        },
+        navAccounting: {
+          title: "وحدة المحاسبة",
+          body: "المال الداخل والخارج أبعد من قائمة فواتير المبيعات: المدفوعات، المصروفات، وإشعارات الدائن. استخدمها لضبط الدفاتر لنهاية اليوم/الشهر.",
+        },
+        navExpenses: {
+          title: "المصروفات",
+          body: "سجّل تكاليف الشركة (إيجار، مستلزمات، شحن…). صنّفها بوضوح عشان تقارير المبيعات والربح تطلع مفهومة.",
+        },
+        navReports: {
+          title: "التقارير",
+          body: "ملخصات المبيعات والأداء — وش انباع، وش تحصل، والاتجاهات. الإدارة والمحاسبة يعتمدون عليها؛ لا تعتمد على الذاكرة والأرقام موجودة هنا.",
+        },
+        navAudit: {
+          title: "سجلّ التدقيق",
+          body: "أثر أمني/تاريخي لأهم الإجراءات (مين غيّر وش). استخدمه عند التحقيق بأخطاء أو خلافات أو تغييرات حالة غير متوقعة.",
+        },
+        navTemplates: {
+          title: "قوالب المستندات",
+          body: "تخطيطات PDF (فواتير، عروض…). حدّث رأس الشركة والشروط والهوية هنا عشان المستندات المطبوعة/المشاركة تطلع متناسقة.",
+        },
+        navSettings: {
+          title: "الإعدادات",
+          body: "تفضيلاتك وتفضيلات الشركة: اللغة، المظهر، وخيارات المبيعات/المستندات المسموح لك تغييرها. إذا شي طالع غلط عام، راجع الإعدادات (وإعدادات المبيعات) قبل ما تفترض فيه خلل.",
+        },
+        topbarHelp: {
+          title: "أعد الجولة متى ما احتجت",
+          body: "أيقونة ؟ الصفراء فوق بالشريط تعيد هالجولة. مفيدة للموظفين الجدد أو لما تنسى وين پنل معيّن. الجولة تبرز فقط الوحدات اللي حسابك يقدر يفتحها.",
+        },
+        flowSummary: {
+          title: "مسار الطلب الكامل (احفظه)",
+          body: "١) المبيعات تنشئ الطلب وتعيّن الفريق. ٢) موافقة الزبون/الإدارة عند الحاجة. ٣) المحاسب يعلّم مدفوع (مع إثبات). ٤) المخزن يوافق على المخزون. ٥) تصميم → طباعة → CNC → تشطيب على لوحة المشاريع. ٦) التسليم يؤكد الاستلام. كل حركة مسجّلة بدردشة الطلب — اقرأها قبل ما تسأل «وين هالشغل؟»",
+        },
+        done: {
+          title: "جاهز تستكشف",
+          body: "الحين تعرف وظيفة كل پنل. ابدأ بوحدتك اليومية، اتبع مسار الطلب فوق، واضغط ؟ متى ما احتجت الدليل. إذا محتار، افتح دردشة الطلب ومرحلة اللوحة — النظام يبيّن المالك التالي.",
+        },
+        sales_welcome: {
+          title: "المبيعات — ابدأ من هنا",
+          body: "أنت مسؤول الاستلام: الزبائن، العروض، الطلبات، التسعير، تعيين الفريق، والإطلاق. الجولة كمان توضح CRM وكيف المالية والمخزن والإنتاج يكملون بعدك.",
+        },
+        accountant_welcome: {
+          title: "المالية — ابدأ من هنا",
+          body: "أنت مسؤول الفواتير والمدفوعات والمصروفات وبوابة «مدفوع». بدون تأكيدك (مع إثبات) المخزن والإنتاج يبقون موقفين. كمان نشوف پنلات المبيعات والتقارير المرتبطة.",
+        },
+        warehouse_welcome: {
+          title: "المخزن — ابدأ من هنا",
+          body: "أنت مسؤول المواد والمشتريات والموردين وبوابة فحص المخزون بعد الدفع. وافق فقط لما المواد متوفرة فعلاً — بعدها الإنتاج يقدر يبدأ بأمان.",
+        },
+        production_welcome: {
+          title: "الإنتاج — ابدأ من هنا",
+          body: "أنت مسؤول مرحلتك على لوحة المشاريع. نشرح اللوحة وكيف تقدّم الشغل، والأدوات القريبة (طلبات، مواد، رسائل) عشان تشوف الصورة الكاملة حول محطتك.",
+        },
+        executive_welcome: {
+          title: "الإدارة — جولة النظام كاملة",
+          body: "تمر على كل الوحدات الرئيسية ومسار الطلب الكامل. تقدر تتجاوز المراحل عند الحاجة — استخدمها بحذر واترك ملاحظة بالدردشة.",
+        },
+      },
+    },
     nav: {
+      modDashboard: "لوحة التحكم",
+      modSales: "المبيعات",
+      modPos: "نقاط البيع",
+      modInstallments: "إدارة الأقساط",
+      modCrm: "إدارة علاقات العملاء",
+      modHrm: "الموارد البشرية",
+      modInventory: "المخزون والمشتريات",
+      modOperations: "العمليات",
+      modAccounting: "المحاسبة",
+      modReports: "التقارير",
+      modTemplates: "القوالب",
+      modSettings: "الإعدادات",
       overview: "نظرة عامة",
       crm: "إدارة العلاقات",
       operations: "العمليات",
@@ -2779,20 +4287,35 @@ const ar: Dict = {
       service: "الخدمة",
       insights: "الإدارة",
       dashboard: "لوحة التحكم",
+      humanResources: "الموارد البشرية",
+      payrollReport: "تقرير الرواتب",
       auditLog: "سجلّ التدقيق",
-      customers: "الزبائن",
+      customers: "العملاء",
       companies: "الشركات",
       leads: "العملاء المحتملون",
       opportunities: "الفرص",
       orders: "الطلبات",
       newOrder: "طلب جديد",
+      manageOrders: "إدارة أوامر البيع",
+      createOrder: "إنشاء أمر بيع",
       orderBoard: "لوحة الطلبات",
       quotations: "عروض الأسعار",
+      manageQuotations: "إدارة عروض الأسعار",
       invoices: "الفواتير",
+      manageInvoices: "إدارة الفواتير",
+      createInvoice: "إنشاء فاتورة",
+      creditNotes: "إشعارات دائنة",
+      salesReturns: "الفواتير المرتجعة",
+      recurringInvoices: "الفواتير الدورية",
+      customerPayments: "مدفوعات العملاء",
+      salesSettings: "إعدادات المبيعات",
       payments: "المدفوعات",
+      expenses: "المصروفات",
       products: "المنتجات",
       materials: "المواد",
       movements: "حركات المخزون",
+      purchases: "المشتريات",
+      vendors: "الموردون",
       tickets: "التذاكر",
       messages: "الرسائل",
       design: "ستوديو التصميم",
@@ -2801,6 +4324,247 @@ const ar: Dict = {
       users: "المستخدمون والأدوار",
       myEmployees: "موظفيني",
       settings: "الإعدادات",
+      posTerminal: "نقطة البيع",
+      posSessions: "جلسات نقاط البيع",
+      installmentPlans: "خطط الأقساط",
+      salesReports: "تقارير المبيعات",
+      docTemplates: "قوالب المستندات",
+    },
+    hr: {
+      title: "الموارد البشرية",
+      description: "العقود والرواتب والحضور ودليل القوة العاملة والطلبات المعلقة للموظفين.",
+      contractsTitle: "ملخص العقود",
+      contractsSub: "توزيع حالات عقود الموظفين",
+      contractsTotal: "المجموع {n} عقد",
+      viewDetails: "عرض التفاصيل",
+      showAll: "عرض الجميع",
+      newEmployee: "موظف جديد",
+      pendingTitle: "الطلبات المعلقة",
+      pendingSub: "طلبات الإجازة والموارد البشرية بانتظار الإجراء",
+      pendingEmpty: "لا يوجد طلبات حتى الآن",
+      pendingBadge: "معلّق",
+      payrollTitle: "ملخص الرواتب",
+      totalGross: "إجمالي الأجر المدفوع",
+      totalDeductions: "إجمالي الخصومات",
+      totalNet: "إجمالي صافي الأجر",
+      payslips: "قسائم الرواتب",
+      last7Days: "آخر ٧ أيام",
+      last30Days: "آخر ٣٠ يوم",
+      last90Days: "آخر ٩٠ يوم",
+      lastNDays: "آخر {n} يوم",
+      expiringTitle: "العقود التي ستنتهي صلاحيتها",
+      expiringSub: "عقود تنتهي خلال ٤٥ يوماً القادمة",
+      expiringEmpty: "لا توجد عقود قاربت على الانتهاء.",
+      attendanceTitle: "ملخص الحضور",
+      payrollReportTitle: "تقرير الرواتب",
+      payrollReportSub: "تقرير كامل للرواتب المدفوعة في المؤسسة",
+      payrollReportExport: "تصدير CSV",
+      payrollReportFrom: "من",
+      payrollReportTo: "إلى",
+      payrollReportDept: "القسم",
+      payrollReportAllDepts: "كل الأقسام",
+      payrollReportHeadcount: "عدد الموظفين",
+      payrollReportBonus: "إجمالي المكافآت",
+      payrollReportEmpty: "لا توجد قسائم في هذه الفترة.",
+      workforceTitle: "دليل القوة العاملة",
+      workforceSub: "الموظفون المستوردون للنظام — حسب القسم والمسمى الوظيفي",
+      employeesTotal: "إجمالي الموظفين",
+      employeesActive: "نشط",
+      employeesInactive: "غير نشط",
+      syncedDaftra: "مزامن من دفترة",
+      withDepartment: "لديهم قسم",
+      withTitle: "لديهم مسمى",
+      withContract: "لديهم عقد",
+      byDepartment: "حسب القسم",
+      byTitle: "حسب المسمى",
+      viewEmployees: "فتح الموظفين",
+      contractStatuses: {
+        active: "نشط",
+        expired: "منتهي",
+        under_review: "تحت المراجعة",
+        replacement: "استبدال",
+        cancelled: "ملغي",
+        suspended: "موقوف",
+        draft: "مسودة",
+      },
+      attendanceStatuses: {
+        present: "حضور",
+        absent: "غياب",
+        late: "تأخير",
+        on_leave: "إجازة",
+      },
+      requestTypes: {
+        leave: "إجازة",
+        permission: "استئذان",
+        overtime: "عمل إضافي",
+        document: "مستند",
+        other: "أخرى",
+      },
+      employee: {
+        notFound: "الموظف غير موجود",
+        notFoundHint: "ملف هذا الموظف غير متاح أو ليس حساب موظّف.",
+        backToHr: "العودة للموارد البشرية",
+        editInUsers: "إدارة من المستخدمين",
+        editEmployee: "تعديل الموظف",
+        deleteEmployee: "حذف",
+        newEmployee: "موظف جديد",
+        defaultSubtitle: "ملف الموظف",
+        inactive: "غير نشط",
+        contractCode: "العقد",
+        statPresent: "حضور",
+        statPayslips: "قسائم",
+        statRequests: "طلبات",
+        statContracts: "عقود",
+        statProjects: "مشاريع",
+        tabDetails: "التفاصيل",
+        tabProjects: "المشاريع",
+        tabAttendance: "الحضور",
+        tabPayroll: "المرتبات",
+        tabRequests: "الطلبات",
+        tabActivity: "سجل النشاطات",
+        projectsTitle: "المشاريع المعيّنة",
+        projectsSub: "الطلبات التي يملكها أو يعمل عليها هذا الموظف على لوحة المشاريع",
+        projectsEmpty: "لا توجد تعيينات مشاريع بعد.",
+        projectOnBoard: "على اللوحة",
+        projectOffBoard: "خارج اللوحة",
+        projectRoleAssignee: "مكلّف",
+        projectRoleOwner: "مالك",
+        openOrder: "فتح الطلب",
+        openBoard: "لوحة المشاريع",
+        stageLabel: "المرحلة",
+        contractInfo: "معلومات العقد",
+        profileInfo: "ملف الموظف",
+        contactInfo: "التواصل والهواتف",
+        fieldAddress: "العنوان",
+        fieldAddress2: "العنوان 2",
+        fieldCity: "المدينة",
+        fieldState: "المحافظة / الولاية",
+        fieldPostal: "الرمز البريدي",
+        fieldCountry: "الدولة",
+        fieldNationality: "الجنسية",
+        fieldCitizenship: "حالة المواطنة",
+        fieldOfficialId: "الرقم الرسمي",
+        fieldGender: "الجنس",
+        fieldHireDate: "تاريخ التعيين",
+        fieldBirthDate: "تاريخ الميلاد",
+        fieldResidenceExpiry: "انتهاء الإقامة",
+        fieldHourlyRate: "الأجر بالساعة",
+        fieldCodeStaff: "رمز الموظف",
+        fieldStaffType: "نوع الموظف",
+        fieldSystemAccess: "صلاحية النظام",
+        fieldHomePhone: "هاتف المنزل",
+        fieldBusinessPhone: "هاتف العمل",
+        fieldMobile: "الموبايل",
+        fieldFax: "الفاكس",
+        fieldEmail: "البريد الإلكتروني",
+        fieldLastLogin: "آخر تسجيل دخول",
+        fieldCreated: "تاريخ الإنشاء",
+        fieldNotes: "ملاحظات",
+        fieldDaftraId: "معرّف دفترة",
+        timeline: "التواريخ والمدة",
+        salaryData: "بيانات المرتب",
+        allContracts: "كل العقود",
+        fieldEmployee: "موظف",
+        fieldJobTitle: "المسمى الوظيفي",
+        fieldJobLevel: "المستوى الوظيفي",
+        fieldCode: "الكود",
+        fieldPrimary: "العقد الأساسي",
+        fieldDescription: "الوصف",
+        fieldStart: "تاريخ البدء",
+        fieldJoin: "تاريخ الالتحاق",
+        fieldSigned: "تاريخ توقيع العقد",
+        fieldEnd: "تاريخ الانتهاء",
+        fieldProbation: "نهاية مدة الاختبار",
+        fieldDuration: "المدة",
+        fieldCurrency: "العملة",
+        fieldSalary: "الراتب الأساسي",
+        fieldTemplate: "قالب الراتب",
+        fieldNetPeriod: "صافي الفترة",
+        yes: "نعم",
+        no: "لا",
+        attendanceSummary: "ملخص الحضور",
+        attendanceLog: "سجل الحضور",
+        attendanceLogSub: "آخر تسجيلات الدخول والغياب",
+        attendanceEmpty: "لا توجد سجلات حضور بعد.",
+        attendanceCalendar: "تقويم الحضور",
+        markWeekdaysPresent: "تأشير أيام العمل حضور",
+        dailyRate: "الأجر اليومي (الراتب ÷ 30)",
+        saveAttendance: "حفظ اليوم",
+        checkIn: "وقت الدخول",
+        checkOut: "وقت الخروج",
+        deductionOverride: "مبلغ خصم مخصص",
+        clearDay: "مسح",
+        attendanceSaved: "تم الحفظ",
+        attendanceSaveFailed: "تعذّر الحفظ",
+        payrollThisMonth: "راتب هذا الشهر",
+        payrollThisMonthSub: "من الحضور والمكافآت والخصومات",
+        absentDays: "أيام الغياب",
+        absenceDeduction: "خصم الغياب",
+        rowBonus: "مكافأة",
+        extraDeduction: "خصومات إضافية",
+        adjustments: "التعديلات",
+        addAdjustment: "إضافة",
+        adjAmount: "المبلغ",
+        adjReason: "السبب",
+        kindBonus: "مكافأة",
+        kindDeduction: "خصم",
+        kindOvertime: "أوفر تايم",
+        generateDraft: "إنشاء مسودة قسيمة",
+        confirmPaid: "تأكيد ودفع",
+        draftStatus: "مسودة",
+        noAdjustments: "لا توجد تعديلات لهذا الشهر.",
+        actions: "إجراءات",
+        addPayslip: "إضافة قسيمة",
+        editPayslip: "تعديل القسيمة",
+        runPayroll: "تشغيل الرواتب",
+        unpayPayslip: "إرجاع لمسودة",
+        deletePayslip: "حذف",
+        markPaid: "تعيين كمدفوع",
+        confirmDeletePayslip: "حذف هذه القسيمة؟",
+        runFromAttendance: "حساب من الحضور",
+        payrollMonth: "شهر الراتب",
+        totalGross: "إجمالي الأجر المدفوع",
+        totalDeductions: "إجمالي الخصومات",
+        totalNet: "إجمالي صافي الراتب",
+        avgGross: "متوسط الراتب الإجمالي",
+        avgNet: "متوسط الراتب الصافي",
+        payrollOverview: "نظرة عامة على العقود",
+        payrollOverviewSub: "إجماليات واتجاهات الراتب لهذا الموظف",
+        payrollChart: "اتجاه صافي الراتب",
+        payrollMatrix: "التفصيل الشهري",
+        rowSalary: "الراتب",
+        rowOvertime: "أوفر تايم",
+        rowAbsence: "غياب",
+        rowTotal: "الإجمالي",
+        colTotal: "الإجمالي",
+        payslips: "قسائم الرواتب",
+        payslipList: "قسائم الرواتب",
+        payslipEmpty: "لا توجد قسائم بعد.",
+        voucherId: "الرقم التعريفي",
+        voucherPeriod: "الفترة الزمنية",
+        voucherAmount: "إجمالي المبلغ",
+        voucherStatus: "الحالة",
+        paid: "مدفوع",
+        unpaid: "غير مدفوع",
+        requestsTitle: "طلبات الموظف",
+        requestsEmpty: "لا توجد طلبات بعد.",
+        activityTitle: "سجل النشاطات",
+        activitySub: "الطلبات والقسائم والحضور وإجراءات النظام",
+        activityEmpty: "لا يوجد نشاط بعد.",
+        salaryTemplates: { monthly: "شهري", weekly: "أسبوعي", daily: "يومي" },
+        requestStatuses: {
+          pending: "معلّق",
+          approved: "مقبول",
+          rejected: "مرفوض",
+          cancelled: "ملغي",
+        },
+        activityKinds: {
+          request: "طلب",
+          payslip: "قسيمة",
+          attendance: "حضور",
+          audit: "نظام",
+        },
+      },
     },
     common: {
       cancel: "إلغاء",
@@ -2851,7 +4615,32 @@ const ar: Dict = {
     },
     dashboard: {
       title: "نظرة عامة على اللوحة",
+      greeting: "أهلاً بعودتك، {name}",
+      defaultUser: "مرحباً",
       description: "الأرقام اللي تحتاج انتباه أولاً — بعدها الرسوم والنشاط.",
+      quickAccessTitle: "الوصول السريع",
+      quickAccessDescription: "ابحث في السجلات أو انتقل مباشرة إلى المهمة المطلوبة.",
+      customerSearchLabel: "البحث عن الزبائن",
+      orderSearchLabel: "البحث عن الطلبات",
+      searchCustomers: "ابحث باسم الزبون أو الإيميل أو الموبايل…",
+      searchOrders: "ابحث برمز الطلب أو عنوانه…",
+      schedulesTitle: "أحدث المواعيد",
+      schedulesSub: "مواعيد تسليم الطلبات والمتابعات القادمة",
+      schedulesEmpty: "لا توجد مواعيد قادمة.",
+      scheduleOrder: "أمر الشغل",
+      scheduleFollowUp: "متابعة",
+      scheduleBy: "بواسطة {name}",
+      scheduleNoOwner: "غير معيّن",
+      lowStockPanelTitle: "المواد منخفضة المخزون",
+      lowStockPanelSub: "عند أو تحت مستوى إعادة الطلب",
+      stockCritical: "نفد المخزون",
+      stockLow: "مخزون منخفض",
+      stockOk: "في المخزون",
+      stockAvailable: "{count} {unit} متوفّر",
+      currentActivityTitle: "الأنشطة الحالية",
+      currentActivitySub: "آخر الإجراءات داخل النظام",
+      todayFilter: "اليوم",
+      showAll: "عرض الجميع",
       revenueTitle: "الإيرادات · آخر ٣٠ يوم",
       revenueSubtitle: "اليوم {today} · الشهر حتى الآن {mtd}",
       paid: "مدفوع",
@@ -2883,10 +4672,10 @@ const ar: Dict = {
       kpis: {
         revenueToday: "إيرادات اليوم",
         revenueMTD: "الإيرادات الشهرية",
-        activeOrders: "طلبات نشطة",
-        delayedOrders: "طلبات متأخرة",
-        onlineNow: "متّصلون الآن",
-        pendingApprovals: "اعتمادات معلّقة",
+        activeOrders: "نشطة",
+        delayedOrders: "متأخرة",
+        onlineNow: "متّصلون",
+        pendingApprovals: "اعتمادات",
         revenueTodayHint: "فواتير مدفوعة",
         revenueMTDHint: "منذ بداية الشهر",
         activeHint: "قيد التنفيذ",
@@ -3071,6 +4860,7 @@ const ar: Dict = {
       activityEmpty: "ما في تغييرات حالة حديثة.",
       sourcePortal: "بوابة الزبون",
       sourceStaff: "الموظفين",
+      sourceDaftra: "دفترة",
       lastUpdated: "آخر تحديث",
       zoomIn: "تكبير",
       zoomOut: "تصغير",
@@ -3099,6 +4889,11 @@ const ar: Dict = {
       filterMine: "شغلي",
       filterOverdue: "متأخر",
       hideEmpty: "إخفاء الفارغ",
+      showDone: "إظهار المكتمل",
+      selectStage: "المراحل",
+      prevPage: "الصفحة السابقة",
+      nextPage: "الصفحة التالية",
+      pageOf: "صفحة {page} من {pages}",
       showingCount: "عرض {shown} من {total}",
       mineBadge: "إلي",
       overdueBadge: "متأخر",
@@ -3111,7 +4906,8 @@ const ar: Dict = {
         intake: "طلب جديد",
         approval: "الموافقة",
         confirmed: "مؤكّد",
-        paid: "مدفوع",
+        paid: "مدفوع — جاهز",
+        warehouse: "فحص المخزن",
         design: "التصميم",
         printing: "الطباعة",
         production: "الإنتاج",
@@ -3119,6 +4915,34 @@ const ar: Dict = {
         delivery: "جاهز للتسليم",
         completed: "مكتمل",
         cancelled: "ملغى",
+      },
+    },
+    orderLifecycle: {
+      guideTitle: "مسار الطلب",
+      guideSubtitle: "من الاستلام حتى التسليم — كل دور مسؤول عن خطوة.",
+      gmHint: "المدير العام يقدر يحرّك أي مرحلة للأمام أو للخلف من اللوحة أو صفحة الطلب.",
+      roleSales: "المبيعات / الإدارة — إنشاء، تسعير، إطلاق",
+      roleAccountant: "المحاسب — تأكيد الدفع",
+      roleWarehouse: "المخزن — التحقق وحجز المواد",
+      roleDesigner: "المصمم — العمل الفني",
+      rolePrint: "مشغّل الطباعة",
+      roleCnc: "CNC / الإنتاج",
+      roleFinish: "التشطيب / Flex-UV",
+      roleDelivery: "التسليم / تسليم المخزن",
+      roleDone: "الزبون أو الموظف يؤكد الاستلام",
+      stockCheck: {
+        title: "فحص مخزون المخزن",
+        subtitle: "تأكيد توفر المواد قبل بدء الإنتاج.",
+        waitingHint: "راجع مواد BOM ثم وافق لحجز المخزون — أو ارفض مع سبب.",
+        waitForWarehouse: "بانتظار موافقة المخزن على المخزون…",
+        notesLabel: "ملاحظات",
+        notesPlaceholder: "ملاحظة اختيارية (مطلوبة عند الرفض)…",
+        approve: "الموافقة على المخزون",
+        reject: "رفض",
+        approvedLabel: "تمت الموافقة على المخزون — يمكن بدء الإنتاج",
+        rejectedLabel: "تم رفض المخزون",
+        approvedToast: "تمت الموافقة على المخزون",
+        rejectedToast: "تم رفض فحص المخزون",
       },
     },
     messages: {
@@ -3191,15 +5015,15 @@ const ar: Dict = {
       },
     },
     newOrder: {
-      title: "طلب جديد",
-      description: "اضبط الخدمات، شوف السعر مباشرة، وقدّم الطلب.",
+      title: "إنشاء أمر بيع",
+      description: "العميل والبنود والخصم والمرفقات في نموذج واحد.",
       cancel: "إلغاء",
       submit: "تقديم الطلب",
       created: "تم إنشاء الطلب {code}",
       detailsTitle: "تفاصيل الطلب",
       detailsSub: "الزبون، الموعد، والبيانات",
-      customerLabel: "الزبون",
-      selectCustomer: "اختر الزبون…",
+      customerLabel: "العميل",
+      selectCustomer: "اختر العميل…",
       placingAs: "بصفة: {name}",
       orderTitleLabel: "عنوان الطلب",
       orderTitlePh: "مثلاً: حملة الربع الثالث",
@@ -3208,17 +5032,17 @@ const ar: Dict = {
       priorities: { low: "منخفضة", normal: "عادية", high: "عالية", urgent: "عاجلة" },
       notes: "ملاحظات",
       lineItemsTitle: "بنود الطلب",
-      lineItemsSub: "اختر منتج واضبطه — السعر يتحدّث مباشرة.",
-      addLine: "إضافة بند",
+      lineItemsSub: "البند والسعر والكمية والخصم والضريبة.",
+      addLine: "إضافة",
       noItems: "ما في بنود بعد.",
       noItemsHintBefore: "اضغط ",
-      noItemsHintLink: "إضافة بند",
+      noItemsHintLink: "إضافة",
       noItemsHintAfter: " للبدء.",
       summaryTitle: "ملخّص الطلب",
       summarySub: "المجموع المباشر",
       subtotal: "المجموع الفرعي",
       tax: "الضريبة",
-      grandTotal: "المجموع الكلي",
+      grandTotal: "المجموع",
       instantQuote: "تسعيرة فورية",
       attachTitle: "إرفاق ملفات",
       attachSub: "تصاميم، مراجع، ملفات مصدرية",
@@ -3226,16 +5050,40 @@ const ar: Dict = {
       uploadHint: "أي نوع ملف (صور، PDF، PSD، AI، ZIP، DOCX، …) — حتى ٥٠ ميغا لكل ملف",
       uploadsDone: "تم رفع الملفات",
       product: "المنتج",
-      selectProduct: "اختر المنتج…",
+      selectProduct: "اختر البند…",
       quantity: "الكمية",
       unit: "الوحدة",
       unitPrice: "سعر الوحدة",
       livePricing: "تفصيل التسعير المباشر",
-      addProduct: "إضافة منتج جديد",
+      addProduct: "منتج جديد",
       reviewTitle: "مراجعة الطلب",
       reviewSub: "تأكد من التفاصيل قبل الإرسال",
       itemCount: "{count} بند",
       itemFallback: "بند {n}",
+      preview: "معاينة",
+      saveDraft: "حفظ كمسودة",
+      saveSubmit: "حفظ",
+      template: "قالب المستند",
+      defaultTemplate: "القالب الافتراضي",
+      newCustomer: "جديد",
+      orderNumber: "رقم أمر البيع",
+      orderNumberHint: "تلقائي عند الحفظ",
+      orderDate: "تاريخ أمر البيع",
+      salesperson: "مسؤول المبيعات",
+      selectSalesperson: "اختر المسؤول…",
+      colItem: "البند",
+      colDescription: "الوصف",
+      colDiscount: "الخصم %",
+      colTax: "الضريبة %",
+      colLineTotal: "المجموع",
+      tabSettlement: "الخصم والتسوية",
+      tabWarehouse: "المستودع",
+      tabAttachments: "إرفاق المستندات",
+      orderDiscount: "خصم الطلب",
+      orderDiscountPct: "خصم الطلب %",
+      settlement: "تسوية",
+      warehouse: "المستودع",
+      selectWarehouse: "اختر المستودع…",
     },
     workflowAssignments: {
       title: "تعيينات الإنتاج",
@@ -3318,6 +5166,189 @@ const ar: Dict = {
       orderSectionSub: "أنشئ فواتير PDF احترافية لهذا المشروع في أي مرحلة.",
       noOrderInvoices: "ما في فواتير لهذا الطلب بعد.",
       shareWithPortal: "مشاركة مع بوابة الزبون عند الإنشاء",
+      list: {
+        newInvoice: "فاتورة جديدة",
+        reports: "التقارير",
+        settings: "الإعدادات",
+        searchTitle: "بحث",
+        filterCustomer: "العميل",
+        anyCustomer: "أي عميل",
+        filterCode: "بحث الفواتير",
+        searchCustomerPh: "الاسم، الرمز، الهاتف…",
+        searchInvoicePh: "رقم الفاتورة، اسم أو رمز العميل…",
+        searchInvoiceHint: "يبحث في رقم الفاتورة واسم العميل ورمزه وهاتفه وبريده",
+        filterStatus: "الحالة",
+        anyStatus: "أي حالة",
+        searchBtn: "بحث",
+        clearFilters: "إلغاء الفلتر",
+        tabResults: "النتائج",
+        tabAll: "الكل",
+        tabLate: "متأخر",
+        tabDue: "مستحقة الدفع",
+        tabUnpaid: "غير مدفوعة",
+        tabDraft: "مسودة",
+        tabOverpaid: "مدفوع بالزيادة",
+        sortNewest: "الترتيب: الأحدث",
+        sortOldest: "الترتيب: الأقدم",
+        sortAmountDesc: "الترتيب: المبلغ من الأعلى",
+        sortAmountAsc: "الترتيب: المبلغ من الأقل",
+        sortDue: "الترتيب: تاريخ الاستحقاق",
+        soldBy: "بواسطة",
+        activityCreated: "أنشئت",
+        activityPayment: "أضيفت عملية دفع",
+        linkedOrder: "الطلب",
+        balance: "الرصيد",
+        actions: "إجراءات",
+        open: "فتح",
+        recordPayment: "تسجيل دفعة",
+        statuses: {
+          unpaid: "غير مدفوعة",
+          partial: "مدفوعة جزئياً",
+          paid: "مدفوعة",
+          draft: "مسودة",
+          late: "متأخر",
+          overpaid: "مدفوع بالزيادة",
+        },
+      },
+      createForm: {
+        title: "إضافة فاتورة",
+        description: "الزبون والبنود والخصم والإيداع والدفع في نموذج واحد.",
+        preview: "معاينة",
+        saveDraft: "حفظ كمسودة",
+        saveSubmit: "حفظ دون طباعة",
+        template: "قالب الفاتورة",
+        defaultTemplate: "القالب الافتراضي",
+        customer: "العميل",
+        selectCustomer: "اختر العميل…",
+        newCustomer: "جديد",
+        invoiceNumber: "رقم الفاتورة",
+        invoiceNumberHint: "تلقائي عند الحفظ",
+        invoiceDate: "تاريخ الفاتورة",
+        issueDate: "تاريخ الإصدار",
+        dueDate: "تاريخ الاستحقاق",
+        salesperson: "مسؤول المبيعات",
+        selectSalesperson: "اختر مسؤول المبيعات…",
+        paymentTerms: "شروط الدفع (أيام)",
+        lineItems: "البنود",
+        lineItemsSub: "البند والسعر والكمية والخصم والضريبة.",
+        addLine: "إضافة",
+        colItem: "البند",
+        colDescription: "الوصف",
+        colUnitPrice: "سعر الوحدة",
+        colQty: "الكمية",
+        colDiscount: "الخصم %",
+        colTax: "الضريبة",
+        colLineTotal: "المجموع",
+        selectItem: "اختر البند…",
+        customItem: "اسم بند مخصص",
+        noTax: "بدون ضريبة",
+        itemFallback: "بند",
+        subtotal: "الإجمالي",
+        tax: "الضريبة",
+        grandTotal: "الإجمالي",
+        tabSettlement: "الخصم والتسوية",
+        tabDeposit: "إيداع",
+        tabWarehouse: "المستودع",
+        tabAttachments: "إرفاق المستندات",
+        orderDiscount: "الخصم",
+        orderDiscountPct: "نسبة الخصم %",
+        discountTypePct: "نسبة مئوية (%)",
+        discountTypeFixed: "مبلغ ثابت",
+        settlement: "التسوية",
+        settlementHint: "تعديل يدوي يُضاف إلى إجمالي الفاتورة.",
+        settlementNotePh: "ملاحظة",
+        deposit: "إيداع",
+        advancePayment: "الدفعة المقدمة",
+        advancePaymentHint: "المبلغ المتوقع كدفعة مقدمة لهذه الفاتورة.",
+        depositAmount: "المبلغ",
+        payMethodCash: "نقداً",
+        payMethodCard: "بطاقة",
+        payMethodTransfer: "تحويل",
+        payMethodDeposit: "إيداع",
+        warehouse: "المستودع",
+        selectWarehouse: "اختر المستودع…",
+        attachmentsHint: "أرفق الملفات من صفحة تفاصيل الفاتورة بعد الحفظ.",
+        notesTerms: "الملاحظات / الشروط",
+        alreadyPaid: "مدفوع بالفعل",
+        alreadyPaidQ: "مدفوع بالفعل؟",
+        alreadyPaidHint: "عند الحفظ تُسجَّل الفاتورة كمدفوعة بالكامل.",
+      },
+      detail: {
+        invoiceTitle: "فاتورة",
+        print: "طباعة",
+        edit: "تعديل",
+        pdf: "PDF",
+        addPayment: "إضافة عملية دفع",
+        creditNote: "قسيمة دائن",
+        undoCreditNote: "تراجع / حذف",
+        confirmDeleteCreditNote: "إلغاء إشعار الدائن {code}؟ رصيد الفاتورة المرتبطة يُرجَع.",
+        creditNoteDeleted: "تم إلغاء إشعار الدائن",
+        return: "مرتجع",
+        copy: "نسخ",
+        addInstallment: "أضف اتفاقية تقسيط",
+        more: "المزيد",
+        allPayments: "كل المدفوعات",
+        tabInvoice: "فاتورة",
+        tabDetails: "التفاصيل",
+        tabStock: "الأذون المخزنية",
+        tabActivity: "سجل النشاطات",
+        docTitle: "فاتورة",
+        docNumber: "رقم الفاتورة",
+        docDate: "تاريخ الفاتورة",
+        docBillTo: "فاتورة إلى",
+        docItem: "البند",
+        docDescription: "الوصف",
+        docUnitPrice: "سعر الوحدة",
+        docQty: "الكمية",
+        docLineTotal: "المجموع",
+        amountDue: "المبلغ المستحق",
+        customer: "العميل",
+        soldBy: "بواسطة",
+        warehouse: "المستودع",
+        order: "الطلب",
+        noWarehouse: "لم يُحدد مستودع",
+        stockHint: "تظهر هنا حركات المخزون المرتبطة بهذه الفاتورة عند ترحيل أذون المخزن.",
+        linkedInstallments: "اتفاقيات التقسيط المرتبطة",
+        activityCreated: "تم إنشاء الفاتورة",
+        activityPayment: "أضيفت عملية دفع",
+        noActivityExtra: "لا توجد مدفوعات مسجّلة بعد.",
+        amount: "المبلغ",
+        method: "الطريقة",
+        installmentCount: "عدد الأقساط",
+        firstDue: "أول تاريخ استحقاق",
+        saved: "تم تحديث الفاتورة",
+        paymentRecorded: "تم تسجيل الدفعة",
+        installmentCreated: "تم إنشاء اتفاقية التقسيط",
+        copied: "تم النسخ كـ {code}",
+        creditReason: "إشعار دائن على الفاتورة",
+        creditCreated: "تم إنشاء إشعار دائن {code}",
+        returnCreated: "تم إنشاء المرتجع",
+        issueDate: "تاريخ الإصدار",
+        totalAmount: "إجمالي المبلغ",
+        createdBy: "أنشئ بواسطة",
+        lastAction: "أحدث إجراء",
+        actionCreated: "أنشئت",
+        salesperson: "مسؤول المبيعات",
+        salesRecord: "قيد المبيعات",
+        shippingData: "بيانات الشحن",
+        productsList: "قائمة المنتجات",
+        qtyRequired: "الكمية المطلوبة",
+        qtyReceived: "الكمية المستلمة",
+        underDelivery: "تحت التسليم",
+        noStockVoucher: "لا يوجد إذن مخزني بعد",
+        createStockVoucher: "إنشاء إذن صرف مخزن",
+        stockIssued: "تم إنشاء إذن الصرف المخزني",
+        stockIssueBy: "إذن صرف مخزن {warehouse} بواسطة: {user}",
+        undoStockVoucher: "تراجع / حذف",
+        confirmUndoStock: "إلغاء إذن المخزن هذا؟ تقدر تنشئه مرة ثانية لاحقاً إذا احتجت.",
+        stockIssueUndone: "تم إلغاء إذن المخزن",
+        filterActions: "الإجراءات",
+        allActions: "كل الإجراءات",
+        periodFrom: "الفترة من",
+        periodTo: "إلى",
+        activityStock: "إذن مخزني",
+        activityUpdate: "تحديث",
+      },
     },
     materials: {
       title: "المواد والمخزون",
@@ -3554,8 +5585,8 @@ const ar: Dict = {
     },
     users: {
       title: "موظفيني",
-      description: "إضافة أعضاء الفريق وتعيين أي دور لهم.",
-      searchPh: "بحث…",
+      description: "دليل الفريق — الأقسام والمسميات والأدوار. الموظفون المستوردون من دفترة يظهرون هنا بعد المزامنة.",
+      searchPh: "بحث بالاسم أو البريد أو الموبايل أو المسمى…",
       staffOnly: "الموظفون فقط",
       filterEmployees: "الموظفون",
       filterPortal: "زبائن البوابة",
@@ -3579,14 +5610,18 @@ const ar: Dict = {
       updated: "تم تحديث الموظف",
       deleted: "تم حذف الموظف",
       confirmDelete: "حذف هذا الموظف؟",
-      colUser: "المستخدم",
+      colUser: "الموظف",
       colRoles: "الأدوار",
       colDept: "القسم",
+      colTitle: "المسمى",
       colStatus: "الحالة",
       colLastLogin: "آخر دخول",
       active: "نشط",
       inactive: "غير نشط",
       emptyTitle: "ما في موظفين",
+      emptyDesc: "استورد الموظفين من الإعدادات ← مزامنة دفترة، أو أضف موظفاً يدوياً.",
+      allDepartments: "كل الأقسام",
+      resultCount: "{n} موظف",
     },
     settings: {
       title: "الإعدادات",
@@ -3669,6 +5704,29 @@ const ar: Dict = {
       previewBadgeBrand: "الهوية",
       previewBadgeAccent: "مساعد",
       previewBadgeSuccess: "نجاح",
+      daftraTitle: "مزامنة دفترة",
+      daftraSub: "استيراد العملاء والفواتير والاشتراكات والمنتجات والمدفوعات والمصروفات وإيصالات الاسترداد (إشعارات دائن) والمسميات الوظيفية والموظفين وقسائم الرواتب وأوامر العمل (لوحة المشاريع) من دفترة. البيانات تُحفظ محلياً — النظام يشتغل حتى لو دفترة توقف. الزبائن يحصلون على بوابة (موبايل + كلمة مرور افتراضية).",
+      daftraTest: "اختبار الاتصال",
+      daftraSync: "مزامنة الآن",
+      daftraEnabled: "مفعّل",
+      daftraDisabled: "معطّل على السيرفر",
+      daftraConfigured: "مفتاح API مضبوط",
+      daftraNotConfigured: "مفتاح API غير موجود",
+      daftraBaseUrl: "عنوان الـ API",
+      daftraMapped: "سجلات مستوردة",
+      daftraLastSync: "آخر مزامنة",
+      daftraNever: "أبداً",
+      daftraTestOk: "الاتصال ناجح",
+      daftraTestFail: "فشل الاتصال",
+      daftraSyncOk: "انتهت المزامنة",
+      daftraSyncFail: "انتهت المزامنة مع أخطاء",
+      daftraSyncStarted: "بدأت المزامنة في الخلفية — للحسابات الكبيرة قد تستغرق عدة دقائق.",
+      daftraSyncRunning: "جارٍ المزامنة…",
+      daftraCreated: "جديد",
+      daftraUpdated: "محدّث",
+      daftraSkipped: "متجاوز",
+      daftraErrors: "أخطاء",
+      daftraPages: "صفحات",
     },
     placedVia: {
       portal: "البوابة",

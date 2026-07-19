@@ -30,6 +30,7 @@ class Department(IntPK, TimestampMixin, Base):
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    daftra_id: Mapped[Optional[str]] = mapped_column(String(40), unique=True, index=True, nullable=True)
 
     users: Mapped[List["User"]] = relationship(back_populates="dept")
     products: Mapped[List["Product"]] = relationship(

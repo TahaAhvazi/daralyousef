@@ -91,10 +91,11 @@ async def _issue_tokens(db: AsyncSession, user: User, request: Request) -> Token
 
 @router.post("/login", response_model=TokenResponse)
 async def login(data: LoginInput, request: Request, db: AsyncSession = Depends(get_db)):
-    res = await db.execute(select(User).where(User.email == data.email.lower()))
-    user = res.scalar_one_or_none()
+    from app.services.portal_access import find_user_by_login
+
+    user = await find_user_by_login(db, data.email)
     if not user or not user.is_active or not verify_password(data.password, user.password_hash):
-        raise UnauthorizedError("Invalid email or password")
+        raise UnauthorizedError("Invalid email/phone or password")
     user.last_login_at = datetime.now(timezone.utc)
     user.last_seen_at = user.last_login_at
     user.last_login_ip = request.client.host if request.client else None

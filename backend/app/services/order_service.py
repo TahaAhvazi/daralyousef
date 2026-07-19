@@ -29,7 +29,7 @@ from app.schemas.order import (
     WorkflowAssignmentOut,
 )
 from app.services import workflow_assignment_service as assign_svc
-from app.services.inventory_service import deduct_materials_for_order, validate_stock_for_items
+from app.services.inventory_service import validate_stock_for_items
 from app.utils.codes import order_code
 from app.utils.line_totals import aggregate_order_totals
 from app.utils.product_departments import first_product_department_id
@@ -147,19 +147,34 @@ async def create_order(
     db.add(order)
     await db.flush()
 
-    await deduct_materials_for_order(db, order, user)
+    # Stock is validated above; materials are deducted at warehouse approval (not at create)
+    order.materials_deducted = False
+    order.stock_check_status = None
 
     if placed_via == "staff" and data.workflow_assignments:
         await assign_svc.replace_order_assignments(
             db, order, user, data.workflow_assignments, require_all_stages=False,
         )
     else:
-        # Still create the project chat room (members: creator + CEO/accountant)
         from app.services import chat_service as chat_svc
 
         await chat_svc.ensure_order_conversation(
             db, order, created_by_id=user.id, extra_member_ids={user.id},
         )
+
+    from app.services.order_lifecycle import format_status_chat, post_order_chat
+
+    await post_order_chat(
+        db,
+        order,
+        body=format_status_chat(
+            action="Order created" if placed_via != "portal" else "Customer order request submitted",
+            actor_name=user.full_name,
+            to_status=initial_status,
+            notes=order.title,
+        ),
+        actor=user,
+    )
 
     return order
 
@@ -243,6 +258,8 @@ async def toggle_order_payment(
 ) -> Order:
     if not await user_can_change_paid_status(db, user):
         raise ForbiddenError("Only accountant or general manager can change paid status")
+    from app.services.order_lifecycle import format_status_chat, post_order_chat
+
     if data.paid:
         if order.status not in ("confirmed", "paid"):
             raise ValidationError("Order must be confirmed before marking payment received")
@@ -254,18 +271,48 @@ async def toggle_order_payment(
             )
         if order.status == "paid":
             return order
-        return await _change_order_status_with_paid(
+        result = await _change_order_status_with_paid(
             db, order, user,
             OrderStatusChange(to_status="paid", notes=data.notes),
         )
+        # Queue warehouse review
+        if result.stock_check_status != "approved":
+            result.stock_check_status = "pending"
+        await post_order_chat(
+            db,
+            result,
+            body=format_status_chat(
+                action="Payment confirmed — waiting for warehouse stock check",
+                actor_name=user.full_name,
+                from_status="confirmed",
+                to_status="paid",
+                notes=data.notes,
+            ),
+            actor=user,
+        )
+        return result
     if order.status != "paid":
         raise ValidationError("Order is not marked as paid")
     if not data.notes or not data.notes.strip():
         raise ValidationError("Reason required to clear payment confirmation")
-    return await _change_order_status_with_paid(
+    result = await _change_order_status_with_paid(
         db, order, user,
         OrderStatusChange(to_status="confirmed", notes=data.notes),
     )
+    result.stock_check_status = None
+    await post_order_chat(
+        db,
+        result,
+        body=format_status_chat(
+            action="Payment confirmation cleared",
+            actor_name=user.full_name,
+            from_status="paid",
+            to_status="confirmed",
+            notes=data.notes,
+        ),
+        actor=user,
+    )
+    return result
 
 
 async def get_order_by_id(db: AsyncSession, oid: int) -> Order:
@@ -334,6 +381,16 @@ async def serialize_order(db: AsyncSession, order: Order) -> OrderOut:
     data.board_column = derive_order_board_column(
         order.status,
         [it.workflow_status for it in order.items],
+        stock_check_status=getattr(order, "stock_check_status", None),
+    )
+    data.stock_check_status = getattr(order, "stock_check_status", None)
+    data.stock_checked_at = getattr(order, "stock_checked_at", None)
+    data.stock_checked_by_id = getattr(order, "stock_checked_by_id", None)
+    data.stock_check_notes = getattr(order, "stock_check_notes", None)
+    data.materials_deducted = bool(getattr(order, "materials_deducted", False))
+    data.stock_approved = (
+        getattr(order, "stock_check_status", None) == "approved"
+        or order.status in ("in_production", "delivered", "closed")
     )
     data.workflow_assignments = [
         WorkflowAssignmentOut(**row) for row in await assign_svc.serialize_assignments(db, order)
@@ -355,6 +412,8 @@ def serialize_order_summary(order: Order) -> OrderSummaryOut:
     data.board_column = derive_order_board_column(
         order.status,
         [it.workflow_status for it in order.items],
+        stock_check_status=getattr(order, "stock_check_status", None),
     )
+    data.stock_check_status = getattr(order, "stock_check_status", None)
     return data
 

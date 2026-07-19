@@ -18,8 +18,8 @@ export function Pagination({
   className?: string;
 }) {
   const { t } = useT();
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  if (total <= pageSize) return null;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1);
+  if (total <= 0) return null;
 
   const from = (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, total);

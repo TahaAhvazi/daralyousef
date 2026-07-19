@@ -2,12 +2,15 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from datetime import date, datetime, timedelta, timezone
 
 from sqlalchemy import select, text
 
+from app.core.config import settings
 from app.core.security import hash_password
 from app.db.base import Base, SessionLocal, engine
+from app.db.migrate import run_schema_migrations
 from app.models import (  # noqa: F401  (register all)
     BrandSettings, Customer, Company, Department, Material, Order, OrderItem,
     OrderItemStatusHistory, OrderStatusEvent, OrderWorkflowAssignment,
@@ -15,12 +18,17 @@ from app.models import (  # noqa: F401  (register all)
     Ticket, TicketMessage,
     Conversation, ConversationMember, ChatMessage,
     User, UserRole, Warehouse,
+    EmployeeContract, HrRequest, Payslip, AttendanceRecord, Designation, StaffProfile,
+    CreditNote, SalesReturn, RecurringInvoice, InstallmentPlan, PosSession,
+    Vendor, PurchaseOrder, SalesSettings, DocumentTemplate,
 )
 from app.utils.product_departments import sync_product_departments
 from app.models.branding import (
     DEFAULT_ACCENT_DARK, DEFAULT_ACCENT_LIGHT,
     DEFAULT_BRAND_DARK, DEFAULT_BRAND_LIGHT,
 )
+
+logger = logging.getLogger(__name__)
 
 
 # Previous palettes — migrate unmodified rows to the fixed monochrome defaults.
@@ -106,6 +114,8 @@ PERMS = [
     ("academic:manage", "academic", "manage"),
     ("audit:read", "audit", "read"),
     ("dashboard:read", "dashboard", "read"),
+    ("hr:read", "hr", "read"),
+    ("hr:manage", "hr", "manage"),
 ]
 
 ROLE_PERMS = {
@@ -117,15 +127,18 @@ ROLE_PERMS = {
         "finance:read",
         "production:read", "production:update",
         "audit:read", "dashboard:read",
+        "hr:read", "hr:manage",
         "messages:read", "messages:send",
     ],
     "general_manager": [
-        "users:read", "crm:read", "crm:create", "crm:update",
-        "orders:read", "orders:create", "orders:update",
+        "users:read", "users:create", "users:update", "users:delete",
+        "crm:read", "crm:create", "crm:update",
+        "orders:read", "orders:create", "orders:update", "orders:admin",
         "finance:read", "finance:create", "finance:update",
         "inventory:read", "inventory:create", "inventory:update",
         "production:read", "production:update",
         "catalog:manage", "audit:read", "support:read",
+        "dashboard:read", "hr:read", "hr:manage",
         "messages:read", "messages:send",
     ],
     "department_manager": [
@@ -145,11 +158,13 @@ ROLE_PERMS = {
     "warehouse": [
         "inventory:read", "inventory:create", "inventory:update",
         "catalog:manage",
+        "orders:read", "production:read",
         "messages:read", "messages:send",
     ],
     "sales": [
         "crm:read", "crm:create", "crm:update",
-        "orders:create", "finance:read", "finance:create",
+        "orders:read", "orders:create", "orders:update",
+        "finance:read", "finance:create",
         "messages:read", "messages:send",
     ],
     "support": ["support:read", "support:reply", "crm:read", "messages:read", "messages:send"],
@@ -368,12 +383,38 @@ async def _seed_roles_and_permissions(db) -> dict[str, Role]:
 
 
 async def _seed_users(db, roles: dict[str, Role]) -> dict[str, User]:
+    """Idempotent demo login accounts (Login page «Try a demo role»).
+
+    Always ensures @atelier.app users exist with Demo@1234 and the correct role,
+    even when Daftra-synced staff already fill the DB.
+    """
     users: dict[str, User] = {}
     pwd = hash_password("Demo@1234")
     for email, full_name, department, title, role_slug, is_active, is_staff, is_super in USERS:
         res = await db.execute(select(User).where(User.email == email))
         u = res.scalar_one_or_none()
+        role = roles.get(role_slug)
         if u:
+            # Revive / refresh demo accounts without touching Daftra-linked users
+            if u.daftra_id is None:
+                u.full_name = full_name
+                u.department = department
+                u.title = title
+                u.password_hash = pwd
+                u.is_active = is_active
+                u.is_staff = is_staff
+                u.is_superuser = is_super
+                if u.deleted_at is not None:
+                    u.deleted_at = None
+                if role:
+                    has_role = await db.scalar(
+                        select(UserRole.id).where(
+                            UserRole.user_id == u.id,
+                            UserRole.role_id == role.id,
+                        )
+                    )
+                    if not has_role:
+                        db.add(UserRole(user_id=u.id, role_id=role.id, is_primary=True))
             users[email] = u
             continue
         u = User(
@@ -381,7 +422,6 @@ async def _seed_users(db, roles: dict[str, Role]) -> dict[str, User]:
             password_hash=pwd, is_active=is_active, is_staff=is_staff, is_superuser=is_super,
         )
         db.add(u); await db.flush()
-        role = roles.get(role_slug)
         if role:
             db.add(UserRole(user_id=u.id, role_id=role.id, is_primary=True))
         users[email] = u
@@ -726,85 +766,38 @@ async def _seed_brand_settings(db) -> None:
         row.accent_color_dark = DEFAULT_ACCENT_DARK
 
 
-async def _migrate_workflow_assignments_multi_assignee(conn) -> None:
-    """Allow multiple staff per workflow stage (drop old single-assignee unique constraint)."""
-    res = await conn.execute(text(
-        "SELECT sql FROM sqlite_master WHERE type='table' AND name='order_workflow_assignments'"
-    ))
-    ddl = res.scalar()
-    if not ddl or "uq_order_workflow_stage_assignee" in ddl:
-        return
-    if "uq_order_workflow_assignee" not in ddl:
-        return
-
-    await conn.execute(text("""
-        CREATE TABLE order_workflow_assignments_new (
-            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-            created_at DATETIME NOT NULL DEFAULT (datetime('now')),
-            updated_at DATETIME NOT NULL DEFAULT (datetime('now')),
-            order_id INTEGER NOT NULL,
-            workflow_status VARCHAR(40) NOT NULL,
-            assignee_id INTEGER NOT NULL,
-            is_skipped INTEGER NOT NULL DEFAULT 0,
-            assigned_by_id INTEGER,
-            FOREIGN KEY(order_id) REFERENCES orders (id) ON DELETE CASCADE,
-            FOREIGN KEY(assignee_id) REFERENCES users (id) ON DELETE RESTRICT,
-            FOREIGN KEY(assigned_by_id) REFERENCES users (id) ON DELETE SET NULL,
-            CONSTRAINT uq_order_workflow_stage_assignee UNIQUE (order_id, workflow_status, assignee_id)
-        )
-    """))
-    await conn.execute(text("""
-        INSERT INTO order_workflow_assignments_new
-            (id, created_at, updated_at, order_id, workflow_status, assignee_id, is_skipped, assigned_by_id)
-        SELECT id, created_at, updated_at, order_id, workflow_status, assignee_id, is_skipped, assigned_by_id
-        FROM order_workflow_assignments
-    """))
-    await conn.execute(text("DROP TABLE order_workflow_assignments"))
-    await conn.execute(text(
-        "ALTER TABLE order_workflow_assignments_new RENAME TO order_workflow_assignments"
-    ))
-
-
 async def _migrate_schema_columns(conn) -> None:
-    """Lightweight SQLite migrations for columns added after initial release."""
-    migrations = [
-        ("brand_settings", [
-            ("brand_color", f"VARCHAR(7) NOT NULL DEFAULT '{LEGACY_BRAND_LIGHT}'"),
-            ("brand_color_dark", f"VARCHAR(7) NOT NULL DEFAULT '{LEGACY_BRAND_DARK}'"),
-            ("accent_color", f"VARCHAR(7) NOT NULL DEFAULT '{LEGACY_ACCENT_LIGHT}'"),
-            ("accent_color_dark", f"VARCHAR(7) NOT NULL DEFAULT '{LEGACY_ACCENT_DARK}'"),
-        ]),
-        ("users", [
-            ("department_id", "INTEGER"),
-        ]),
-        ("products", [
-            ("pricing_model", "VARCHAR(20) NOT NULL DEFAULT 'variable'"),
-            ("name_ar", "VARCHAR(255)"),
-            ("description_ar", "TEXT"),
-        ]),
-        ("product_categories", [
-            ("name_ar", "VARCHAR(120)"),
-        ]),
-        ("order_items", [
-            ("workflow_status", "VARCHAR(40) NOT NULL DEFAULT 'pending'"),
-            ("current_department_id", "INTEGER"),
-        ]),
-        ("order_workflow_assignments", [
-            ("is_skipped", "INTEGER NOT NULL DEFAULT 0"),
-        ]),
-        ("invoices", [
-            ("portal_visible", "INTEGER NOT NULL DEFAULT 0"),
-            ("pdf_lang", "VARCHAR(4)"),
-            ("issued_at", "DATETIME"),
-        ]),
-    ]
-    for table, cols in migrations:
-        res = await conn.execute(text(f"PRAGMA table_info({table})"))
-        existing = {row[1] for row in res.fetchall()}
-        for col, typedef in cols:
-            if col in existing:
-                continue
-            await conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {typedef}"))
+    """Additive runtime migrations for live DBs (SQLite + PostgreSQL)."""
+    report = await run_schema_migrations(
+        conn,
+        legacy_brand_light=LEGACY_BRAND_LIGHT,
+        legacy_brand_dark=LEGACY_BRAND_DARK,
+        legacy_accent_light=LEGACY_ACCENT_LIGHT,
+        legacy_accent_dark=LEGACY_ACCENT_DARK,
+    )
+    # Attendance uniqueness (best-effort)
+    try:
+        await conn.execute(text(
+            "DELETE FROM attendance_records WHERE id NOT IN ("
+            "  SELECT MIN(id) FROM attendance_records GROUP BY employee_id, work_date"
+            ")"
+        ))
+        await conn.execute(text(
+            "CREATE UNIQUE INDEX IF NOT EXISTS uq_attendance_employee_date "
+            "ON attendance_records (employee_id, work_date)"
+        ))
+    except Exception:
+        pass
+    # Payslip status backfill
+    try:
+        await conn.execute(text(
+            "UPDATE payslips SET status = CASE WHEN paid = 1 THEN 'paid' ELSE 'draft' END "
+            "WHERE status IS NULL OR status = ''"
+        ))
+    except Exception:
+        pass
+    if report.get("columns_added"):
+        logger.info("Schema columns added: %s", ", ".join(report["columns_added"]))
 
 
 async def _migrate_brand_settings_columns(conn) -> None:
@@ -813,35 +806,310 @@ async def _migrate_brand_settings_columns(conn) -> None:
 
 
 async def _migrate_order_legacy_statuses(conn) -> None:
-    from sqlalchemy import text
-    await conn.execute(
-        text("UPDATE orders SET status = 'in_production' WHERE status IN ('qa', 'ready')")
-    )
+    try:
+        await conn.execute(
+            text("UPDATE orders SET status = 'in_production' WHERE status IN ('qa', 'ready')")
+        )
+    except Exception:
+        pass
 
 
 async def init_db() -> None:
+    """Boot-time: create missing tables, migrate columns, seed essentials.
+
+    Safe for production redeploys:
+    - Never drops tables or wipes Daftra-synced rows
+    - Additive column/index migrations only
+    - Demo sample orders/HR skipped in production and when Daftra data exists
+    """
+    logger.info("DB init starting (env=%s, url=%s)", settings.APP_ENV, settings.DATABASE_URL.split("@")[-1])
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         await _migrate_brand_settings_columns(conn)
-        await _migrate_workflow_assignments_multi_assignee(conn)
+        # workflow rebuild is inside run_schema_migrations
         await _migrate_order_legacy_statuses(conn)
+
+    is_prod = settings.APP_ENV.lower() in ("production", "prod")
+
     async with SessionLocal() as db:
-        depts = await _seed_departments(db)
+        # System essentials only — never wipe or re-seed demo HR/users once
+        # real Daftra data exists (daftra_id on users/customers).
+        from sqlalchemy import func
+
+        from app.models.customer import Customer
+        from app.models.user import User
+
+        has_daftra = bool(
+            await db.scalar(
+                select(func.count()).select_from(User).where(User.daftra_id.is_not(None))
+            )
+            or await db.scalar(
+                select(func.count()).select_from(Customer).where(Customer.daftra_id.is_not(None))
+            )
+        )
+
         roles = await _seed_roles_and_permissions(db)
+        await _seed_brand_settings(db)
+        await _seed_sales_ops(db)
+
+        # Always ensure RBAC demo logins + org structure exist (idempotent upserts).
+        depts = await _seed_departments(db)
         users = await _seed_users(db, roles)
         await _link_user_departments(db, users, depts)
-        customer = await _seed_customer(db, users)
+        await _seed_customer(db, users)
         warehouse = await _seed_warehouse(db)
-        await _seed_catalog(db, depts)
-        await _seed_materials(db, warehouse)
-        await _seed_product_bom(db)
-        await _seed_sample_order(db, users, customer, depts)
-        await _seed_logo_sample_order(db, users, customer, depts)
-        await _seed_existing_order_assignments(db, users)
-        await _seed_sample_ticket(db, users, customer)
-        await _seed_sample_conversation(db, users)
-        await _seed_brand_settings(db)
+
+        # Title → role + default staff login (email / yousef123) — safe on every boot
+        from app.services.staff_role_mapping import backfill_staff_roles_and_login
+
+        await backfill_staff_roles_and_login(db)
+
+        if not has_daftra and not is_prod:
+            # Local / first-time empty DB: optional demo scaffolding
+            await _seed_catalog(db, depts)
+            await _seed_materials(db, warehouse)
+            await _seed_product_bom(db)
+            customer = users and (await db.execute(
+                select(Customer).where(Customer.email == "customer@atelier.app")
+            )).scalar_one_or_none()
+            if not customer:
+                customer = await _seed_customer(db, users)
+            if customer:
+                await _seed_sample_order(db, users, customer, depts)
+                await _seed_logo_sample_order(db, users, customer, depts)
+                await _seed_sample_ticket(db, users, customer)
+            await _seed_existing_order_assignments(db, users)
+            await _seed_sample_conversation(db, users)
+            await _seed_hr(db, users)
+        elif not has_daftra and is_prod:
+            # Production empty DB: catalog/materials only — no fake orders/HR payroll
+            await _seed_catalog(db, depts)
+            await _seed_materials(db, warehouse)
+            await _seed_product_bom(db)
+            logger.info("Production seed: roles/catalog only (awaiting Daftra sync)")
+        else:
+            logger.info("Existing Daftra-linked data detected — skipping demo sample seed")
+
         await db.commit()
+    logger.info("DB init complete")
+
+
+# Keep old multi-assignee helper name for any external callers / tests
+async def _migrate_workflow_assignments_multi_assignee(conn) -> None:
+    from app.db.migrate import migrate_workflow_assignments_multi_assignee
+    await migrate_workflow_assignments_multi_assignee(conn)
+
+async def _seed_sales_ops(db) -> None:
+    from app.models.sales_ops import DocumentTemplate, SalesSettings
+
+    existing = (await db.execute(select(SalesSettings).limit(1))).scalar_one_or_none()
+    if not existing:
+        db.add(SalesSettings(
+            default_currency="IQD",
+            default_tax_pct=0,
+            default_due_days=14,
+            invoice_prefix="INV",
+            credit_note_prefix="CN",
+            quotation_prefix="QT",
+            payment_terms="Payment due within 14 days of invoice date.",
+        ))
+
+    tpl = (await db.execute(select(DocumentTemplate).limit(1))).scalar_one_or_none()
+    if not tpl:
+        db.add(DocumentTemplate(
+            code="TPL-INV-EN",
+            name="Standard Invoice",
+            doc_type="invoice",
+            header_html="Thank you for your business",
+            footer_html="Dar Al-Yousef Printing",
+            is_default=True,
+            locale="en",
+        ))
+        db.add(DocumentTemplate(
+            code="TPL-INV-AR",
+            name="فاتورة قياسية",
+            doc_type="invoice",
+            header_html="شكراً لتعاملكم معنا",
+            footer_html="مطبعة دار اليوسف",
+            is_default=True,
+            locale="ar",
+        ))
+
+
+async def _seed_hr(db, users: dict) -> None:
+    """Rich HR demo data so every HR widget/capability is visible.
+
+    Never run against a database that already has Daftra-synced staff —
+    older versions wiped ALL EmployeeContract rows on every boot.
+    """
+    from sqlalchemy import delete, func
+
+    from app.models.user import User
+
+    synced = await db.scalar(
+        select(func.count()).select_from(User).where(User.daftra_id.is_not(None))
+    )
+    if synced:
+        return
+
+    staff = [
+        u for email, u in users.items()
+        if getattr(u, "is_staff", False) and email != "customer@atelier.app"
+    ]
+    if not staff:
+        return
+
+    # Only clear demo rows for these seed users (never global wipe)
+    staff_ids = [u.id for u in staff]
+    await db.execute(delete(AttendanceRecord).where(AttendanceRecord.employee_id.in_(staff_ids)))
+    await db.execute(delete(Payslip).where(Payslip.employee_id.in_(staff_ids)))
+    await db.execute(delete(HrRequest).where(HrRequest.employee_id.in_(staff_ids)))
+    await db.execute(delete(EmployeeContract).where(EmployeeContract.employee_id.in_(staff_ids)))
+    await db.flush()
+
+    today = date.today()
+    titles = [
+        "General Manager", "Senior Designer", "Print Operator", "CNC Operator",
+        "Finishing Lead", "Delivery Lead", "Accountant", "Sales Executive",
+        "Support Agent", "Warehouse Keeper", "Department Manager", "Technician",
+    ]
+    levels = ["Executive", "Senior", "Mid", "Junior", "Technician", "Lead"]
+    templates = ["monthly", "weekly", "monthly", "monthly", "daily"]
+
+    # Primary contracts — cover all statuses + several expiring soon
+    status_plan = [
+        "active", "active", "active", "active", "active",
+        "expired", "under_review", "replacement", "cancelled", "suspended", "draft",
+    ]
+    for i, user in enumerate(staff):
+        status = status_plan[i % len(status_plan)]
+        start = today - timedelta(days=120 + i * 11)
+        if status == "expired":
+            end = today - timedelta(days=3 + (i % 5))
+        elif status == "active" and i < 5:
+            end = today + timedelta(days=5 + i * 6)  # expiring soon
+        elif status == "draft":
+            end = today + timedelta(days=365)
+        else:
+            end = today + timedelta(days=90 + i * 15)
+
+        db.add(EmployeeContract(
+            code=f"CTR-{user.id:06d}",
+            employee_id=user.id,
+            title=f"Employment · {titles[i % len(titles)]}",
+            job_title=user.title or titles[i % len(titles)],
+            job_level=levels[i % len(levels)],
+            description="Standard full-time employment contract for printing & branding operations.",
+            status=status if status != "active" or i >= 5 else "active",
+            start_date=start,
+            end_date=end,
+            join_date=start - timedelta(days=60 + i * 3),
+            signed_at=start + timedelta(days=2),
+            probation_end=start + timedelta(days=90),
+            salary=480_000 + i * 55_000,
+            currency="IQD",
+            salary_template=templates[i % len(templates)],
+            is_primary=True,
+            notes="Demo contract for HR showcase.",
+        ))
+
+    # Extra secondary contracts for first employees
+    for i, user in enumerate(staff[:3]):
+        db.add(EmployeeContract(
+            code=f"CTR-SEC-{user.id:04d}",
+            employee_id=user.id,
+            title="Previous contract",
+            job_title=user.title or "Staff",
+            job_level="Mid",
+            status="expired",
+            start_date=today - timedelta(days=800),
+            end_date=today - timedelta(days=400),
+            join_date=today - timedelta(days=900),
+            signed_at=today - timedelta(days=790),
+            probation_end=today - timedelta(days=710),
+            salary=350_000,
+            currency="IQD",
+            salary_template="monthly",
+            is_primary=False,
+        ))
+
+    # Payslips — current + previous month for many staff
+    for month_back in (0, 1, 2):
+        period_end = today - timedelta(days=30 * month_back)
+        period_start = period_end - timedelta(days=29)
+        paid_at = datetime.now(timezone.utc) - timedelta(days=2 + month_back * 28)
+        for i, user in enumerate(staff):
+            gross = 700_000 + i * 45_000 + month_back * 10_000
+            deductions = 95_000 + i * 8_000
+            db.add(Payslip(
+                employee_id=user.id,
+                code=f"PAY-{period_end.strftime('%Y%m')}-{user.id:03d}",
+                period_start=period_start,
+                period_end=period_end,
+                gross_pay=float(gross),
+                deductions=float(deductions),
+                net_pay=float(gross - deductions),
+                currency="IQD",
+                paid=month_back > 0 or i % 5 != 0,
+                paid_at=paid_at if month_back > 0 or i % 5 != 0 else None,
+                notes="Demo payslip",
+            ))
+
+    # HR requests — pending + history covering all types/statuses
+    request_specs = [
+        ("leave", "pending", "Annual leave request", 14, 16),
+        ("leave", "pending", "Sick leave — 2 days", 2, 3),
+        ("permission", "pending", "Permission to leave early", 0, 0),
+        ("overtime", "pending", "Weekend overtime approval", 3, 3),
+        ("document", "pending", "Request employment letter", None, None),
+        ("other", "pending", "Update bank account details", None, None),
+        ("leave", "approved", "Eid holiday leave", -20, -15),
+        ("permission", "approved", "Doctor appointment", -10, -10),
+        ("overtime", "rejected", "Night shift overtime", -8, -8),
+        ("leave", "cancelled", "Cancelled travel leave", 20, 25),
+        ("document", "pending", "Salary certificate for bank", None, None),
+        ("leave", "pending", "Family emergency leave", 1, 2),
+    ]
+    for idx, (rtype, status, subject, start_off, end_off) in enumerate(request_specs):
+        user = staff[idx % len(staff)]
+        starts = today + timedelta(days=start_off) if start_off is not None else None
+        ends = today + timedelta(days=end_off) if end_off is not None else None
+        db.add(HrRequest(
+            employee_id=user.id,
+            request_type=rtype,
+            status=status,
+            subject=subject,
+            body=f"Demo HR request: {subject}",
+            starts_on=starts,
+            ends_on=ends,
+        ))
+
+    # Attendance — last 45 calendar days, weekdays, varied statuses
+    statuses_cycle = [
+        "present", "present", "present", "present", "late",
+        "present", "absent", "present", "on_leave", "present",
+    ]
+    for d_offset in range(45):
+        day = today - timedelta(days=d_offset)
+        if day.weekday() >= 5:
+            continue
+        for i, user in enumerate(staff):
+            st = statuses_cycle[(d_offset + i) % len(statuses_cycle)]
+            db.add(AttendanceRecord(
+                employee_id=user.id,
+                work_date=day,
+                status=st,
+                check_in="08:55" if st == "present" else ("09:25" if st == "late" else None),
+                check_out="17:05" if st in ("present", "late") else None,
+                notes="Demo attendance",
+            ))
+
+    await db.flush()
+    count_c = await db.scalar(select(func.count()).select_from(EmployeeContract))
+    count_r = await db.scalar(select(func.count()).select_from(HrRequest))
+    count_p = await db.scalar(select(func.count()).select_from(Payslip))
+    count_a = await db.scalar(select(func.count()).select_from(AttendanceRecord))
+    print(f"[HR demo] contracts={count_c} requests={count_r} payslips={count_p} attendance={count_a}")
 
 
 if __name__ == "__main__":

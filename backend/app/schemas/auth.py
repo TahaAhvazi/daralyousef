@@ -10,7 +10,8 @@ from app.schemas.common import ORMModel
 
 
 class LoginInput(BaseModel):
-    email: EmailStr
+    """Email (staff) or phone number (portal customers)."""
+    email: str = Field(min_length=3, max_length=255)
     password: str = Field(min_length=6, max_length=128)
 
 
@@ -55,6 +56,7 @@ class UserOut(ORMModel):
     phone: Optional[str] = None
     avatar_url: Optional[str] = None
     department: Optional[str] = None
+    department_id: Optional[int] = None
     title: Optional[str] = None
     is_active: bool
     is_staff: bool
@@ -62,6 +64,7 @@ class UserOut(ORMModel):
     theme: str
     locale: str
     last_login_at: Optional[datetime] = None
+    daftra_id: Optional[str] = None
     roles: List[RoleOut] = []
     permissions: List[str] = []
 

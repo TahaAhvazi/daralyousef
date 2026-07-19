@@ -56,6 +56,38 @@ export function columnAtPoint(x: number, y: number): string | null {
   return null;
 }
 
+/** Faster hit-test during drag — avoids elementsFromPoint every frame. */
+export function columnAtPointFromZones(
+  x: number,
+  y: number,
+  zones: ReadonlyArray<{ col: string; left: number; right: number; top: number; bottom: number }>,
+): string | null {
+  for (let i = 0; i < zones.length; i++) {
+    const z = zones[i];
+    if (x >= z.left && x <= z.right && y >= z.top && y <= z.bottom) return z.col;
+  }
+  return null;
+}
+
+export function collectBoardDropZones(): Array<{
+  col: string;
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}> {
+  const nodes = document.querySelectorAll("[data-board-drop]");
+  const out: Array<{ col: string; left: number; right: number; top: number; bottom: number }> = [];
+  for (let i = 0; i < nodes.length; i++) {
+    const el = nodes[i] as HTMLElement;
+    const col = el.getAttribute("data-board-drop");
+    if (!col) continue;
+    const r = el.getBoundingClientRect();
+    out.push({ col, left: r.left, right: r.right, top: r.top, bottom: r.bottom });
+  }
+  return out;
+}
+
 export function BoardCanvas({
   children,
   className,

@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ComponentType, ReactNode } from "react";
 import { useLocation } from "react-router-dom";
-import { Activity, AlertTriangle, ArrowUpRight, Boxes, CheckCircle2, Clock, FileWarning, TrendingUp, Users, Zap } from "lucide-react";
+import { Activity, AlertTriangle, ArrowUpRight, CheckCircle2, Clock, FileWarning, TrendingUp, Users } from "lucide-react";
 import {
-  Area, AreaChart, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
+  Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip,
 } from "recharts";
 
 import { dashboardApi } from "@/api/modules";
@@ -12,14 +12,15 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StatCard } from "@/components/ui/StatCard";
 import { Badge, StatusBadge } from "@/components/ui/Badge";
+import { DashboardCommandCenter } from "@/components/dashboard/DashboardCommandCenter";
+import { DashboardActivityPanel, DashboardOpsPanels } from "@/components/dashboard/DashboardOpsPanels";
 import { formatMoney, formatNumber, fromNow } from "@/lib/format";
 import {
-  chartAxisColor,
   chartLegendColor,
   orderStatusChartColor,
-  revenueChartColor,
 } from "@/lib/chartColors";
 import { useT } from "@/i18n/useT";
+import { useAuthStore } from "@/store/auth";
 import { useThemeStore } from "@/store/theme";
 import { staffBreadcrumbs } from "@/lib/breadcrumbs";
 
@@ -38,11 +39,10 @@ function getKpiDict(t: ReturnType<typeof useT>["t"]) {
 }
 
 export default function DashboardPage() {
-  const { t } = useT();
+  const { t, locale } = useT();
   const location = useLocation();
+  const user = useAuthStore((s) => s.user);
   const theme = useThemeStore((s) => s.theme);
-  const revenueColors = revenueChartColor(theme);
-  const axisColor = chartAxisColor();
   const legendColor = chartLegendColor();
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard.summary"],
@@ -52,8 +52,6 @@ export default function DashboardPage() {
 
   if (isLoading || !data) return <DashboardSkeleton />;
 
-  const revenueToday = data.kpis.find((k) => k.label === "Revenue Today");
-  const revenueMTD = data.kpis.find((k) => k.label === "Revenue MTD");
   const kpiDict = getKpiDict(t);
   const tDash = t.staffUi.dashboard;
   const breadcrumbs = staffBreadcrumbs(location.pathname, t.staffUi.nav, {
@@ -62,21 +60,40 @@ export default function DashboardPage() {
 
   const translateStatus = (s: string) =>
     t.portalUi.statuses[s] ?? s.replace(/_/g, " ");
+  const displayName = user?.full_name?.split(" ")[0] ?? tDash.defaultUser;
+  const today = new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date());
 
   return (
     <div className="page-shell space-y-6">
       <PageHeader
-        title={tDash.title}
+        title={tDash.greeting.replace("{name}", displayName)}
         description={tDash.description}
         breadcrumbs={breadcrumbs}
         actions={
-          <span className="badge badge-brand">
-            <Activity className="size-3" /> {t.staffUi.common.autoRefresh}
-          </span>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <span className="text-[12px] font-medium text-text-3">{today}</span>
+            <span className="badge badge-brand">
+              <Activity className="size-3" /> {t.staffUi.common.autoRefresh}
+            </span>
+          </div>
         }
       />
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(11.5rem,1fr))] gap-3 sm:gap-4">
+      <DashboardCommandCenter />
+
+      <DashboardOpsPanels
+        schedules={data.upcoming_schedules ?? []}
+        schedulesTotal={data.schedules_total ?? 0}
+        lowStock={data.low_stock ?? []}
+        lowStockTotal={data.low_stock_total ?? 0}
+      />
+
+      <div className="-mx-1 flex gap-2 overflow-x-auto overscroll-x-contain px-1 pb-1 [scrollbar-width:thin] sm:gap-2.5 lg:mx-0 lg:grid lg:grid-cols-6 lg:overflow-visible lg:px-0 lg:pb-0">
         {data.kpis.map((k) => {
           const m = KPI_LABEL_MAP[k.label];
           const label = m ? kpiDict[m.labelKey] : k.label;
@@ -84,6 +101,8 @@ export default function DashboardPage() {
           return (
             <StatCard
               key={k.label}
+              compact
+              className="w-[9.75rem] shrink-0 sm:w-[11rem] lg:w-auto lg:min-w-0"
               label={label}
               value={
                 k.currency
@@ -98,31 +117,8 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* Operational alerts — compact row next to KPIs */}
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
-        <DashboardAlertCard
-          title={tDash.lowStockTitle}
-          subtitle={tDash.lowStockSub}
-          icon={AlertTriangle}
-          tone="warning"
-          count={data.low_stock.length}
-          isEmpty={data.low_stock.length === 0}
-          emptyText={tDash.lowStockOk}
-        >
-          {data.low_stock.map((m) => (
-            <div key={m.id} className="flex items-center justify-between gap-2 text-[12.5px]">
-              <div className="min-w-0">
-                <div className="font-medium truncate">{m.name}</div>
-                <div className="text-[11px] text-text-3 truncate">{m.sku}</div>
-              </div>
-              <span className="badge badge-warning shrink-0">
-                <Boxes className="size-3" />
-                {m.on_hand}/{m.reorder_level}
-              </span>
-            </div>
-          ))}
-        </DashboardAlertCard>
-
+      {/* Remaining operational alerts */}
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
         <DashboardAlertCard
           title={tDash.overdueTitle}
           subtitle={tDash.overdueSub}
@@ -168,50 +164,9 @@ export default function DashboardPage() {
         </DashboardAlertCard>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        {/* Revenue trend */}
-        <Card className="lg:col-span-2">
-          <CardHeader
-            title={tDash.revenueTitle}
-            subtitle={tDash.revenueSubtitle
-              .replace("{today}", formatMoney(revenueToday?.value ?? 0))
-              .replace("{mtd}", formatMoney(revenueMTD?.value ?? 0))}
-            action={<span className="badge badge-success"><TrendingUp className="size-3" /> {tDash.paid}</span>}
-          />
-          <CardBody>
-            <div className="h-[260px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data.revenue_series} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
-                  <defs>
-                    <linearGradient id="rev" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stopColor={revenueColors.fill} stopOpacity={theme === "dark" ? 0.55 : 0.4} />
-                      <stop offset="100%" stopColor={revenueColors.fill} stopOpacity={0.02} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="t" tick={{ fontSize: 11, fill: axisColor }} stroke={axisColor} />
-                  <YAxis tick={{ fontSize: 11, fill: axisColor }} stroke={axisColor} />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 10, background: "rgb(var(--surface))",
-                      border: "1px solid rgb(var(--border))", fontSize: 12,
-                      color: "rgb(var(--text))",
-                    }}
-                    formatter={(v: any) => formatMoney(Number(v))}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke={revenueColors.stroke}
-                    fill="url(#rev)"
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardBody>
-        </Card>
+      <DashboardActivityPanel activity={data.activity_feed ?? []} />
 
-        {/* Orders by status */}
+      <div className="grid gap-4 lg:grid-cols-3">
         <Card>
           <CardHeader title={tDash.ordersByStatusTitle} subtitle={tDash.ordersByStatusSub} />
           <CardBody>
@@ -243,9 +198,7 @@ export default function DashboardPage() {
             </div>
           </CardBody>
         </Card>
-      </div>
 
-      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
         {/* Online users */}
         <Card>
           <CardHeader title={tDash.onlineTitle} subtitle={tDash.onlineSub} action={<Badge variant="brand">{data.online_users.length}</Badge>} />
@@ -265,29 +218,6 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <span className="text-[11px] text-text-3">{fromNow(u.last_seen_at)}</span>
-                </div>
-              ))
-            )}
-          </CardBody>
-        </Card>
-
-        {/* Activity feed */}
-        <Card>
-          <CardHeader title={tDash.liveActivityTitle} subtitle={tDash.liveActivitySub} action={<Zap className="size-4 text-warning" />} />
-          <CardBody className="space-y-3">
-            {data.activity_feed.length === 0 ? (
-              <p className="text-[13px] text-text-3">{tDash.noActivity}</p>
-            ) : (
-              data.activity_feed.map((a) => (
-                <div key={a.id} className="flex items-start gap-3">
-                  <div className="mt-0.5 size-7 grid place-items-center rounded-md bg-surface-2 text-text-2">
-                    <CheckCircle2 className="size-3.5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-medium truncate">{a.summary}</div>
-                    <div className="text-[11px] text-text-3">{fromNow(a.occurred_at)}</div>
-                  </div>
-                  <Badge variant="default">{a.module}</Badge>
                 </div>
               ))
             )}
@@ -407,18 +337,22 @@ function KpiIcon({ label }: { label: string }) {
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(11.5rem,1fr))] gap-3 sm:gap-4">
+      <div className="card p-5"><Skeleton className="h-24 w-full" /></div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="card p-5"><Skeleton className="h-48" /></div>
+        <div className="card p-5"><Skeleton className="h-48" /></div>
+      </div>
+      <div className="flex gap-2 overflow-hidden lg:grid lg:grid-cols-6">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="card p-5"><Skeleton className="h-3 w-24" /><Skeleton className="mt-3 h-6 w-32" /></div>
+          <div key={i} className="card w-[9.75rem] shrink-0 p-3 lg:w-auto">
+            <Skeleton className="h-8 w-full" />
+          </div>
         ))}
       </div>
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="card p-4"><Skeleton className="h-9 w-full" /><Skeleton className="mt-3 h-4 w-3/4" /></div>
-        ))}
-      </div>
+      <div className="card p-5"><Skeleton className="h-40" /></div>
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="card lg:col-span-2"><div className="p-5"><Skeleton className="h-[260px]" /></div></div>
+        <div className="card"><div className="p-5"><Skeleton className="h-[260px]" /></div></div>
+        <div className="card"><div className="p-5"><Skeleton className="h-[260px]" /></div></div>
         <div className="card"><div className="p-5"><Skeleton className="h-[260px]" /></div></div>
       </div>
     </div>

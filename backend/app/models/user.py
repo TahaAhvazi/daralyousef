@@ -37,6 +37,7 @@ class User(IntPK, TimestampMixin, SoftDeleteMixin, Base):
     title: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     locale: Mapped[str] = mapped_column(String(10), default="en", nullable=False)
     theme: Mapped[str] = mapped_column(String(10), default="light", nullable=False)
+    daftra_id: Mapped[Optional[str]] = mapped_column(String(40), unique=True, index=True, nullable=True)
 
     last_login_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     last_seen_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)

@@ -10,6 +10,11 @@ from app.models.order_note import OrderNote  # noqa: F401
 from app.models.production import PrintJob, DesignRevision, DesignApproval, Signature  # noqa: F401
 from app.models.inventory import Warehouse, Material, StockMovement, MaterialUsage     # noqa: F401
 from app.models.finance import Quotation, QuotationItem, Invoice, InvoiceItem, Payment, Expense  # noqa: F401
+from app.models.sales_ops import (  # noqa: F401
+    CreditNote, CreditNoteItem, SalesReturn, SalesReturnItem, RecurringInvoice, RecurringInvoiceItem,
+    InstallmentPlan, Installment, PosSession, PosSale, Vendor, PurchaseOrder, PurchaseOrderItem,
+    SalesSettings, DocumentTemplate,
+)
 from app.models.support import Ticket, TicketMessage, Message                  # noqa: F401
 from app.models.chat import Conversation, ConversationMember, ChatMessage      # noqa: F401
 from app.models.marketing import Campaign, ContentPost, SocialAccount          # noqa: F401
@@ -21,3 +26,6 @@ from app.models.notification import Notification                               #
 from app.models.push_subscription import PushSubscription                     # noqa: F401
 from app.models.audit import AuditLog, OutboxEmail                             # noqa: F401
 from app.models.branding import BrandSettings                                  # noqa: F401
+from app.models.hr import (  # noqa: F401
+    Designation, EmployeeContract, HrRequest, Payslip, AttendanceRecord, StaffProfile, PayrollAdjustment,
+)

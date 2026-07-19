@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Lock, Phone } from "lucide-react";
 import { motion } from "framer-motion";
 
 import { authApi } from "@/api/auth";
@@ -66,13 +66,15 @@ export default function LoginPage() {
 
       <form onSubmit={handleLogin} className="mt-6 grid gap-4">
         <Input
-          label={t.auth.email}
-          type="email"
+          label={t.auth.emailOrPhone}
+          type="text"
           required
-          autoComplete="email"
-          iconLeft={<Mail className="size-4" />}
+          autoComplete="username"
+          inputMode="text"
+          iconLeft={<Phone className="size-4" />}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          hint={t.auth.emailOrPhoneHint}
         />
         <Input
           label={t.auth.password}

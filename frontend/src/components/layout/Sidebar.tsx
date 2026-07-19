@@ -13,6 +13,7 @@ export function Sidebar() {
 
   return (
     <aside
+      data-tour="app-sidebar"
       className={cn(
         "hidden lg:flex h-full min-h-0 w-[268px] shrink-0 flex-col border-border bg-surface/80 backdrop-blur-xl",
         dir === "rtl" ? "border-l" : "border-r",

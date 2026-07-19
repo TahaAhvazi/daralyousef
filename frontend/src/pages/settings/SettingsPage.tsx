@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { ImageUp, MonitorSmartphone, ShieldAlert, Trash2 } from "lucide-react";
+import { ImageUp, MonitorSmartphone, RefreshCw, ShieldAlert, Trash2, Wifi } from "lucide-react";
 
 import { authApi } from "@/api/auth";
 import { brandApi } from "@/api/brand";
+import { daftraApi, type DaftraSyncReport } from "@/api/modules";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -135,6 +136,8 @@ export default function SettingsPage() {
             </CardBody>
           </Card>
         )}
+
+        {isAdmin ? <DaftraSyncCard /> : null}
       </div>
     </div>
   );
@@ -328,6 +331,145 @@ function BrandIdentityCard() {
             </Button>
           </div>
         </div>
+      </CardBody>
+    </Card>
+  );
+}
+
+function DaftraSyncCard() {
+  const { t } = useT();
+  const tt = t.staffUi.settings;
+  const queryClient = useQueryClient();
+
+  const statusQ = useQuery({
+    queryKey: ["daftra-status"],
+    queryFn: () => daftraApi.status(),
+    refetchInterval: (q) => {
+      const d = q.state.data;
+      const running =
+        !!d?.sync_running ||
+        (d?.last_sync as DaftraSyncReport | undefined)?.status === "running";
+      return running ? 3000 : false;
+    },
+  });
+
+  const testM = useMutation({
+    mutationFn: () => daftraApi.test(),
+    onSuccess: (res) => {
+      if (res.ok) toast.success(`${tt.daftraTestOk}: ${res.message}`);
+      else toast.error(`${tt.daftraTestFail}: ${res.message}`);
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || tt.daftraTestFail);
+    },
+  });
+
+  const syncM = useMutation({
+    mutationFn: () => daftraApi.sync(),
+    onSuccess: () => {
+      toast.success(tt.daftraSyncStarted);
+      queryClient.invalidateQueries({ queryKey: ["daftra-status"] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || tt.daftraSyncFail);
+    },
+  });
+
+  const status = statusQ.data;
+  const last = status?.last_sync as DaftraSyncReport | undefined;
+  const running =
+    !!status?.sync_running || last?.status === "running" || syncM.isPending;
+  const counts = status?.mapped_counts ?? {};
+  const lastAt = last?.finished_at || last?.started_at || null;
+
+  // Toast once when a running sync finishes
+  const prevRunning = useRef(false);
+  useEffect(() => {
+    if (prevRunning.current && !running && last?.status) {
+      if (last.status === "done" && last.ok) toast.success(tt.daftraSyncOk);
+      else if (last.status === "error" || last.ok === false) toast.error(tt.daftraSyncFail);
+      queryClient.invalidateQueries({ queryKey: ["daftra-status"] });
+    }
+    prevRunning.current = running;
+  }, [running, last?.status, last?.ok, queryClient, tt.daftraSyncFail, tt.daftraSyncOk]);
+
+  return (
+    <Card className="lg:col-span-3">
+      <CardHeader
+        title={
+          <span className="inline-flex items-center gap-2">
+            <RefreshCw className={`size-4 text-brand ${running ? "animate-spin" : ""}`} />
+            {tt.daftraTitle}
+          </span>
+        }
+        subtitle={tt.daftraSub}
+      />
+      <CardBody className="space-y-4">
+        <div className="grid gap-2 sm:grid-cols-2 text-[13px]">
+          <p>
+            <span className="text-text-3">{tt.daftraBaseUrl}: </span>
+            <span className="break-all">{status?.base_url || "—"}</span>
+          </p>
+          <p>
+            {status?.enabled ? tt.daftraEnabled : tt.daftraDisabled}
+            {" · "}
+            {status?.configured ? tt.daftraConfigured : tt.daftraNotConfigured}
+            {running ? ` · ${tt.daftraSyncRunning}` : null}
+            {last?.current_module ? ` (${last.current_module})` : null}
+          </p>
+          <p className="sm:col-span-2">
+            <span className="text-text-3">{tt.daftraLastSync}: </span>
+            {lastAt ? new Date(lastAt).toLocaleString() : tt.daftraNever}
+            {last?.message ? ` — ${last.message}` : null}
+          </p>
+          <p className="sm:col-span-2 text-text-2">
+            <span className="text-text-3">{tt.daftraMapped}: </span>
+            {Object.entries(counts)
+              .map(([k, v]) => `${k}: ${v}`)
+              .join(" · ") || "—"}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="secondary"
+            loading={testM.isPending}
+            disabled={running}
+            onClick={() => testM.mutate()}
+          >
+            <Wifi className="size-4" />
+            {tt.daftraTest}
+          </Button>
+          <Button
+            loading={syncM.isPending}
+            disabled={!status?.enabled || !status?.configured || running}
+            onClick={() => syncM.mutate()}
+          >
+            <RefreshCw className="size-4" />
+            {running ? tt.daftraSyncRunning : tt.daftraSync}
+          </Button>
+        </div>
+
+        {last?.modules?.length ? (
+          <div className="rounded-lg border border-border bg-surface-2/40 p-3 text-[12px] space-y-1.5">
+            {last.modules.map((m) => (
+              <div key={m.module} className="flex flex-wrap gap-x-3 gap-y-0.5">
+                <span className="font-medium min-w-[5.5rem]">{m.module}</span>
+                <span>{m.created} {tt.daftraCreated}</span>
+                <span>{m.updated} {tt.daftraUpdated}</span>
+                <span>{m.skipped} {tt.daftraSkipped}</span>
+                {m.pages_done ? (
+                  <span className="text-text-3">
+                    {m.pages_done}{m.total_pages ? `/${m.total_pages}` : ""} {tt.daftraPages}
+                  </span>
+                ) : null}
+                {m.errors?.length ? (
+                  <span className="text-danger">{m.errors.length} {tt.daftraErrors}</span>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        ) : null}
       </CardBody>
     </Card>
   );

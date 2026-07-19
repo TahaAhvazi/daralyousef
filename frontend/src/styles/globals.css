@@ -206,6 +206,12 @@ button {
     box-shadow: theme('boxShadow.medium');
   }
 
+  /* Project board cards — defer paint for off-screen rows */
+  [data-board-card] {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 128px;
+  }
+
   .input {
     width: 100%;
     min-height: 44px;
@@ -229,9 +235,14 @@ button {
 
   select.input {
     cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: rgb(var(--surface));
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
+    background-size: 16px 16px;
     padding-right: 36px;
   }
 
@@ -684,6 +695,21 @@ a {
   clip-path: ellipse(118% 100% at 50% 100%);
   pointer-events: none;
   z-index: 6;
+  transform-origin: center bottom;
+  animation: landing-dar-wave-breathe 9s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes landing-dar-wave-breathe {
+
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  50% {
+    transform: scaleY(1.045);
+  }
 }
 
 .landing-dar-nav {
@@ -699,8 +725,122 @@ a {
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
+/* Golden hairline under the nav */
+.landing-dar-nav::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  inset-inline: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 12%, rgba(245, 197, 24, 0.45) 50%, transparent 88%);
+  pointer-events: none;
+}
+
+/* 2026 floating-capsule state once the page is scrolled */
+.landing-dar-nav {
+  transition:
+    inset-inline 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+    top 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-radius 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+    background-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.landing-dar-nav.is-scrolled {
+  inset-inline: clamp(0.5rem, 3vw, 2.5rem);
+  top: 0.55rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(8, 26, 64, 0.62);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.landing-dar-nav.is-scrolled::after {
+  inset-inline: 12%;
+  bottom: 0;
+  border-radius: 9999px;
+}
+
+/* Brand wordmark inside the nav — fades in after scrolling past the hero logo */
+.landing-dar-nav-brand {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+  pointer-events: none;
+}
+
+.landing-dar-nav-brand.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.landing-dar-nav-brand img {
+  display: block;
+  height: clamp(1.6rem, 4.5vh, 2.4rem);
+  width: auto;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
+}
+
 .landing-dar-nav-menus {
   position: relative;
+}
+
+/* Desktop menu group sits in a subtle glass pill of its own */
+@media (min-width: 640px) {
+  .landing-dar-nav-menus {
+    padding: 0.22rem 0.35rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  }
+}
+
+/* Gold CTA pill in the nav */
+.landing-dar-nav-cta {
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.3rem;
+  padding-inline-start: 1rem;
+  border-radius: 9999px;
+  background: linear-gradient(120deg, #ffd84a 0%, #f5c518 55%, #eab308 100%);
+  border: 1px solid rgba(10, 31, 77, 0.35);
+  font-size: 12px;
+  font-weight: 700;
+  color: #0a1f4d;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(245, 197, 24, 0.22);
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.25s ease;
+}
+
+.landing-dar-nav-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(245, 197, 24, 0.35);
+}
+
+.landing-dar-nav-cta-arrow {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 9999px;
+  background: #0a1f4d;
+  color: #f5c518;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.landing-dar-nav-cta:hover .landing-dar-nav-cta-arrow {
+  transform: translateX(2px) scale(1.06);
+}
+
+[dir="rtl"] .landing-dar-nav-cta:hover .landing-dar-nav-cta-arrow {
+  transform: translateX(-2px) scale(1.06);
 }
 
 .landing-dar-nav-item {
@@ -731,11 +871,33 @@ a {
   }
 }
 
+.landing-dar-nav-trigger::after {
+  content: "";
+  position: absolute;
+  bottom: 0.1rem;
+  inset-inline: 0.9rem;
+  height: 2px;
+  border-radius: 9999px;
+  background: #f5c518;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.landing-dar-nav-trigger {
+  position: relative;
+}
+
 .landing-dar-nav-trigger:hover,
 .landing-dar-nav-trigger.is-open {
   color: #fff;
   background: rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.landing-dar-nav-trigger:hover::after,
+.landing-dar-nav-trigger.is-open::after {
+  transform: scaleX(1);
 }
 
 .landing-dar-nav-chevron {
@@ -781,22 +943,68 @@ a {
   overflow-y: auto;
 }
 
+.landing-dar-nav-dropdown-list > li {
+  animation: landing-dar-item-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.landing-dar-nav-dropdown-list > li:nth-child(1) { animation-delay: 0.02s; }
+.landing-dar-nav-dropdown-list > li:nth-child(2) { animation-delay: 0.06s; }
+.landing-dar-nav-dropdown-list > li:nth-child(3) { animation-delay: 0.1s; }
+.landing-dar-nav-dropdown-list > li:nth-child(4) { animation-delay: 0.14s; }
+.landing-dar-nav-dropdown-list > li:nth-child(5) { animation-delay: 0.18s; }
+.landing-dar-nav-dropdown-list > li:nth-child(6) { animation-delay: 0.22s; }
+
+@keyframes landing-dar-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .landing-dar-nav-dropdown-link {
+  position: relative;
   display: grid;
   gap: 0.15rem;
-  padding: 0.62rem 0.7rem;
+  padding: 0.62rem 0.7rem 0.62rem 0.85rem;
   border-radius: 0.7rem;
   text-decoration: none;
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
+[dir="rtl"] .landing-dar-nav-dropdown-link {
+  padding: 0.62rem 0.85rem 0.62rem 0.7rem;
+}
+
+/* Yellow indicator bar on hover */
+.landing-dar-nav-dropdown-link::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0.2rem;
+  top: 50%;
+  width: 3px;
+  height: 55%;
+  border-radius: 9999px;
+  background: #f5c518;
+  transform: translateY(-50%) scaleY(0);
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.landing-dar-nav-dropdown-link:hover::before {
+  transform: translateY(-50%) scaleY(1);
+}
+
 .landing-dar-nav-dropdown-link:hover {
   background: rgba(255, 255, 255, 0.08);
-  transform: translateX(2px);
+  transform: translateX(3px);
 }
 
 [dir="rtl"] .landing-dar-nav-dropdown-link:hover {
-  transform: translateX(-2px);
+  transform: translateX(-3px);
 }
 
 .landing-dar-nav-dropdown-label {
@@ -833,6 +1041,122 @@ a {
   color: #ffd84a;
 }
 
+/* ── Mobile navigation drawer (full-height side sheet) ─────────────────── */
+.landing-dar-drawer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  inset-inline-end: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(21rem, 88vw);
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(200deg, rgba(13, 45, 107, 0.98) 0%, rgba(8, 26, 64, 0.99) 100%);
+  box-shadow: -24px 0 60px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+[dir="rtl"] .landing-dar-drawer {
+  box-shadow: 24px 0 60px rgba(0, 0, 0, 0.45);
+}
+
+/* Golden hairline on the drawer's leading edge */
+.landing-dar-drawer::before {
+  content: "";
+  position: absolute;
+  inset-block: 8%;
+  inset-inline-start: 0;
+  width: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, transparent, rgba(245, 197, 24, 0.6), transparent);
+  pointer-events: none;
+}
+
+.landing-dar-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.landing-dar-drawer-logo {
+  display: block;
+  height: 2.1rem;
+  width: auto;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
+}
+
+.landing-dar-drawer-close {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.landing-dar-drawer-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: rotate(90deg);
+}
+
+.landing-dar-drawer-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.85rem 0.85rem 0.5rem;
+  margin: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.25rem;
+  align-content: start;
+}
+
+.landing-dar-drawer-list > li {
+  animation: landing-dar-item-in 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.landing-dar-drawer-list > li:nth-child(1) { animation-delay: 0.08s; }
+.landing-dar-drawer-list > li:nth-child(2) { animation-delay: 0.14s; }
+.landing-dar-drawer-list > li:nth-child(3) { animation-delay: 0.2s; }
+.landing-dar-drawer-list > li:nth-child(4) { animation-delay: 0.26s; }
+
+.landing-dar-drawer-foot {
+  padding: 1rem 1.1rem calc(1rem + env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.landing-dar-drawer-cta {
+  display: flex;
+  height: 2.9rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background: #f5c518;
+  border: 2px solid #0a0a0a;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0a1f4d;
+  text-decoration: none;
+}
+
+.landing-dar-drawer-tagline {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+}
+
 .landing-dar-mobile-menu-section {
   overflow: hidden;
   border-radius: 0.85rem;
@@ -867,6 +1191,18 @@ a {
   padding: 0 0.35rem 0.35rem;
   overflow: hidden;
 }
+
+.landing-dar-mobile-submenu > li {
+  animation: landing-dar-item-in 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.landing-dar-mobile-submenu > li:nth-child(1) { animation-delay: 0.03s; }
+.landing-dar-mobile-submenu > li:nth-child(2) { animation-delay: 0.07s; }
+.landing-dar-mobile-submenu > li:nth-child(3) { animation-delay: 0.11s; }
+.landing-dar-mobile-submenu > li:nth-child(4) { animation-delay: 0.15s; }
+.landing-dar-mobile-submenu > li:nth-child(5) { animation-delay: 0.19s; }
+.landing-dar-mobile-submenu > li:nth-child(6) { animation-delay: 0.23s; }
+.landing-dar-mobile-submenu > li:nth-child(7) { animation-delay: 0.27s; }
 
 .landing-dar-mobile-submenu-link,
 .landing-dar-mobile-submenu-viewall {
@@ -945,6 +1281,8 @@ a {
 }
 
 .landing-dar-logo-link {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   width: max-content;
   max-width: min(98vw, 100rem);
@@ -953,6 +1291,105 @@ a {
   background: none;
   border: none;
   padding: 0;
+  animation: landing-dar-float 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes landing-dar-float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Ambient light blobs — pure transform animation, GPU-composited */
+.landing-dar-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.landing-dar-glow span {
+  position: absolute;
+  border-radius: 9999px;
+  will-change: transform;
+}
+
+.landing-dar-glow span:nth-child(1) {
+  top: -14%;
+  left: -8%;
+  width: 48vw;
+  height: 48vw;
+  background: radial-gradient(circle, rgba(245, 197, 24, 0.13) 0%, transparent 62%);
+  animation: landing-dar-blob-a 22s ease-in-out infinite alternate;
+}
+
+.landing-dar-glow span:nth-child(2) {
+  bottom: 2%;
+  right: -12%;
+  width: 54vw;
+  height: 54vw;
+  background: radial-gradient(circle, rgba(130, 178, 255, 0.15) 0%, transparent 62%);
+  animation: landing-dar-blob-b 26s ease-in-out infinite alternate;
+}
+
+@keyframes landing-dar-blob-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(6vw, 7vh, 0) scale(1.14);
+  }
+}
+
+@keyframes landing-dar-blob-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.08);
+  }
+
+  to {
+    transform: translate3d(-7vw, -6vh, 0) scale(0.94);
+  }
+}
+
+/* Rotating conic halo behind the logo */
+.landing-dar-halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 0;
+  width: min(80vw, 46rem);
+  aspect-ratio: 1 / 1;
+  margin-left: calc(min(80vw, 46rem) / -2);
+  margin-top: calc(min(80vw, 46rem) / -2);
+  border-radius: 9999px;
+  background: conic-gradient(from 0deg,
+      transparent 0deg,
+      rgba(255, 255, 255, 0.12) 55deg,
+      transparent 120deg,
+      rgba(245, 197, 24, 0.14) 200deg,
+      transparent 265deg,
+      rgba(255, 255, 255, 0.09) 320deg,
+      transparent 360deg);
+  -webkit-mask-image: radial-gradient(circle, transparent 40%, #000 58%, transparent 74%);
+  mask-image: radial-gradient(circle, transparent 40%, #000 58%, transparent 74%);
+  animation: landing-dar-spin 24s linear infinite;
+  will-change: transform;
+  pointer-events: none;
+}
+
+@keyframes landing-dar-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .landing-dar-logo-link:hover .landing-dar-logo {
@@ -1065,7 +1502,8 @@ a {
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.35),
     0 16px 36px rgba(0, 0, 0, 0.32),
-    0 0 32px rgba(255, 255, 255, 0.2);
+    0 0 30px rgba(255, 255, 255, 0.16),
+    0 0 44px rgba(245, 197, 24, 0.22);
 }
 
 .landing-dar-column-caption {
@@ -1083,6 +1521,28 @@ a {
       transparent 100%);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Yellow underline that draws in under the caption on hover */
+.landing-dar-column-caption::after {
+  content: "";
+  display: block;
+  width: 2.25rem;
+  height: 2px;
+  margin: 0.3rem auto 0;
+  border-radius: 9999px;
+  background: #f5c518;
+  transform: scaleX(0);
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) 0.05s;
+}
+
+.landing-dar-column-link:hover .landing-dar-column-caption {
+  transform: translateY(-2px);
+}
+
+.landing-dar-column-link:hover .landing-dar-column-caption::after {
+  transform: scaleX(1);
 }
 
 .landing-dar-column-title {
@@ -1091,6 +1551,11 @@ a {
   font-weight: 600;
   line-height: 1.35;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+  transition: color 0.25s ease;
+}
+
+.landing-dar-column-link:hover .landing-dar-column-title {
+  color: #ffe066;
 }
 
 .landing-dar-columns {
@@ -1154,11 +1619,25 @@ a {
   background: #f5c518;
   color: #0a1f4d;
   border: 2px solid #0a0a0a;
+  box-shadow: 0 0 0 0 rgba(245, 197, 24, 0.45);
+  animation: landing-dar-cta-pulse 3.2s ease-in-out infinite;
 }
 
 .landing-dar-cta-primary:hover {
   background: #ffd84a;
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.02);
+  animation-play-state: paused;
+}
+
+@keyframes landing-dar-cta-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 197, 24, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 9px rgba(245, 197, 24, 0);
+  }
 }
 
 .landing-dar-cta-secondary {
@@ -1185,8 +1664,52 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .landing-dar-bg {
+  .landing-dar-bg,
+  .landing-dar-logo-link,
+  .landing-dar-glow span,
+  .landing-dar-halo,
+  .landing-dar-marquee-track,
+  .landing-dar-cta-band::before,
+  .landing-dar-cta-primary,
+  .landing-dar-scroll-hint::after,
+  .landing-dar-hero-wave,
+  .landing-dar-eyebrow::before,
+  .landing-dar-nav-dropdown-list > li,
+  .landing-dar-mobile-submenu > li,
+  .landing-dar-dialog-items li,
+  .landing-dar-tmk-track,
+  .landing-dar-drawer-list > li {
     animation: none;
+  }
+
+  .landing-dar-drawer-close:hover,
+  .landing-dar-nav-brand,
+  .landing-dar-nav-cta:hover,
+  .landing-dar-nav-cta:hover .landing-dar-nav-cta-arrow {
+    transform: none;
+  }
+
+  .landing-dar-nav {
+    transition: none;
+  }
+
+  .landing-dar-spot-card:hover,
+  .landing-dar-spot-card:hover .landing-dar-spot-icon,
+  .landing-dar-tmk-card:hover {
+    transform: none;
+  }
+
+  .landing-dar-spot-card::after {
+    display: none;
+  }
+
+  .landing-dar-footer-links a:hover,
+  .landing-dar-footer-logo-link:hover .landing-dar-footer-logo,
+  a.landing-dar-footer-contact-row:hover .lucide,
+  .landing-dar-dialog-close:hover,
+  .landing-dar-nav-dropdown-link:hover,
+  .landing-dar-column-link:hover .landing-dar-column-caption {
+    transform: none;
   }
 
   .landing-dar-shine:hover::after {
@@ -1194,8 +1717,19 @@ a {
   }
 
   .landing-dar-cta-primary:hover,
-  .landing-dar-cta-secondary:hover {
+  .landing-dar-cta-secondary:hover,
+  .landing-dar-card:hover,
+  .landing-dar-step:hover,
+  .landing-dar-stat:hover,
+  .landing-dar-card:hover .landing-dar-card-icon,
+  .landing-dar-step:hover .landing-dar-step-num,
+  .landing-dar-step:hover .landing-dar-step-icon {
     transform: none;
+  }
+
+  .landing-dar-faq-panel-wrap,
+  .landing-dar-faq-panel {
+    transition: none;
   }
 }
 
@@ -1207,6 +1741,15 @@ a {
   .landing-dar-logo {
     width: min(98vw, 100%);
     max-height: min(82vh, 60rem);
+  }
+
+  /* Grid tiles are much wider than the desktop slivers — captions can breathe */
+  .landing-dar-column-title {
+    font-size: 0.74rem;
+  }
+
+  .landing-dar-column-caption {
+    padding: 0.55rem 0.45rem;
   }
 }
 
@@ -1250,6 +1793,28 @@ a {
   color: #fff;
 }
 
+/* Golden hairline along the dialog top */
+.landing-dar-dialog::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline: 1.25rem;
+  height: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, transparent, rgba(245, 197, 24, 0.75), transparent);
+}
+
+.landing-dar-dialog-items li {
+  animation: landing-dar-item-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.landing-dar-dialog-items li:nth-child(1) { animation-delay: 0.05s; }
+.landing-dar-dialog-items li:nth-child(2) { animation-delay: 0.1s; }
+.landing-dar-dialog-items li:nth-child(3) { animation-delay: 0.15s; }
+.landing-dar-dialog-items li:nth-child(4) { animation-delay: 0.2s; }
+.landing-dar-dialog-items li:nth-child(5) { animation-delay: 0.25s; }
+.landing-dar-dialog-items li:nth-child(6) { animation-delay: 0.3s; }
+
 .landing-dar-dialog-close {
   position: absolute;
   top: 0.85rem;
@@ -1263,11 +1828,12 @@ a {
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .landing-dar-dialog-close:hover {
   background: rgba(255, 255, 255, 0.18);
+  transform: rotate(90deg);
 }
 
 .landing-dar-dialog-title {
@@ -1435,6 +2001,102 @@ a {
   transform: translateY(2px);
 }
 
+.landing-dar-scroll-hint::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  border: 1px solid rgba(10, 31, 77, 0.35);
+  animation: landing-dar-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes landing-dar-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+
+  70%,
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+
+/* ── Services marquee band ──────────────────────────────────────────────── */
+.landing-dar-marquee {
+  position: relative;
+  overflow: hidden;
+  padding-block: clamp(0.85rem, 2vw, 1.25rem);
+  background: #0a1f4d;
+  border-bottom: 3px solid #0a0a0a;
+}
+
+.landing-dar-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: landing-dar-marquee-scroll 34s linear infinite;
+  will-change: transform;
+}
+
+.landing-dar-marquee:hover .landing-dar-marquee-track {
+  animation-play-state: paused;
+}
+
+.landing-dar-marquee-row {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.landing-dar-marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(1rem, 2.5vw, 1.75rem);
+  padding-inline-end: clamp(1rem, 2.5vw, 1.75rem);
+  white-space: nowrap;
+  font-size: clamp(0.95rem, 2.2vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.landing-dar-marquee-item:nth-child(even) {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(245, 197, 24, 0.85);
+}
+
+.landing-dar-marquee-dot {
+  font-size: 0.7em;
+  color: #f5c518;
+  -webkit-text-stroke: 0;
+}
+
+@keyframes landing-dar-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+[dir="rtl"] .landing-dar-marquee-track {
+  animation-name: landing-dar-marquee-scroll-rtl;
+}
+
+@keyframes landing-dar-marquee-scroll-rtl {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(50%);
+  }
+}
+
 .landing-dar-section {
   scroll-margin-top: calc(var(--landing-nav-h) + 1rem);
   padding-block: clamp(3.5rem, 8vw, 6rem);
@@ -1464,12 +2126,41 @@ a {
 }
 
 .landing-dar-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   margin-bottom: 0.65rem;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(10, 31, 77, 0.65);
+}
+
+/* Dash that stretches in with the section reveal */
+.landing-dar-eyebrow::before {
+  content: "";
+  width: 2rem;
+  height: 2px;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.7;
+  transform-origin: left center;
+  animation: landing-dar-dash-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+[dir="rtl"] .landing-dar-eyebrow::before {
+  transform-origin: right center;
+}
+
+@keyframes landing-dar-dash-in {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
 }
 
 .landing-dar-section--stats .landing-dar-eyebrow,
@@ -1524,13 +2215,33 @@ a {
   border: 2px solid rgba(10, 31, 77, 0.14);
   background: rgba(255, 255, 255, 0.72);
   box-shadow: 0 10px 28px rgba(10, 31, 77, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+/* Top accent bar that expands on hover */
+.landing-dar-card::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  inset-inline: 1.1rem;
+  height: 3px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #0a1f4d, #1a3f96);
+  transform: scaleX(0.25);
+  transform-origin: center;
+  opacity: 0.55;
+  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.3s ease;
 }
 
 .landing-dar-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(10, 31, 77, 0.28);
-  box-shadow: 0 18px 40px rgba(10, 31, 77, 0.14);
+  transform: translateY(-6px);
+  border-color: rgba(10, 31, 77, 0.32);
+  box-shadow: 0 22px 48px rgba(10, 31, 77, 0.16);
+}
+
+.landing-dar-card:hover::before {
+  transform: scaleX(1);
+  opacity: 1;
 }
 
 .landing-dar-card-icon {
@@ -1542,6 +2253,13 @@ a {
   border-radius: 0.75rem;
   background: #0a1f4d;
   color: #f5c518;
+  box-shadow: 0 6px 16px rgba(10, 31, 77, 0.22);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+
+.landing-dar-card:hover .landing-dar-card-icon {
+  transform: translateY(-3px) rotate(-6deg) scale(1.08);
+  box-shadow: 0 10px 24px rgba(10, 31, 77, 0.3);
 }
 
 .landing-dar-card-title {
@@ -1581,6 +2299,13 @@ a {
   border-radius: 1rem;
   border: 2px solid rgba(10, 31, 77, 0.12);
   background: rgba(255, 255, 255, 0.65);
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.3s ease, box-shadow 0.35s ease;
+}
+
+.landing-dar-step:hover {
+  transform: translateY(-4px);
+  border-color: rgba(10, 31, 77, 0.28);
+  box-shadow: 0 16px 36px rgba(10, 31, 77, 0.13);
 }
 
 .landing-dar-step-num {
@@ -1593,6 +2318,11 @@ a {
   color: #f5c518;
   font-size: 0.75rem;
   font-weight: 700;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.landing-dar-step:hover .landing-dar-step-num {
+  transform: scale(1.18);
 }
 
 .landing-dar-step-icon {
@@ -1603,6 +2333,13 @@ a {
   border-radius: 0.65rem;
   background: rgba(10, 31, 77, 0.08);
   color: #0a1f4d;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease, color 0.3s ease;
+}
+
+.landing-dar-step:hover .landing-dar-step-icon {
+  transform: rotate(6deg) scale(1.1);
+  background: #0a1f4d;
+  color: #f5c518;
 }
 
 .landing-dar-step-title {
@@ -1631,8 +2368,16 @@ a {
 }
 
 .landing-dar-stat {
+  position: relative;
   text-align: center;
-  padding: 0.5rem;
+  padding: 0.85rem 0.5rem;
+  border-radius: 1rem;
+  transition: background 0.3s ease, transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.landing-dar-stat:hover {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-3px);
 }
 
 .landing-dar-stat-value {
@@ -1640,7 +2385,12 @@ a {
   font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 800;
   line-height: 1.1;
+  background: linear-gradient(180deg, #ffe066 0%, #f5c518 60%, #e0ae08 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   color: #f5c518;
+  text-shadow: 0 0 32px rgba(245, 197, 24, 0.25);
 }
 
 .landing-dar-stat-label {
@@ -1648,6 +2398,255 @@ a {
   margin-top: 0.35rem;
   font-size: 0.82rem;
   color: rgba(255, 255, 255, 0.78);
+}
+
+/* ── Why-us section — interactive dot field + spotlight cards ───────────── */
+.landing-dar-section--why {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 0%, rgba(26, 63, 150, 0.55), transparent 62%),
+    linear-gradient(180deg, #0d2d6b 0%, #081a40 100%);
+  color: #fff;
+  border-top: 3px solid #0a0a0a;
+  border-bottom: 3px solid #0a0a0a;
+}
+
+.landing-dar-section--why .landing-dar-eyebrow {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.landing-dar-section--why .landing-dar-section-lead {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.landing-dar-section--why .landing-shell {
+  position: relative;
+  z-index: 1;
+}
+
+.landing-dar-why-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.landing-dar-why-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Sections that host a dot-wave canvas keep their own background;
+   content just needs to sit above the canvas layer. */
+.landing-dar-section--alt,
+.landing-dar-section--cta,
+.landing-dar-section--tmk {
+  position: relative;
+}
+
+.landing-dar-section--alt > .landing-shell,
+.landing-dar-section--cta > .landing-shell,
+.landing-dar-section--tmk > .landing-shell,
+.landing-dar-section--tmk .landing-dar-tmk {
+  position: relative;
+  z-index: 1;
+}
+
+.landing-dar-spot-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .landing-dar-spot-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .landing-dar-spot-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.15rem;
+  }
+}
+
+.landing-dar-spot-card {
+  position: relative;
+  height: 100%;
+  padding: 1.35rem 1.25rem 1.4rem;
+  border-radius: 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(165deg, rgba(13, 45, 107, 0.72), rgba(8, 26, 64, 0.86));
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.3s ease, box-shadow 0.35s ease;
+}
+
+/* Mouse-following golden spotlight */
+.landing-dar-spot-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(210px circle at var(--mx, -250px) var(--my, -250px),
+      rgba(245, 197, 24, 0.16),
+      transparent 65%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.landing-dar-spot-card:hover::after {
+  opacity: 1;
+}
+
+.landing-dar-spot-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(245, 197, 24, 0.4);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.35);
+}
+
+.landing-dar-spot-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(245, 197, 24, 0.3);
+  background: rgba(245, 197, 24, 0.1);
+  color: #f5c518;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease;
+}
+
+.landing-dar-spot-card:hover .landing-dar-spot-icon {
+  transform: translateY(-3px) rotate(-6deg) scale(1.08);
+  background: rgba(245, 197, 24, 0.18);
+}
+
+.landing-dar-spot-title {
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.landing-dar-spot-desc {
+  margin-top: 0.45rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* ── Testimonials — dual-direction marquee ──────────────────────────────── */
+.landing-dar-section--tmk {
+  overflow: hidden;
+}
+
+.landing-dar-tmk {
+  display: grid;
+  gap: 1rem;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+
+.landing-dar-tmk-track {
+  display: flex;
+  width: max-content;
+  animation: landing-dar-marquee-scroll 52s linear infinite;
+  will-change: transform;
+}
+
+[dir="rtl"] .landing-dar-tmk-track {
+  animation-name: landing-dar-marquee-scroll-rtl;
+}
+
+.landing-dar-tmk-track--reverse {
+  animation-direction: reverse;
+}
+
+.landing-dar-tmk:hover .landing-dar-tmk-track {
+  animation-play-state: paused;
+}
+
+.landing-dar-tmk-row {
+  display: flex;
+  flex-shrink: 0;
+  gap: 1rem;
+  padding-inline-end: 1rem;
+}
+
+.landing-dar-tmk-card {
+  display: flex;
+  flex-direction: column;
+  width: clamp(16rem, 32vw, 22rem);
+  margin: 0;
+  padding: 1.25rem 1.2rem;
+  border-radius: 1.1rem;
+  border: 2px solid rgba(10, 31, 77, 0.14);
+  background: rgba(255, 255, 255, 0.82);
+  color: #0a1f4d;
+  box-shadow: 0 10px 26px rgba(10, 31, 77, 0.08);
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.3s ease, box-shadow 0.35s ease;
+}
+
+.landing-dar-tmk-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(10, 31, 77, 0.3);
+  box-shadow: 0 18px 40px rgba(10, 31, 77, 0.15);
+}
+
+.landing-dar-tmk-quote {
+  color: rgba(10, 31, 77, 0.35);
+  margin-bottom: 0.4rem;
+}
+
+.landing-dar-tmk-stars {
+  display: inline-flex;
+  gap: 0.15rem;
+  margin-bottom: 0.6rem;
+  color: #d4a80c;
+}
+
+.landing-dar-tmk-card blockquote {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: rgba(10, 31, 77, 0.85);
+}
+
+.landing-dar-tmk-card figcaption {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.landing-dar-tmk-avatar {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: #0a1f4d;
+  color: #f5c518;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.landing-dar-tmk-card figcaption strong {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.landing-dar-tmk-card figcaption small {
+  display: block;
+  font-size: 0.72rem;
+  color: rgba(10, 31, 77, 0.6);
 }
 
 .landing-dar-faq-shell {
@@ -1691,14 +2690,46 @@ a {
   transform: rotate(180deg);
 }
 
+/* Smooth expand/collapse via grid rows — cheap, no JS height measuring */
+.landing-dar-faq-panel-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.landing-dar-faq-item.is-open .landing-dar-faq-panel-wrap {
+  grid-template-rows: 1fr;
+}
+
 .landing-dar-faq-panel {
-  padding: 0 1.1rem 1rem;
+  overflow: hidden;
+  min-height: 0;
+  padding: 0 1.1rem;
   font-size: 0.875rem;
   line-height: 1.65;
   color: rgba(10, 31, 77, 0.75);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.3s ease 0.05s, transform 0.3s ease 0.05s;
+}
+
+.landing-dar-faq-item.is-open .landing-dar-faq-panel {
+  padding-bottom: 1rem;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.landing-dar-faq-item {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.landing-dar-faq-item.is-open {
+  border-color: rgba(10, 31, 77, 0.32);
+  box-shadow: 0 12px 30px rgba(10, 31, 77, 0.1);
 }
 
 .landing-dar-cta-band {
+  position: relative;
   display: grid;
   gap: 2rem;
   align-items: center;
@@ -1708,6 +2739,35 @@ a {
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  overflow: hidden;
+}
+
+/* Slow aurora sweep inside the CTA band */
+.landing-dar-cta-band::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(ellipse 42% 34% at 22% 30%, rgba(245, 197, 24, 0.14), transparent 70%),
+    radial-gradient(ellipse 42% 34% at 78% 72%, rgba(130, 178, 255, 0.16), transparent 70%);
+  animation: landing-dar-aurora 16s ease-in-out infinite alternate;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.landing-dar-cta-band > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes landing-dar-aurora {
+  from {
+    transform: translate3d(-4%, -4%, 0) rotate(0deg);
+  }
+
+  to {
+    transform: translate3d(4%, 4%, 0) rotate(6deg);
+  }
 }
 
 @media (min-width: 900px) {
@@ -1757,11 +2817,25 @@ a {
 }
 
 .landing-dar-footer {
+  position: relative;
   scroll-margin-top: calc(var(--landing-nav-h) + 1rem);
   padding-block: clamp(3rem, 7vw, 4.5rem) 1.5rem;
-  background: #081a40;
+  background:
+    radial-gradient(ellipse 60% 45% at 50% 0%, rgba(26, 63, 150, 0.55), transparent 65%),
+    #081a40;
   color: rgba(255, 255, 255, 0.85);
   border-top: 3px solid #0a0a0a;
+}
+
+/* Golden hairline along the footer top edge */
+.landing-dar-footer::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  inset-inline: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 5%, rgba(245, 197, 24, 0.55) 50%, transparent 95%);
+  pointer-events: none;
 }
 
 .landing-dar-footer-grid {
@@ -1792,6 +2866,20 @@ a {
   max-width: 100%;
   height: auto;
   filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.25));
+  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.landing-dar-footer-logo-link:hover .landing-dar-footer-logo {
+  transform: translateY(-3px) scale(1.015);
+}
+
+.landing-dar-footer-contact-row .lucide {
+  color: #f5c518;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+a.landing-dar-footer-contact-row:hover .lucide {
+  transform: scale(1.2) rotate(-6deg);
 }
 
 .landing-dar-footer-tagline {
@@ -1840,14 +2928,46 @@ a.landing-dar-footer-contact-row:hover {
 }
 
 .landing-dar-footer-links a {
+  position: relative;
+  display: inline-block;
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.72);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Underline slides in from the start edge */
+.landing-dar-footer-links a::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  inset-inline-start: 0;
+  width: 100%;
+  height: 1px;
+  background: #f5c518;
+  transform: scaleX(0);
+  transition: transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+[dir="ltr"] .landing-dar-footer-links a::after {
+  transform-origin: left center;
+}
+
+[dir="rtl"] .landing-dar-footer-links a::after {
+  transform-origin: right center;
 }
 
 .landing-dar-footer-links a:hover {
   color: #fff;
+  transform: translateX(3px);
+}
+
+[dir="rtl"] .landing-dar-footer-links a:hover {
+  transform: translateX(-3px);
+}
+
+.landing-dar-footer-links a:hover::after {
+  transform: scaleX(1);
 }
 
 .landing-dar-footer-bottom {
@@ -1883,4 +3003,24 @@ a.landing-dar-footer-contact-row:hover {
 .board-canvas-layer [data-board-card] {
   -webkit-font-smoothing: antialiased;
   backface-visibility: hidden;
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .invoice-print-sheet,
+  .invoice-print-sheet * {
+    visibility: visible !important;
+  }
+  .invoice-print-sheet {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
 }

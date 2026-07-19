@@ -86,7 +86,7 @@ class Order(IntPK, TimestampMixin, SoftDeleteMixin, Base):
 
     priority: Mapped[str] = mapped_column(String(20), default="normal", nullable=False)
 
-    placed_via: Mapped[str] = mapped_column(String(20), default="staff", nullable=False)  # portal/staff
+    placed_via: Mapped[str] = mapped_column(String(20), default="staff", nullable=False)  # portal/staff/daftra
 
 
 
@@ -111,6 +111,21 @@ class Order(IntPK, TimestampMixin, SoftDeleteMixin, Base):
     grand_total: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
 
     currency: Mapped[str] = mapped_column(String(8), default="USD", nullable=False)
+
+    # Daftra work-order linkage (pull-sync → local board)
+    daftra_id: Mapped[Optional[str]] = mapped_column(String(40), unique=True, index=True, nullable=True)
+    daftra_number: Mapped[Optional[str]] = mapped_column(String(40), nullable=True, index=True)
+    daftra_workflow_type_id: Mapped[Optional[str]] = mapped_column(String(40), nullable=True, index=True)
+
+    # Warehouse gate (after paid, before design / production)
+    # stock_check_status: None | pending | approved | rejected
+    stock_check_status: Mapped[Optional[str]] = mapped_column(String(20), nullable=True, index=True)
+    stock_checked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    stock_checked_by_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True,
+    )
+    stock_check_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    materials_deducted: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0", nullable=False)
 
 
 

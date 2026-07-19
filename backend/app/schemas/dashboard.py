@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel
 
@@ -42,12 +42,38 @@ class OnlineUser(BaseModel):
 class ActivityFeedItem(BaseModel):
     id: int
     occurred_at: datetime
-    user_email: Optional[str]
+    user_id: Optional[int] = None
+    user_email: Optional[str] = None
+    user_name: Optional[str] = None
     action: str
     module: str
-    entity_type: Optional[str]
-    entity_id: Optional[int]
+    entity_type: Optional[str] = None
+    entity_id: Optional[int] = None
     summary: str
+
+
+class ScheduleItem(BaseModel):
+    id: str
+    kind: Literal["order_deadline", "follow_up"]
+    title: str
+    subtitle: Optional[str] = None
+    reference_code: Optional[str] = None
+    reference_id: Optional[int] = None
+    owner_name: Optional[str] = None
+    starts_at: datetime
+    ends_at: Optional[datetime] = None
+    status: Optional[str] = None
+    overdue: bool = False
+
+
+class LowStockItem(BaseModel):
+    id: int
+    name: str
+    sku: str
+    on_hand: float
+    reorder_level: float
+    unit: str
+    stock_status: Literal["critical", "low", "ok"]
 
 
 class DashboardSummary(BaseModel):
@@ -57,6 +83,9 @@ class DashboardSummary(BaseModel):
     department_load: List[DepartmentLoad]
     online_users: List[OnlineUser]
     activity_feed: List[ActivityFeedItem]
-    low_stock: List[dict] = []
+    upcoming_schedules: List[ScheduleItem] = []
+    schedules_total: int = 0
+    low_stock: List[LowStockItem] = []
+    low_stock_total: int = 0
     overdue_invoices: List[dict] = []
     pending_approvals: List[dict] = []

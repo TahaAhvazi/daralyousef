@@ -134,6 +134,15 @@ class OrderOut(ORMModel, OrderBase):
     tax_total: float
     discount_total: float
     grand_total: float
+    daftra_id: Optional[str] = None
+    daftra_number: Optional[str] = None
+    daftra_workflow_type_id: Optional[str] = None
+    stock_check_status: Optional[str] = None
+    stock_checked_at: Optional[datetime] = None
+    stock_checked_by_id: Optional[int] = None
+    stock_check_notes: Optional[str] = None
+    materials_deducted: bool = False
+    stock_approved: bool = False
     items: List[OrderItemOut] = []
     events: List[OrderStatusEventOut] = []
     workflow_assignments: List[WorkflowAssignmentOut] = []
@@ -163,6 +172,10 @@ class OrderSummaryOut(ORMModel, OrderBase):
     tax_total: float
     discount_total: float
     grand_total: float
+    daftra_id: Optional[str] = None
+    daftra_number: Optional[str] = None
+    daftra_workflow_type_id: Optional[str] = None
+    stock_check_status: Optional[str] = None
     items: List[OrderItemSummaryOut] = []
     events: List[OrderStatusEventOut] = []
     created_at: datetime
@@ -194,6 +207,8 @@ class WorkflowBoardOrderOut(BaseModel):
     item_count: int
     items_summary: str
     updated_at: datetime
+    daftra_id: Optional[str] = None
+    daftra_number: Optional[str] = None
     stage_assignee_id: Optional[int] = None
     stage_assignee_name: Optional[str] = None
     stage_assignee_ids: List[int] = []
@@ -209,6 +224,7 @@ class WorkflowBoardOrderOut(BaseModel):
     prev_column: Optional[str] = None
     can_revert: bool = False
     revert_requires_reason: bool = False
+    stock_check_status: Optional[str] = None
 
 
 class WorkflowBoardActivityOut(BaseModel):
@@ -258,6 +274,11 @@ class OrderReceiptConfirm(BaseModel):
 
 class OrderPaymentToggle(BaseModel):
     paid: bool
+    notes: Optional[str] = None
+
+
+class OrderStockCheck(BaseModel):
+    approved: bool
     notes: Optional[str] = None
 
 
